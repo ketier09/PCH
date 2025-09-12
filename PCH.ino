@@ -144,20 +144,20 @@ void serial_enviar(datos data[], int n) {
     Serial.println(data[i].unidad);  //Se imprime la unidad de medida física respecto a la cuál está siendo expresada la variable
     //Se continúa imprimiendo en la siguiente línea, los componentes de la siguiente variable
   }
-  const int g = (int)data[IDX_GENERADORES_ACTIVOS].valor;
-  Serial.print(data[n - 1].etiqueta);
+  const int g = (int)data[IDX_GENERADORES_ACTIVOS].valor;  //Se guarda el número simbólico que representa el estado de los generadores
+  Serial.print(data[IDX_GENERADORES_ACTIVOS].etiqueta);  //Se imprime el nombre de la última variable
   Serial.print(": ");
-  Serial.println(generadoresActivosExplicacion(g));
+  Serial.println(generadoresActivosExplicacion(g));  //Se imprime el mensaje que explica el estado de los generadores
 }
 
 // -------------------- Controlador --------------------
 void setup() {
   // Comunicadores
-  Serial.begin(115200);
+  Serial.begin(115200);  //Se inicializa el puerto serial en el baudio de un ESP32
+  //Se llaman todos los códigos que cada dispositivo necesita en el "setup()"
   pagina.set_up();
   pa_1.set_up();
   pa_2.set_up();
-  pa_3.set_up();
 
   // Sensores
   ca_preazud.set_up();
@@ -175,10 +175,13 @@ void setup() {
 }
 
 void loop() {
+  //El código principal se ejecuta cada un segundo
   static uint32_t lastPrint = 0;
   if (millis() - lastPrint > 1000) {
     lastPrint = millis();
 
+    //Se almacenan las variables en esta matriz semejante a una tabla
+    //La primera columna almacena el nombre; la segunda, la dirección al firebase; la tercera, la únidad física de medida, y la cuarta, el valor almacenado
     static datos data[] = {
       {"Cota en captación",     "cotaCaptacion",     "msnm", ut_captacion.reading()},
       {"Cota del río",          "cotaRio",           "msnm", ut_rio.reading()},
@@ -196,12 +199,13 @@ void loop() {
       {"Generadores activos",   "generadoresActivos", "",     (float)generadoresActivos()},
     };
 
-    serial_enviar(data, sizeof(data) / sizeof(data[0]));
-    pagina.enviar(data, sizeof(data) / sizeof(data[0]));
-    pa_1.enviar(data);
-    pa_2.enviar(data);
+    serial_enviar(data, sizeof(data) / sizeof(data[0]));  //Se envía la data al puerto serial
+    pagina.enviar(data, sizeof(data) / sizeof(data[0]));  //Se envía la data a la página de Firebase
+    pa_1.enviar(data);  //Se envía la data a la primera pantalla
+    pa_2.enviar(data);  //Se envía la data a la segunda pantalla
   }
 }
+
 
 
 
