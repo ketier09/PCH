@@ -1,7 +1,7 @@
 #include "Ultrasonico.h"
 
 ultrasonico::ultrasonico(byte t, byte e, void (*i1)(), void (*i2)(), float te, float pi, float a, float pe)
-  : trig(t), echo(e), echoRising(i1), echoFalling(i2), techo(te), piso(pi), ancho(a), pendiente(pe) {}
+  : trig(t), echo(e), echoRising(i1), echoFalling(i2), techo(te), piso(pi), ancho(a), raizCuadrada_pendiente(pe) {}
 
 void ultrasonico::set_up() {
   pinMode(trig, OUTPUT);
@@ -47,3 +47,4 @@ float ultrasonico::flujo() {
 
   return velocidadFlujo * areaMojada;
 }
+
