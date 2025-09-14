@@ -160,9 +160,9 @@ void setup() {
   pa_2.set_up();
 
   // Sensores
-  ca_preazud.set_up();
+  ca_inicio.set_up();
   ca_turbinable.set_up();
-  ca_postazud.set_up();
+  ca_final.set_up();
 
   ut_captacion.set_up();
   ut_rio.set_up();
@@ -170,7 +170,6 @@ void setup() {
   ut_aduccion.set_up();
 
   // Actuadores
-  bo_principal.set_up();
   mo_compuerta.set_up();
 }
 
@@ -205,6 +204,7 @@ void loop() {
     pa_2.enviar(data);  //Se envía la data a la segunda pantalla
   }
 }
+
 
 
 
