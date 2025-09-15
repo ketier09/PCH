@@ -10,9 +10,9 @@
 
 enum : uint8_t {
   // Caudalímetros
-  PIN_CAUD_INI     = 13,  //Se conecta el caudalímetro que mide el flujo antes del azud al pin 13 del controlador
+  PIN_CAUD_INI     = 13,  //Se conecta el caudalímetro que mide el flujo al inicio del sistema al pin 13 del controlador
   PIN_CAUD_TURB    = 14,  //Se conecta el caudalímetro que mide el flujo turbinable al pin 14 del controlador
-  PIN_CAUD_END     = 26,  //Se conecta el caudalímetro que mide el flujo después del azud al pin 26 del controlador
+  PIN_CAUD_END     = 26,  //Se conecta el caudalímetro que mide el flujo al final del sistema al pin 26 del controlador
 
   // Sensores ultrasonido
   PIN_US_TRIG_C    = 27,  //Se conecta el trigger del sensor ultrasonido que mide el nivel del agua en el tanque de captación al pin 27 del controlador
@@ -204,9 +204,3 @@ void loop() {
     pa_2.enviar(data);  //Se envía la data a la segunda pantalla
   }
 }
-
-
-
-
-
-
