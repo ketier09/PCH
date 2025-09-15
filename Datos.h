@@ -16,9 +16,7 @@ enum DataIndex {
     IDX_CAUDAL_TURBINABLE,
     IDX_CAUDAL_FINAL,
 
-    IDX_GENERADORES_ACTIVOS,
-
-    DATA_COUNT
+    IDX_GENERADORES_ACTIVOS
 };
 
 // --------------------- Estructura común ---------------------------
