@@ -24,6 +24,7 @@ struct datos {
   const char* etiqueta;
   const char* etiquetaFirebase;
   const char* unidad;
-  float valor;
+  float valor = 0.0;
 };
+
 
