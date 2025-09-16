@@ -27,23 +27,23 @@
 // Usamos un enum anónimo para mantener los pines con nombre y tipo fijo (uint8_t).
 enum : uint8_t {
   // Caudalímetros (entradas por interrupción)
-  PIN_CAUD_INI  = 13, // Caudal al inicio del sistema
-  PIN_CAUD_TURB = 14, // Caudal turbinable (alimentará la lógica de generadores)
-  PIN_CAUD_END  = 26, // Caudal al final del sistema
+  PIN_CAUD_INI  = 13, // Medidor del caudal al inicio del sistema, conectado al pin 13
+  PIN_CAUD_TURB = 14, // Medidor del caudal turbinable (alimentará la lógica de generadores), conectado al pin 14
+  PIN_CAUD_END  = 26, // Medidor del caudal al final del sistema, conectado al pin 26
 
   // Ultrasonidos (cada uno: TRIG salida, ECHO entrada sólo-entrada)
-  PIN_US_TRIG_C = 27, PIN_US_ECHO_C = 36, // Captación
-  PIN_US_TRIG_R = 32, PIN_US_ECHO_R = 35, // Río
-  PIN_US_TRIG_G = 33, PIN_US_ECHO_G = 34, // Canal garantía
-  PIN_US_TRIG_A = 21, PIN_US_ECHO_A = 39, // Aducción
+  PIN_US_TRIG_C = 27, PIN_US_ECHO_C = 36, // Medidor del nivel en captación, conectado a los pines 27 y 36
+  PIN_US_TRIG_R = 32, PIN_US_ECHO_R = 35, // Medidor del nivel en el río, conectado a los pines 32 y 35
+  PIN_US_TRIG_G = 33, PIN_US_ECHO_G = 34, // Medidor del nivel en el canal de garantía, conectado a los pines 33 y 34
+  PIN_US_TRIG_A = 21, PIN_US_ECHO_A = 39, // Medidor del nivel en aducción, conectado a los pines 21 y 39
 
-  // Motor compuerta (puente H: IN1/IN2)
+  // Motor compuerta (puente H), conectado a los pines 16 (IN1) y 17 (IN2)
   PIN_COMPUERTA_1 = 16,
   PIN_COMPUERTA_2 = 17,
 };
 
 //----------------- Prototipos de ISRs -----------------
-// ISR = rutinas de servicio de interrupción. Deben ser rapidísimas.
+// ISRs. Funciones rápidas que se activan como reacción a eventos importantes en los sensores (Más abajo se explican sus algoritmos internos).
 void IRAM_ATTR ISR_CAUD_INI();
 void IRAM_ATTR ISR_CAUD_TURB();
 void IRAM_ATTR ISR_CAUD_END();
@@ -58,73 +58,72 @@ void IRAM_ATTR ISR_ULTRA_DIS_ADU();
 void IRAM_ATTR ISR_ULTRA_REGR_ADU();
 
 //----------------- Objetos de caudalímetros -----------------
-// Cada caudalímetro recibe su pin de pulsos y la ISR que incrementa su contador interno.
+// Se crean los objetos que representan los caudalímetros del sistema
 caudalimetro ca_inicio    (PIN_CAUD_INI,  ISR_CAUD_INI);
 caudalimetro ca_turbinable(PIN_CAUD_TURB, ISR_CAUD_TURB);
 caudalimetro ca_final     (PIN_CAUD_END,  ISR_CAUD_END);
 
-// ISRs de caudalímetros: sumar 1 pulso por flanco detectado.
-// Importante: pulseCount debe ser `volatile` dentro de la clase para ser seguro en ISR.
+// ISRs de caudalímetros: sumar 1 pulso por pulso detectado.
 void IRAM_ATTR ISR_CAUD_INI()  { ca_inicio.pulseCount++; }
 void IRAM_ATTR ISR_CAUD_TURB() { ca_turbinable.pulseCount++; }
 void IRAM_ATTR ISR_CAUD_END()  { ca_final.pulseCount++; }
 
 //----------------- Objetos de ultrasonido -----------------
-// Constructor: (TRIG, ECHO, ISR_disparo, ISR_regreso, cota_ref, offs, escala, filtro)
-// Los parámetros TBD deben calibrarse en sitio (geometría del tanque/canal).
+// Se crean los objetos que representan los ultrasonidos del sistema
 ultrasonico ut_captacion(PIN_US_TRIG_C, PIN_US_ECHO_C, ISR_ULTRA_DIS_CAP, ISR_ULTRA_REGR_CAP, 100.0f/*TBD*/, 0.0f/*TBD*/, 1.0f/*TBD*/, 0.01f/*TBD*/);
 ultrasonico ut_rio      (PIN_US_TRIG_R, PIN_US_ECHO_R, ISR_ULTRA_DIS_RIO, ISR_ULTRA_REGR_RIO, 100.0f/*TBD*/, 0, 0, 0);
 ultrasonico ut_garantia (PIN_US_TRIG_G, PIN_US_ECHO_G, ISR_ULTRA_DIS_GAR, ISR_ULTRA_REGR_GAR, 100.0f/*TBD*/, 0.0f/*TBD*/, 1.0f/*TBD*/, 0.01f/*TBD*/);
 ultrasonico ut_aduccion (PIN_US_TRIG_A, PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_ULTRA_REGR_ADU, 100.0f/*TBD*/, 0.0f/*TBD*/, 1.0f/*TBD*/, 0.01f/*TBD*/);
 
 // ISRs de ultrasonido: guardan marca de tiempo en envío y en eco.
-// Nota: usar aritmética modular de uint32_t para tolerar overflow de micros().
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
 
 // Captación
-void IRAM_ATTR ISR_ULTRA_DIS_CAP(){ ut_captacion.disparo = micros(); }
+void IRAM_ATTR ISR_ULTRA_DIS_CAP(){ ut_captacion.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
 void IRAM_ATTR ISR_ULTRA_REGR_CAP(){
-  const uint32_t regreso = micros();
-  ut_captacion.duracion = diffMicros(regreso, ut_captacion.disparo);
+  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
+  ut_captacion.duracion = diffMicros(regreso, ut_captacion.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
 }
 // Río
-void IRAM_ATTR ISR_ULTRA_DIS_RIO(){ ut_rio.disparo = micros(); }
+void IRAM_ATTR ISR_ULTRA_DIS_RIO(){ ut_rio.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
 void IRAM_ATTR ISR_ULTRA_REGR_RIO(){
-  const uint32_t regreso = micros();
-  ut_rio.duracion = diffMicros(regreso, ut_rio.disparo);
+  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
+  ut_rio.duracion = diffMicros(regreso, ut_rio.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
 }
 // Garantía
-void IRAM_ATTR ISR_ULTRA_DIS_GAR(){ ut_garantia.disparo = micros(); }
+void IRAM_ATTR ISR_ULTRA_DIS_GAR(){ ut_garantia.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
 void IRAM_ATTR ISR_ULTRA_REGR_GAR(){
-  const uint32_t regreso = micros();
-  ut_garantia.duracion = diffMicros(regreso, ut_garantia.disparo);
+  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
+  ut_garantia.duracion = diffMicros(regreso, ut_garantia.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
 }
 // Aducción
-void IRAM_ATTR ISR_ULTRA_DIS_ADU(){ ut_aduccion.disparo = micros(); }
+void IRAM_ATTR ISR_ULTRA_DIS_ADU(){ ut_aduccion.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
 void IRAM_ATTR ISR_ULTRA_REGR_ADU(){
-  const uint32_t regreso = micros();
-  ut_aduccion.duracion = diffMicros(regreso, ut_aduccion.disparo);
+  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
+  ut_aduccion.duracion = diffMicros(regreso, ut_aduccion.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
 }
 
-//----------------- Actuador: motor compuerta -----------------
+//----------------- Motor de la compuerta -----------------
+// Se crea el objeto que representa el motor de la compuerta
 motor mo_compuerta(PIN_COMPUERTA_1, PIN_COMPUERTA_2);
 
-//----------------- Pantallas (qué muestra cada una) ---------
-pantalla pa_1(IDX_CAUDAL_INICIO,   IDX_CAUDAL_GARANTIA,   IDX_CAUDAL_CAPTACION);
-pantalla pa_2(IDX_CAUDAL_ADUCCION, IDX_CAUDAL_TURBINABLE, IDX_CAUDAL_FINAL);
+//----------------- Pantallas ---------
+// Se crean los objetos que representan las pantallas del sistema
+pantalla pa_1(IDX_CAUDAL_INICIO,   IDX_CAUDAL_GARANTIA,   IDX_CAUDAL_CAPTACION); // La primera pantalla muestra los caudales, al inicio del río, en el canal de garantía, y en captación
+pantalla pa_2(IDX_CAUDAL_ADUCCION, IDX_CAUDAL_TURBINABLE, IDX_CAUDAL_FINAL);  //La segunda pantalla muestra los caudales, en aduccion, turbinable, y al final del río
 
-//----------------- Web / Firebase ---------------------------
-// Rellena credenciales/URLs/Tokens en producción.
+//----------------- Firebase ---------------------------
+// Se crea el objeto que representa la página online
 web pagina(""/*TBD*/, ""/*TBD*/, ""/*TBD*/, ""/*TBD*/, ""/*TBD*/, ""/*TBD*/);
 
 // -------------------- Lógica de generadores --------------------
 // Traduce el caudal turbinable (L/s) a un estado simbólico (0..3).
 int generadoresActivos() {
   const float flow = ca_turbinable.reading();  // Lectura rápida (L/s)
-  if (flow <= 3.0f)   return 0;   // < 3 L/s: apagado
-  if (flow <= 6.0f)   return 1;   // 3–6 L/s: 1 generador
-  if (flow <  12.87f) return 2;   // 6–12.87 L/s: 2 generadores
-  if (flow <= 13.0f)  return 3;   // ≈12.87–13 L/s: máxima PCH
+  if (flow <= 3.0f)   return 0;   // < 3 L/s: generadores apagados
+  if (flow <= 6.0f)   return 1;   // 3–6 L/s: 1 generador encendido
+  if (flow <  12.87f) return 2;   // 6–12.87 L/s: 2 generadores encendidos
+  if (flow <= 13.0f)  return 3;   // ≈12.87–13 L/s: PCH al máximo
   return -1;                      // >13 L/s o lectura inválida
 }
 
@@ -185,23 +184,25 @@ void loop() {
   if (now - lastPrint > 1000) {   // Periodicidad ≈1 s
     lastPrint = now;
 
-    // Tabla de variables a publicar/mostrar.
-    // pero sus "valor" DEBEN actualizarse antes de enviar.
+    // Tabla de variables.
     static datos data[] = {
-      {"Cota en captación",   "cotaCaptacion",   "msnm", 0},
-      {"Cota del río",        "cotaRio",         "msnm", 0},
-      {"Cota en garantía",    "cotaGarantia",    "msnm", 0},
-      {"Cota en aducción",    "cotaAduccion",    "msnm", 0},
 
-      {"Caudal en captación", "caudalCaptacion", "m³/s", 0},
-      {"Caudal en garantía",  "caudalGarantia",  "m³/s", 0},
-      {"Caudal en aducción",  "caudalAduccion",  "m³/s", 0},
+    //|       Nombre       |     Dirección     | Unidad |
+    //|                    |    en Firebase    | Física |
+      {"Cota en captación",   "cotaCaptacion",   "msnm"},
+      {"Cota del río",        "cotaRio",         "msnm"},
+      {"Cota en garantía",    "cotaGarantia",    "msnm"},
+      {"Cota en aducción",    "cotaAduccion",    "msnm"},
 
-      {"Caudal inicio",       "caudalInicio",     "L/s", 0},
-      {"Caudal turbinable",   "caudalTurbinable", "L/s", 0},
-      {"Caudal final",        "caudalFinal",      "L/s", 0},
+      {"Caudal en captación", "caudalCaptacion", "m³/s"},
+      {"Caudal en garantía",  "caudalGarantia",  "m³/s"},
+      {"Caudal en aducción",  "caudalAduccion",  "m³/s"},
 
-      {"Generadores activos", "generadoresActivos","",   0},
+      {"Caudal inicio",       "caudalInicio",     "L/s"},
+      {"Caudal turbinable",   "caudalTurbinable", "L/s"},
+      {"Caudal final",        "caudalFinal",      "L/s"},
+
+      {"Generadores activos", "generadoresActivos",""},
     };
 
     // *** ACTUALIZACIÓN DE VALORES EN CADA CICLO ***
@@ -227,3 +228,4 @@ void loop() {
     pa_2.enviar(data);
   }
 }
+
