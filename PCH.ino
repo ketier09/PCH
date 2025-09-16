@@ -1,19 +1,31 @@
 /*
-  Sistema de monitoreo y control para PCH con ESP32
-  -------------------------------------------------
-  Arquitectura:
-  - Sensores:
-      * 3 caudalímetros por pulsos (inicio, turbinable, final)
-      * 4 ultrasonidos (captación, río, garantía, aducción)
-  - Actuadores:
-      * Motor de compuerta (puente H, dos pines)
-  - Interfaces:
-      * Pantallas locales (pa_1, pa_2)
-      * Envío a web/Firebase
-      * Puerto serial para depuración
-  - Temporización:
-      * Bucle principal reporta cada 1000 ms
+  ¿Qué es esto?
+  Un sistema con un ESP32 que mide niveles de agua y caudales en varios puntos
+  de una pequeña central hidroeléctrica (PCH), decide cuántos generadores
+  deberían estar activos y muestra/envía esos datos cada segundo.
+
+  ¿Qué mide?
+  - Niveles de agua (4 sensores de distancia por ultrasonido).
+  - Cantidad de agua que pasa (3 medidores de flujo).
+
+  ¿Qué hace con esos datos?
+  - Decide el estado de los generadores según el caudal disponible.
+  - Muestra la información en 2 pantallas.
+  - La envía al computador (cable) y a una página web.
+  - Controla una compuerta (motor) cuando se necesite.
+
+  ¿Cada cuánto?
+  - Aproximadamente cada 1 segundo repite: leer → calcular → mostrar/enviar.
+
+Glosario rápido:
+   - Caudalímetro: medidor de cuánta agua pasa por un punto (flujo).
+   - Ultrasonido: sensor que “lanza un eco” y calcula la distancia por el tiempo de regreso.
+   - ISR: función que se ejecuta de inmediato cuando llega una señal del sensor.
+   - Puente H: circuito que permite que un motor gire hacia un lado o hacia el otro.
+   - msnm: metros sobre el nivel del mar (altura del agua respecto a una referencia).
+   - Puerto serial: “cable de datos” para ver mensajes en el computador.
 */
+
 
 #include "Datos.h"
 #include "Caudalimetro.h"
@@ -26,24 +38,31 @@
 // --------------------- Mapeo de pines ---------------------------
 // Usamos un enum anónimo para mantener los pines con nombre y tipo fijo (uint8_t).
 enum : uint8_t {
-  // Caudalímetros (entradas por interrupción)
-  PIN_CAUD_INI  = 13, // Medidor del caudal al inicio del sistema, conectado al pin 13
-  PIN_CAUD_TURB = 14, // Medidor del caudal turbinable (alimentará la lógica de generadores), conectado al pin 14
-  PIN_CAUD_END  = 26, // Medidor del caudal al final del sistema, conectado al pin 26
+  // ¿Dónde está conectado cada sensor/actuador en la tarjeta (ESP32)?
+  // - 3 medidores de flujo: inicio (PIN 13), turbinable (14), final (26).
+  // - 4 sensores de nivel (ultrasonido):
+  //     Captación (TRIG 27, ECHO 36), Río (TRIG 32, ECHO 35),
+  //     Garantía (TRIG 33, ECHO 34), Aducción (TRIG 21, ECHO 39).
+  // - Motor de compuerta: dos cables de control (16 y 17).
+
+  // Caudalímetros
+  PIN_CAUD_INI  = 13,
+  PIN_CAUD_TURB = 14,
+  PIN_CAUD_END  = 26,
 
   // Ultrasonidos (cada uno: TRIG salida, ECHO entrada sólo-entrada)
-  PIN_US_TRIG_C = 27, PIN_US_ECHO_C = 36, // Medidor del nivel en captación, conectado a los pines 27 y 36
-  PIN_US_TRIG_R = 32, PIN_US_ECHO_R = 35, // Medidor del nivel en el río, conectado a los pines 32 y 35
-  PIN_US_TRIG_G = 33, PIN_US_ECHO_G = 34, // Medidor del nivel en el canal de garantía, conectado a los pines 33 y 34
-  PIN_US_TRIG_A = 21, PIN_US_ECHO_A = 39, // Medidor del nivel en aducción, conectado a los pines 21 y 39
+  PIN_US_TRIG_C = 27, PIN_US_ECHO_C = 36,
+  PIN_US_TRIG_R = 32, PIN_US_ECHO_R = 35,
+  PIN_US_TRIG_G = 33, PIN_US_ECHO_G = 34,
+  PIN_US_TRIG_A = 21, PIN_US_ECHO_A = 39,
 
-  // Motor compuerta (puente H), conectado a los pines 16 (IN1) y 17 (IN2)
+  // Motor de la compuerta
   PIN_COMPUERTA_1 = 16,
   PIN_COMPUERTA_2 = 17,
 };
 
 //----------------- Prototipos de ISRs -----------------
-// ISRs. Funciones rápidas que se activan como reacción a eventos importantes en los sensores (Más abajo se explican sus algoritmos internos).
+// Funciones rápidas que se activan como reacción a eventos importantes en los sensores (Más abajo se explican sus algoritmos internos).
 void IRAM_ATTR ISR_CAUD_INI();
 void IRAM_ATTR ISR_CAUD_TURB();
 void IRAM_ATTR ISR_CAUD_END();
@@ -79,28 +98,31 @@ ultrasonico ut_aduccion (PIN_US_TRIG_A, PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_UL
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
 
 // Captación
-void IRAM_ATTR ISR_ULTRA_DIS_CAP(){ ut_captacion.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
+// Captación (sensor de nivel por ultrasonido)
+// Idea simpilficada: el sensor "hace un grito" (disparo) y espera el eco (regreso).
+// Con el tiempo entre el grito y el eco sabemos qué tan lejos está el agua.
+void IRAM_ATTR ISR_ULTRA_DIS_CAP(){ ut_captacion.disparo = micros(); }  // Guardamos el instante del "grito"
 void IRAM_ATTR ISR_ULTRA_REGR_CAP(){
-  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
-  ut_captacion.duracion = diffMicros(regreso, ut_captacion.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
+  const uint32_t regreso = micros();                                    // Guardamos el instante del "eco"
+  ut_captacion.duracion = diffMicros(regreso, ut_captacion.disparo);    // Tiempo del viaje
 }
 // Río
-void IRAM_ATTR ISR_ULTRA_DIS_RIO(){ ut_rio.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
+void IRAM_ATTR ISR_ULTRA_DIS_RIO(){ ut_rio.disparo = micros(); }  // Guardamos el instante del "grito"
 void IRAM_ATTR ISR_ULTRA_REGR_RIO(){
-  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
-  ut_rio.duracion = diffMicros(regreso, ut_rio.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
+  const uint32_t regreso = micros();                              // Guardamos el instante del "eco"
+  ut_rio.duracion = diffMicros(regreso, ut_rio.disparo);          // Tiempo del viaje
 }
 // Garantía
-void IRAM_ATTR ISR_ULTRA_DIS_GAR(){ ut_garantia.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
+void IRAM_ATTR ISR_ULTRA_DIS_GAR(){ ut_garantia.disparo = micros(); }  // Guardamos el instante del "grito"
 void IRAM_ATTR ISR_ULTRA_REGR_GAR(){
-  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
-  ut_garantia.duracion = diffMicros(regreso, ut_garantia.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
+  const uint32_t regreso = micros();                                  // Guardamos el instante del "eco"
+  ut_garantia.duracion = diffMicros(regreso, ut_garantia.disparo);    // Tiempo del viaje
 }
 // Aducción
-void IRAM_ATTR ISR_ULTRA_DIS_ADU(){ ut_aduccion.disparo = micros(); } //Se registra el momento en que se dispara la onda ultrasonido
+void IRAM_ATTR ISR_ULTRA_DIS_ADU(){ ut_aduccion.disparo = micros(); }  // Guardamos el instante del "grito"
 void IRAM_ATTR ISR_ULTRA_REGR_ADU(){
-  const uint32_t regreso = micros(); //Se registra el momento en que regresa la onda ultrasonido
-  ut_aduccion.duracion = diffMicros(regreso, ut_aduccion.disparo); //Se calcula el tiempo en que la onda ultrasonido tardó en ir y volver
+  const uint32_t regreso = micros();                                  // Guardamos el instante del "eco"
+  ut_aduccion.duracion = diffMicros(regreso, ut_aduccion.disparo);    // Tiempo del viaje
 }
 
 //----------------- Motor de la compuerta -----------------
@@ -117,15 +139,18 @@ pantalla pa_2(IDX_CAUDAL_ADUCCION, IDX_CAUDAL_TURBINABLE, IDX_CAUDAL_FINAL);  //
 web pagina(""/*TBD*/, ""/*TBD*/, ""/*TBD*/, ""/*TBD*/, ""/*TBD*/, ""/*TBD*/);
 
 // -------------------- Lógica de generadores --------------------
-// Traduce el caudal turbinable (L/s) a un estado simbólico (0..3).
+// Decisión simple para los generadores:
+// Según el caudal disponible (litros por segundo), elegimos 0, 1 o 2 generadores.
+// La idea es no encender de más si el agua no alcanza, y aprovechar cuando sí.
 int generadoresActivos() {
   const float flow = ca_turbinable.reading();  // Lectura rápida (L/s)
-  if (flow <= 3.0f)   return 0;   // < 3 L/s: generadores apagados
-  if (flow <= 6.0f)   return 1;   // 3–6 L/s: 1 generador encendido
-  if (flow <  12.87f) return 2;   // 6–12.87 L/s: 2 generadores encendidos
-  if (flow <= 13.0f)  return 3;   // ≈12.87–13 L/s: PCH al máximo
-  return -1;                      // >13 L/s o lectura inválida
+  if (flow <= 3.0f)   return 0;   // Muy poca agua: generadores apagados
+  if (flow <= 6.0f)   return 1;   // Agua suficiente para 1 generador
+  if (flow <  12.87f) return 2;   // Agua suficiente para 2 generadores
+  if (flow <= 13.0f)  return 3;   // Muy cerca del máximo de la PCH
+  return -1;                      // Lectura fuera de rango (revisar sensores)
 }
+
 
 // Texto amigable del estado simbólico:
 const char* generadoresActivosExplicacion(int g) {
@@ -139,7 +164,7 @@ const char* generadoresActivosExplicacion(int g) {
 }
 
 //----------------- Salida por puerto serial -----------------
-// Imprime todas las variables con etiqueta, valor y unidad.
+// Envía todas las variables, al computador, con etiqueta, valor y unidad.
 void serial_enviar(datos data[], int n) {
   for (int i = 0; i < n-1; i++) {
     Serial.print(data[i].etiqueta);
@@ -157,10 +182,10 @@ void serial_enviar(datos data[], int n) {
 
 // -------------------- Setup (una sola vez) --------------------
 void setup() {
-  // Serial a 115200 (frecuente en ESP32)
+  // Se inicializa el pueto serial
   Serial.begin(115200);
 
-  // Inicialización de cada módulo/dispositivo (delegado a sus clases)
+  // Inicialización de cada módulo/dispositivo
   pagina.set_up();
   pa_1.set_up();
   pa_2.set_up();
@@ -183,6 +208,11 @@ void loop() {
   const uint32_t now = millis();
   if (now - lastPrint > 1000) {   // Periodicidad ≈1 s
     lastPrint = now;
+    // Cada ~1 segundo:
+    // 1) Leemos todos los sensores.
+    // 2) Calculamos caudales y el estado recomendado de generadores.
+    // 3) Enviamos/mostramos los resultados (pantallas, web y texto por cable).
+
 
     // Tabla de variables.
     static datos data[] = {
@@ -221,11 +251,12 @@ void loop() {
 
     data[IDX_GENERADORES_ACTIVOS].valor = (float)generadoresActivos();
 
-    // Salidas
+    // Se envía la información al equipo conectado a la tarjeta, a la página en línea, y a las pantallas
     serial_enviar(data, sizeof(data)/sizeof(data[0]));
     pagina.enviar(data, sizeof(data)/sizeof(data[0]));
     pa_1.enviar(data);
     pa_2.enviar(data);
   }
 }
+
 
