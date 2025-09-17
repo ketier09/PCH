@@ -26,7 +26,7 @@ Glosario rápido:
    - Puerto serial: “cable de datos” para ver mensajes en el computador.
 */
 
-
+#include "secrets.h" 
 #include "Datos.h"
 #include "Caudalimetro.h"
 #include "Ultrasonico.h"
@@ -137,8 +137,7 @@ pantalla pa_2(IDX_CAUDAL_ADUCCION, IDX_CAUDAL_TURBINABLE, IDX_CAUDAL_FINAL);  //
 //----------------- Firebase ---------------------------
 // Se crea el objeto que representa la página online
 // Se crea el objeto que representa la página online
-auto env = load_env(".env");
-web pagina(env["WIFI_SSID"], env["WIFI_PASSWORD"], env["KEY"], env["URL"], env["EMAIL"], env["PASSWORD"]);
+web pagina;
 // -------------------- Lógica de generadores --------------------
 // Decisión simple para los generadores:
 // Según el caudal disponible (litros por segundo), elegimos 0, 1 o 2 generadores.

@@ -1,9 +1,5 @@
 #include "Web.h"
 
-web::web(const char* w, const char* p, const char* k,
-         const char* u, const char* e, const char* pass)
-  : WIFI_SSID(w), WIFI_PASSWORD(p), key(k), url(u), email(e), password(pass) {}
-
 void web::syncTime() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("\nSincronizando hora...");
