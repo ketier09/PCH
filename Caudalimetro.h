@@ -1,35 +1,41 @@
-#pragma once                  // Evita que este archivo se incluya dos veces en el programa
-#include <Arduino.h>          // Incluye las funciones básicas de Arduino
+#pragma once
+#include <Arduino.h>
 
-// Definimos una estructura llamada "caudalimetro"
-// que contendrá todo lo necesario para medir el flujo de agua
+// Aquí creamos un "molde" llamado caudalimetro.
+// Sirve para guardar todo lo necesario para que el sensor de agua funcione.
 struct caudalimetro {
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED; 
-  // "mux" es un candado de seguridad (protección) para manejar variables compartidas 
-  // entre el programa principal y las interrupciones
+  // Esto es como un "candado de seguridad":
+  // asegura que no haya errores cuando varias partes del programa usan la misma variable.
 
-  // Tiempo entre mediciones (en milisegundos). Aquí: 2000 ms = 2 segundos
+  // Cada cuánto tiempo queremos calcular el agua que pasó (en milisegundos).
+  // Aquí son 2000 ms = 2 segundos.
   static constexpr float periodo_de_las_mediciones = 2000;  
 
-  // Factor de calibración: el caudalímetro envía 450 pulsos por litro
-  // Se ajusta al periodo de medición para calcular correctamente el caudal
-  static constexpr float FLOW_CALIBRATION_FACTOR = 450.0f/*pulsos por litro*/ * periodo_de_las_mediciones / 1000;
+  // El sensor manda unos "clics" (pulsos) cuando pasa agua.
+  // Por cada litro, manda aproximadamente 450 clics.
+  // Con este número podemos convertir "clics" en "litros por minuto".
+  static constexpr float FLOW_CALIBRATION_FACTOR = 450.0f /*clics por litro*/ * periodo_de_las_mediciones / 1000;
 
-  // Factor de escala para ajustar el resultado final (sirve para correcciones)
+  // Factor de ajuste: si después de probar vemos que el sensor mide un poco mal,
+  // aquí podemos corregir el resultado multiplicándolo por este número.
   static constexpr float ESCALA = 1.0f;  
 
-  const byte pin;        // Pin de Arduino al que está conectado el sensor
-  void (*isr)();         // Puntero a la función que contará los pulsos (interrupción)
+  const byte pin;        // Cable del Arduino donde está conectado el sensor.
+  void (*isr)();         // Aquí guardamos la función que cuenta los clics del sensor.
 
-  // Constructor: permite crear un caudalímetro indicando el pin y la función ISR
+  // Esto sirve para crear el caudalímetro y decirle:
+  // "usa este pin y esta función para contar clics".
   caudalimetro(byte p, void (*i)());
 
-  uint32_t lastMillis = 0;     // Guarda el tiempo de la última medición
-  float flowRate = 0.0f;       // Aquí se guardará el caudal calculado
+  uint32_t lastMillis = 0;     // Guarda el último momento en que medimos el agua.
+  float flowRate = 0.0f;       // Aquí se guarda el resultado final (cuánta agua pasa).
 
   volatile uint32_t pulseCount = 0;  
-  // Cuenta de pulsos recibidos desde el caudalímetro (volatile porque cambia en la interrupción)
+  // Aquí se van contando los clics que envía el sensor.
+  // "volatile" significa que puede cambiar en cualquier momento
+  // porque otra parte del programa (la interrupción) también lo usa.
 
-  void set_up();      // Función para configurar el pin y la interrupción
-  float reading();    // Función para calcular el caudal en base a los pulsos
+  void set_up();      // Prepara el sensor para empezar a contar.
+  float reading();    // Calcula cuánta agua pasó en el tiempo definido.
 };
