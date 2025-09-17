@@ -52,3 +52,58 @@ Cada segundo, el sistema:
 ---
 
 ## 📐 Arquitectura (simplificada)
+[Ultrasonidos] → niveles de agua ┐
+[Caudalímetros] → caudales -------┤
+├─> ESP32 → Pantallas
+├─> ESP32 → Serial (PC)
+├─> ESP32 → Firebase (Web)
+└─> ESP32 → Motor (compuerta)
+
+---
+
+## 🚀 Flujo de trabajo
+1. **Lectura** de sensores (niveles + caudales).  
+2. **Cálculo** de caudal disponible y decisión de generadores.  
+3. **Salida** de resultados:  
+   - Pantallas locales.  
+   - Computador por serial.  
+   - Firebase (web).  
+   - Motor de compuerta.  
+
+---
+
+## 📡 Conexiones principales (pines ESP32)
+- **Caudalímetros**: 13, 14, 26.  
+- **Ultrasonidos**: TRIG 27/32/33/21, ECHO 36/35/34/39.  
+- **Motor compuerta**: 16 y 17.  
+
+---
+
+## 🖥️ Ejemplo de salida (por serial)
+Cota en captación: 98.54 msnm
+Cota del río: 97.10 msnm
+Caudal en captación: 0.23 m³/s
+Caudal turbinable: 5.80 L/s
+Generadores activos: 2 encendidos
+
+---
+
+## ✅ Estado del proyecto
+- [x] Lectura de sensores ultrasónicos.  
+- [x] Lectura de caudalímetros.  
+- [x] Decisión de generadores.  
+- [x] Visualización en pantallas.  
+- [x] Envío por WiFi a Firebase.  
+- [ ] Control inteligente de compuerta (en desarrollo).  
+
+---
+
+## 🔒 Notas
+- Las claves WiFi y Firebase están en `secrets.h` (archivo privado).  
+- Asegúrate de calibrar sensores antes de instalar en campo.  
+
+---
+
+## 📜 Licencia
+Uso académico y demostrativo.
+
