@@ -31,7 +31,6 @@ Glosario rápido:
 #include "Caudalimetro.h"
 #include "Ultrasonico.h"
 #include "Pantalla.h"
-#include "Motobomba.h"
 #include "Motor.h"
 #include "Web.h"
 
@@ -258,6 +257,7 @@ void loop() {
     pa_2.enviar(data);
   }
 }
+
 
 
 
