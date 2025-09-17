@@ -1,35 +1,39 @@
-#include "Caudalimetro.h"   // Incluimos el archivo de cabecera con la definición anterior
+#include "Caudalimetro.h"   // Traemos la definición del caudalímetro desde otro archivo
 
-// Constructor: inicializa el pin y la función de interrupción
+// Cuando creamos un caudalímetro, tenemos que decirle:
+// 1. En qué cable del microcontrolador está conectado el sensor.
+// 2. Qué función debe ejecutar cada vez que el sensor detecta que pasó agua.
 caudalimetro::caudalimetro(byte p, void (*i)())
   : pin(p), isr(i) {}
 
-// Configuración inicial del caudalímetro
+// Esta función prepara todo para que el sensor funcione.
 void caudalimetro::set_up() {
-  pinMode(pin, INPUT_PULLUP);   // Configura el pin como entrada con resistencia interna
+  pinMode(pin, INPUT_PULLUP);   // Configura el cable como "entrada", listo para escuchar al sensor.
   attachInterrupt(digitalPinToInterrupt(pin), isr, FALLING);  
-  // Asocia la función de interrupción "isr" al pin del sensor
-  // Se activa cuando la señal del sensor baja (FALLING)
+  // Aquí le decimos al microcontrolador:
+  // "Cada vez que el sensor mande una señal porque pasó agua,
+  // llama a la función que te indiqué al principio".
+  // Esa señal es como un pequeño "clic" que el sensor hace.
 }
 
-// Función para leer el caudal
+// Esta función devuelve cuánta agua está pasando por el sensor.
 float caudalimetro::reading() {
-  // Comprueba si ya pasaron "periodo_de_las_mediciones" (2 segundos por defecto)
+  // Solo calculamos cada cierto tiempo (2 segundos por defecto).
   if (millis() - lastMillis >= periodo_de_las_mediciones) {
-    lastMillis = millis();   // Actualiza el tiempo de la última medición
+    lastMillis = millis();   // Guardamos el momento en que hicimos esta medición.
     
-    uint32_t pulses;         // Variable temporal para guardar los pulsos contados
+    uint32_t pulses;         // Aquí vamos a guardar cuántos "clics" hizo el sensor.
 
-    // Bloque crítico: protegemos el acceso a pulseCount con un candado
+    // Zona protegida: copiamos el número de clics sin que nadie lo interrumpa.
     portENTER_CRITICAL(&mux);
-    pulses = pulseCount;     // Copiamos el número de pulsos acumulados
-    pulseCount = 0;          // Reiniciamos el contador para la siguiente medición
+    pulses = pulseCount;     // Guardamos el número de clics acumulados.
+    pulseCount = 0;          // Reiniciamos el contador para volver a empezar.
     portEXIT_CRITICAL(&mux);
 
-    // Calculamos el caudal: pulsos / factor de calibración
+    // Calculamos el caudal: cada "clic" equivale a una cierta cantidad de agua.
     flowRate = pulses / FLOW_CALIBRATION_FACTOR;
   }
 
-  // Devolvemos el caudal corregido por el factor de escala
+  // Devolvemos el resultado, ajustado por el factor de escala.
   return flowRate * ESCALA;
 }
