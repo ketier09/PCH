@@ -51,17 +51,6 @@ Cada segundo, el sistema:
 
 ---
 
-## 📐 Arquitectura (simplificada)
-[Ultrasonidos] → niveles de agua ┐
-[Caudalímetros] → caudales -------┤
-                                   ├─> ESP32 → Pantallas
-                                   ├─> ESP32 → Serial (PC)
-                                   ├─> ESP32 → Firebase (Web)
-                                   └─> ESP32 → Motor (compuerta)
-
-
----
-
 ## 🚀 Flujo de trabajo
 1. **Lectura** de sensores (niveles + caudales).  
 2. **Cálculo** de caudal disponible y decisión de generadores.  
