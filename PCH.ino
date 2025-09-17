@@ -35,6 +35,7 @@
 #include "Pantalla.h"
 #include "Motor.h"
 #include "Web.h"
+#include "Valvula_y_motobomba.h"
 
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
@@ -255,3 +256,4 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
