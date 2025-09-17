@@ -46,7 +46,7 @@ Cada segundo, el sistema:
 - **4 sensores ultrasónicos** → niveles de agua (captación, río, garantía, aducción).  
 - **3 caudalímetros** → caudal de inicio, turbinable y final.  
 - **Pantallas** → muestran los caudales principales.  
-- **Motor con puente H** → abre/cierra la compuerta.  
+- **Motor** → abre/cierra la compuerta.  
 - **WiFi + Firebase** → conexión a la nube para monitoreo remoto.  
 
 ---
@@ -78,18 +78,8 @@ Generadores activos: 2 encendidos
 
 ---
 
-## ✅ Estado del proyecto
-- [x] Lectura de sensores ultrasónicos.  
-- [x] Lectura de caudalímetros.  
-- [x] Decisión de generadores.  
-- [x] Visualización en pantallas.  
-- [x] Envío por WiFi a Firebase.  
-- [ ] Control inteligente de compuerta (en desarrollo).  
-
----
-
 ## 🔒 Notas
-- Las claves WiFi y Firebase están en `secrets.h` (archivo privado).  
+- Las claves WiFi y Firebase están en `secrets.cpp` (archivo privado). Puedes usa  `secrets.cpp.example` como base sintáctica
 - Asegúrate de calibrar sensores antes de instalar en campo.  
 
 ---
