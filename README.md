@@ -52,15 +52,12 @@ Cada segundo, el sistema:
 ---
 
 ## 📐 Arquitectura (simplificada)
-```mermaid
-flowchart TD
-  A[Ultrasonidos] -->|niveles de agua| ESP32
-  B[Caudalímetros] -->|caudales| ESP32
-
-  ESP32 -->|mostrar| Pantallas
-  ESP32 -->|enviar| Serial[(PC)]
-  ESP32 -->|enviar| Firebase[(Web)]
-  ESP32 -->|controlar| Motor[(Compuerta)]
+[Ultrasonidos] → niveles de agua ┐
+[Caudalímetros] → caudales -------┤
+                                   ├─> ESP32 → Pantallas
+                                   ├─> ESP32 → Serial (PC)
+                                   ├─> ESP32 → Firebase (Web)
+                                   └─> ESP32 → Motor (compuerta)
 
 
 ---
