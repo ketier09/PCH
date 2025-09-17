@@ -137,18 +137,7 @@ pantalla pa_2(IDX_CAUDAL_ADUCCION, IDX_CAUDAL_TURBINABLE, IDX_CAUDAL_FINAL);  //
 //----------------- Firebase ---------------------------
 // Se crea el objeto que representa la página online
 // Se crea el objeto que representa la página online
-std::unordered_map<std::string,std::string> load_env(const std::string& path) {
-    std::unordered_map<std::string,std::string> env;
-    std::ifstream f(path);
-    std::string line;
-    while (std::getline(f, line)) {
-        if (line.empty() || line[0]=='#') continue;
-        auto pos = line.find('=');
-        if (pos == std::string::npos) continue;
-        env[line.substr(0,pos)] = line.substr(pos+1);
-    }
-    return env;
-}
+auto env = load_env(".env");
 web pagina(env["WIFI_SSID"], env["WIFI_PASSWORD"], env["KEY"], env["URL"], env["EMAIL"], env["PASSWORD"]);
 // -------------------- Lógica de generadores --------------------
 // Decisión simple para los generadores:
