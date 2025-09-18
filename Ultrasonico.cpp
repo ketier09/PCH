@@ -6,8 +6,8 @@
 // - Qué funciones se llamarán cuando llegue o termine el eco.
 // - Y también algunos parámetros físicos: nivel máximo (techo),
 //   nivel mínimo (piso), ancho del canal, y la pendiente.
-ultrasonico::ultrasonico(byte t, byte e, void (*i1)(), void (*i2)(), float te, float pi, float a, float pe)
-  : trig(t), echo(e), echoRising(i1), echoFalling(i2), techo(te), piso(pi), ancho(a), raizCuadrada_pendiente(pe) {}
+ultrasonico::ultrasonico(byte t, byte e, void (*i1)(), float te, float pi, float a, float pe)
+  : trig(t), echo(e), echoChange(i1), techo(te), piso(pi), ancho(a), raizCuadrada_pendiente(pe) {}
 
 // Prepara el sensor ultrasónico para empezar a trabajar.
 void ultrasonico::set_up() {
@@ -17,19 +17,20 @@ void ultrasonico::set_up() {
 
   // Configuramos interrupciones: 
   // Se activan automáticamente cuando el pin "echo" cambia de estado.
-  attachInterrupt(digitalPinToInterrupt(echo), echoRising, FALLING);
-  attachInterrupt(digitalPinToInterrupt(echo), echoFalling, RISING);
+  attachInterrupt(digitalPinToInterrupt(echo), echoChange, CHANGE);
 }
-
-// Mide la distancia y calcula el nivel del agua.
-float ultrasonico::reading() {
+void ultrasonico::disparar(){
   // Enviamos un pequeño pulso ultrasónico (el "disparo").
   digitalWrite(trig, LOW);
   delayMicroseconds(2);
   digitalWrite(trig, HIGH);
   delayMicroseconds(10);
   digitalWrite(trig, LOW);
+}
 
+// Mide la distancia y calcula el nivel del agua.
+float ultrasonico::reading() {
+  disparar();
   // Calculamos el tiempo que tardó en regresar el eco
   // y lo convertimos en centímetros.
   portENTER_CRITICAL(&mux);           // Zona protegida para leer la variable
@@ -70,3 +71,4 @@ float ultrasonico::flujo() {
   // Flujo total = velocidad * área
   return velocidadFlujo * areaMojada;
 }
+
