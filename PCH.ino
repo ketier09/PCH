@@ -82,10 +82,10 @@ void IRAM_ATTR ISR_CAUD_END()  { ca_final.pulseCount++; }
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 // Entre paréntesis: pines TRIG y ECHO, funciones de inicio/fin del eco, y parámetros físicos del canal.
-ultrasonico ut_captacion(PIN_US_TRIG_C, PIN_US_ECHO_C, ISR_ULTRA_DIS_CAP, ISR_ULTRA_REGR_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
-ultrasonico ut_rio      (PIN_US_TRIG_R, PIN_US_ECHO_R, ISR_ULTRA_DIS_RIO, ISR_ULTRA_REGR_RIO, 100.0f, 0, 0, 0);
-ultrasonico ut_garantia (PIN_US_TRIG_G, PIN_US_ECHO_G, ISR_ULTRA_DIS_GAR, ISR_ULTRA_REGR_GAR, 100.0f, 0.0f, 1.0f, 0.01f);
-ultrasonico ut_aduccion (PIN_US_TRIG_A, PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_ULTRA_REGR_ADU, 100.0f, 0.0f, 1.0f, 0.01f);
+ultrasonico ut_captacion(PIN_US_TRIG_C, PIN_US_ECHO_C, ISR_ULTRA_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
+ultrasonico ut_rio      (PIN_US_TRIG_R, PIN_US_ECHO_R, ISR_ULTRA_RIO, 100.0f, 0, 0, 0);
+ultrasonico ut_garantia (PIN_US_TRIG_G, PIN_US_ECHO_G, ISR_ULTRA_GAR, 100.0f, 0.0f, 1.0f, 0.01f);
+ultrasonico ut_aduccion (PIN_US_TRIG_A, PIN_US_ECHO_A, ISR_ULTRA_ADU, 100.0f, 0.0f, 1.0f, 0.01f);
 
 // Función auxiliar: diferencia de tiempos en microsegundos
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
@@ -273,4 +273,5 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
