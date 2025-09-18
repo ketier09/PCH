@@ -17,8 +17,8 @@ void ultrasonico::set_up() {
 
   // Configuramos interrupciones: 
   // Se activan automáticamente cuando el pin "echo" cambia de estado.
-  attachInterrupt(digitalPinToInterrupt(echo), echoRising, FALLING);
-  attachInterrupt(digitalPinToInterrupt(echo), echoFalling, RISING);
+  attachInterrupt(digitalPinToInterrupt(echo), echoRising, RISING);
+  attachInterrupt(digitalPinToInterrupt(echo), echoFalling, FALLING);
 }
 void ultrasonico::disparo(){
   // Enviamos un pequeño pulso ultrasónico (el "disparo").
@@ -72,4 +72,5 @@ float ultrasonico::flujo() {
   // Flujo total = velocidad * área
   return velocidadFlujo * areaMojada;
 }
+
 
