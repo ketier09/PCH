@@ -1,6 +1,6 @@
 #include "Actuador_digital.h"
 
-valvula_motobomba::valvula_motobomba(byte v, byte m)
+valvula_motobomba::valvula_motobomba(byte p)
   : pin(p) {}
 
 void valvula_motobomba::set_up(){
