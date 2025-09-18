@@ -10,7 +10,7 @@ struct ultrasonico {
   // varias partes del programa usan la misma variable al mismo tiempo.
 
   // Constantes generales
-  static constexpr float ESCALA   = 1.0f;            // Factor de ajuste (corrección de medidas)
+  static constexpr float ESCALA   = 100.0f;            // Factor de ajuste (corrección de medidas)
   static constexpr float manningInverso  = 1.0f/0.013f; // Constante usada en la fórmula de Manning
 
   // Pines del sensor ultrasónico
@@ -43,4 +43,5 @@ struct ultrasonico {
   float reading();   // Mide la distancia y calcula el nivel del agua
   float flujo();     // Calcula el flujo de agua en el canal usando el nivel
 };
+
 
