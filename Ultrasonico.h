@@ -14,7 +14,7 @@ struct ultrasonico {
   static constexpr float manningInverso  = 1.0f/0.013f; // Constante usada en la fórmula de Manning
 
   // Pines del sensor ultrasónico
-  const byte trig;        // Pin que envía el pulso (disparo ultrasónico)
+  static const byte trig;        // Pin que envía el pulso (disparo ultrasónico)
   const byte echo;        // Pin que recibe el eco (rebote del pulso)
 
   // Funciones que se ejecutan automáticamente cuando el eco empieza y termina
@@ -41,7 +41,9 @@ struct ultrasonico {
 
   // Métodos (acciones que puede hacer el sensor)
   void set_up();     // Prepara los pines e interrupciones para usar el sensor
+  void disparo();
   float reading();   // Mide la distancia y calcula el nivel del agua
   float flujo();     // Calcula el flujo de agua en el canal usando el nivel
 };
+
 
