@@ -41,10 +41,11 @@ struct ultrasonico {
 
   // Métodos (acciones que puede hacer el sensor)
   void set_up();     // Prepara los pines e interrupciones para usar el sensor
-  static void disparo();
+  static void disparar();
   float reading();   // Mide la distancia y calcula el nivel del agua
   float flujo();     // Calcula el flujo de agua en el canal usando el nivel
 };
+
 
 
 
