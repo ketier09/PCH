@@ -7,10 +7,10 @@ void valvula_motobomba::set_up(){
   pinMode(pin, OUTPUT);
 }
 
-void valvula_motobomba::ejecutar_orden(char comando){
-      if(comando == '1'){
-      digitalWrite(pin,HIGH);
-    }else if(comando == '0'){
-      digitalWrite(pin,LOW);
-    }
+void valvula_motobomba::apagar(){
+  digitalWrite(pin, LOW);
+}
+
+void valvula_motobomba::encender(){
+  digitalWrite(pin, HIGH);
 }
