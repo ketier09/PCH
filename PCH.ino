@@ -45,14 +45,15 @@ enum : uint8_t {
   PIN_CAUD_END  = 26, // Caudal al final
 
   // Ultrasonidos: cada sensor usa 2 pines: TRIG (envía) y ECHO (recibe)
+  PIN_US_TRIG = 27,
   // Captación
-  PIN_US_TRIG_C = 27, PIN_US_ECHO_C = 36,
+  PIN_US_ECHO_C = 36,
   // Río
-  PIN_US_TRIG_R = 32, PIN_US_ECHO_R = 35,
+  PIN_US_ECHO_R = 35,
   // Garantía
-  PIN_US_TRIG_G = 33, PIN_US_ECHO_G = 34,
+  PIN_US_ECHO_G = 34,
   // Aducción
-  PIN_US_TRIG_A = 21, PIN_US_ECHO_A = 39,
+  PIN_US_ECHO_A = 39,
 
   // Motor de la compuerta (2 cables de control del puente H)
   PIN_COMPUERTA_1 = 16,
@@ -86,10 +87,11 @@ void IRAM_ATTR ISR_CAUD_END()  { ca_final.pulseCount++; }
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 // Entre paréntesis: pines TRIG y ECHO, funciones de inicio/fin del eco, y parámetros físicos del canal.
-ultrasonico ut_captacion(PIN_US_TRIG_C, PIN_US_ECHO_C, ISR_ULTRA_DIS_CAP, ISR_ULTRA_REGR_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
-ultrasonico ut_rio      (PIN_US_TRIG_R, PIN_US_ECHO_R, ISR_ULTRA_DIS_RIO, ISR_ULTRA_REGR_RIO, 100.0f, 0, 0, 0);
-ultrasonico ut_garantia (PIN_US_TRIG_G, PIN_US_ECHO_G, ISR_ULTRA_DIS_GAR, ISR_ULTRA_REGR_GAR, 100.0f, 0.0f, 1.0f, 0.01f);
-ultrasonico ut_aduccion (PIN_US_TRIG_A, PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_ULTRA_REGR_ADU, 100.0f, 0.0f, 1.0f, 0.01f);
+byte ultrasonico::trig = PIN_US_TRIG;
+ultrasonico ut_captacion(PIN_US_ECHO_C, ISR_ULTRA_DIS_CAP, ISR_ULTRA_REGR_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
+ultrasonico ut_rio      (PIN_US_ECHO_R, ISR_ULTRA_DIS_RIO, ISR_ULTRA_REGR_RIO, 100.0f, 0, 0, 0);
+ultrasonico ut_garantia (PIN_US_ECHO_G, ISR_ULTRA_DIS_GAR, ISR_ULTRA_REGR_GAR, 100.0f, 0.0f, 1.0f, 0.01f);
+ultrasonico ut_aduccion (PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_ULTRA_REGR_ADU, 100.0f, 0.0f, 1.0f, 0.01f);
 
 // Función auxiliar: diferencia de tiempos en microsegundos
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
@@ -227,7 +229,6 @@ void loop() {
 
       {"Generadores activos", "generadoresActivos",""},
     };
-
     // *** ACTUALIZACIÓN DE VALORES EN CADA CICLO ***
     // Niveles (msnm)
     data[IDX_COTA_CAPTACION].valor = ut_captacion.reading();
@@ -255,3 +256,4 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
