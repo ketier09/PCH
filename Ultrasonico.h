@@ -18,8 +18,7 @@ struct ultrasonico {
   const byte echo;        // Pin que recibe el eco (rebote del pulso)
 
   // Funciones que se ejecutan automáticamente cuando el eco empieza y termina
-  void (*echoRising)();
-  void (*echoFalling)();
+  void (*echoChange)();
 
   // Parámetros físicos del canal
   const float techo;      // Nivel máximo posible
@@ -32,7 +31,7 @@ struct ultrasonico {
   // - qué pines usa (trig, echo),
   // - qué funciones controlan el eco,
   // - y los parámetros físicos del canal.
-  ultrasonico(byte t, byte e, void (*i1)(), void (*i2)(), float te, float pi, float a, float pe);
+  ultrasonico(byte t, byte e, void (*i1)(), float te, float pi, float a, float pe);
 
   // Variables que se van actualizando con las mediciones
   float nivel;               // Nivel actual del agua (en metros)
@@ -44,4 +43,5 @@ struct ultrasonico {
   float reading();   // Mide la distancia y calcula el nivel del agua
   float flujo();     // Calcula el flujo de agua en el canal usando el nivel
 };
+
 
