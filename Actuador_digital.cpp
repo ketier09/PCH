@@ -1,4 +1,4 @@
-#include "Valvula_y_motobomba.h"
+#include "Actuador_digital.h"
 
 valvula_motobomba::valvula_motobomba(byte v, byte m)
   : valvula(v), motobomba(m) {}
