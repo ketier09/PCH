@@ -15,7 +15,7 @@ struct caudalimetro {
   // El sensor manda unos "clics" (pulsos) cuando pasa agua.
   // Por cada litro, manda aproximadamente 450 clics.
   // Con este número podemos convertir "clics" en "litros por minuto".
-  static constexpr float FLOW_CALIBRATION_FACTOR = 450.0f /*clics por litro*/ * periodo_de_las_mediciones / 1000;
+  static constexpr float FLOW_CALIBRATION_FACTOR = 450000.0f /*clics por metro cúbico*/ * periodo_de_las_mediciones / 1000;
 
   // Factor de ajuste: si después de probar vemos que el sensor mide un poco mal,
   // aquí podemos corregir el resultado multiplicándolo por este número.
@@ -39,3 +39,4 @@ struct caudalimetro {
   void set_up();      // Prepara el sensor para empezar a contar.
   float reading();    // Calcula cuánta agua pasó en el tiempo definido.
 };
+

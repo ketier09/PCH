@@ -35,6 +35,7 @@
 #include "Pantalla.h"
 #include "Motor.h"
 #include "Web.h"
+#include "Valvula_y_motobomba.h"
 
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
@@ -58,6 +59,8 @@ enum : uint8_t {
   // Motor de la compuerta (2 cables de control del puente H)
   PIN_COMPUERTA_1 = 16,
   PIN_COMPUERTA_2 = 17,
+  PIN_VALVE       = 4,
+  PIN_IMPULSADOR  = 5
 };
 
 //----------------- ISRs (funciones ultrarrápidas que reaccionan a señales de los sensores) -----------------
@@ -66,14 +69,10 @@ void IRAM_ATTR ISR_CAUD_INI();
 void IRAM_ATTR ISR_CAUD_TURB();
 void IRAM_ATTR ISR_CAUD_END();
 
-void IRAM_ATTR ISR_ULTRA_DIS_CAP();
-void IRAM_ATTR ISR_ULTRA_REGR_CAP();
-void IRAM_ATTR ISR_ULTRA_DIS_RIO();
-void IRAM_ATTR ISR_ULTRA_REGR_RIO();
-void IRAM_ATTR ISR_ULTRA_DIS_GAR();
-void IRAM_ATTR ISR_ULTRA_REGR_GAR();
-void IRAM_ATTR ISR_ULTRA_DIS_ADU();
-void IRAM_ATTR ISR_ULTRA_REGR_ADU();
+void IRAM_ATTR ISR_ULTRA_CAP();
+void IRAM_ATTR ISR_ULTRA_RIO();
+void IRAM_ATTR ISR_ULTRA_GAR();
+void IRAM_ATTR ISR_ULTRA_ADU();
 
 //----------------- Creamos los medidores de caudal -----------------
 caudalimetro ca_inicio    (PIN_CAUD_INI,  ISR_CAUD_INI);
@@ -87,43 +86,68 @@ void IRAM_ATTR ISR_CAUD_END()  { ca_final.pulseCount++; }
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 // Entre paréntesis: pines TRIG y ECHO, funciones de inicio/fin del eco, y parámetros físicos del canal.
-byte ultrasonico::trig = PIN_US_TRIG;
+
+const byte ultrasonico::trig = PIN_US_TRIG;
 ultrasonico ut_captacion(PIN_US_ECHO_C, ISR_ULTRA_DIS_CAP, ISR_ULTRA_REGR_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
 ultrasonico ut_rio      (PIN_US_ECHO_R, ISR_ULTRA_DIS_RIO, ISR_ULTRA_REGR_RIO, 100.0f, 0, 0, 0);
 ultrasonico ut_garantia (PIN_US_ECHO_G, ISR_ULTRA_DIS_GAR, ISR_ULTRA_REGR_GAR, 100.0f, 0.0f, 1.0f, 0.01f);
-ultrasonico ut_aduccion (PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_ULTRA_REGR_ADU, 100.0f, 0.0f, 1.0f, 0.01f);
+ultrasonico ut_aduccion (PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_ULTRA_REGR_ADU, 100.0f, 0.0f, 1.0f, 0.01f);}
 
 // Función auxiliar: diferencia de tiempos en microsegundos
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
 
-// Captación: guardamos el instante del “grito” (disparo) y luego el del “eco” (regreso).
-void IRAM_ATTR ISR_ULTRA_DIS_CAP(){ ut_captacion.disparo = micros(); }
-void IRAM_ATTR ISR_ULTRA_REGR_CAP(){
-  const uint32_t regreso = micros();
-  ut_captacion.duracion = diffMicros(regreso, ut_captacion.disparo);
+// Guardamos el instante del “grito” (disparo) y luego el del “eco” (regreso).
+// Captación
+void IRAM_ATTR ISR_ULTRA_CAP() {
+  if (digitalRead(PIN_US_ECHO_C)) {
+    ut_captacion.disparo = micros();           // flanco RISING
+  } else {
+    const uint32_t regreso = micros();         // flanco FALLING
+    // Protege la escritura compartida (ISR-safe)
+    portENTER_CRITICAL_ISR(&ut_captacion.mux);
+    ut_captacion.duracion = regreso - ut_captacion.disparo;
+    portEXIT_CRITICAL_ISR(&ut_captacion.mux);
+  }
 }
 // Río
-void IRAM_ATTR ISR_ULTRA_DIS_RIO(){ ut_rio.disparo = micros(); }
-void IRAM_ATTR ISR_ULTRA_REGR_RIO(){
-  const uint32_t regreso = micros();
-  ut_rio.duracion = diffMicros(regreso, ut_rio.disparo);
+void IRAM_ATTR ISR_ULTRA_RIO() {
+  if (digitalRead(PIN_US_ECHO_R)) {
+    ut_rio.disparo = micros();
+  } else {
+    const uint32_t regreso = micros();
+    portENTER_CRITICAL_ISR(&ut_rio.mux);
+    ut_rio.duracion = regreso - ut_rio.disparo;
+    portEXIT_CRITICAL_ISR(&ut_rio.mux);
+  }
 }
 // Garantía
-void IRAM_ATTR ISR_ULTRA_DIS_GAR(){ ut_garantia.disparo = micros(); }
-void IRAM_ATTR ISR_ULTRA_REGR_GAR(){
-  const uint32_t regreso = micros();
-  ut_garantia.duracion = diffMicros(regreso, ut_garantia.disparo);
+void IRAM_ATTR ISR_ULTRA_GAR() {
+  if (digitalRead(PIN_US_ECHO_G)) {
+    ut_garantia.disparo = micros();
+  } else {
+    const uint32_t regreso = micros();
+    portENTER_CRITICAL_ISR(&ut_garantia.mux);
+    ut_garantia.duracion = regreso - ut_garantia.disparo;
+    portEXIT_CRITICAL_ISR(&ut_garantia.mux);
+  }
 }
 // Aducción
-void IRAM_ATTR ISR_ULTRA_DIS_ADU(){ ut_aduccion.disparo = micros(); }
-void IRAM_ATTR ISR_ULTRA_REGR_ADU(){
-  const uint32_t regreso = micros();
-  ut_aduccion.duracion = diffMicros(regreso, ut_aduccion.disparo);
+void IRAM_ATTR ISR_ULTRA_ADU() {
+  if (digitalRead(PIN_US_ECHO_A)) {
+    ut_aduccion.disparo = micros();
+  } else {
+    const uint32_t regreso = micros();
+    portENTER_CRITICAL_ISR(&ut_aduccion.mux);
+    ut_aduccion.duracion = regreso - ut_aduccion.disparo;
+    portEXIT_CRITICAL_ISR(&ut_aduccion.mux);
+  }
 }
 
-//----------------- Motor de la compuerta -----------------
+//----------------- Actuadores -----------------
 // Este objeto permite encender/girar/detener el motor que mueve la compuerta.
 motor mo_compuerta(PIN_COMPUERTA_1, PIN_COMPUERTA_2);
+//Este objeto permite encender o apagar simultaneamente la válvula y la motobomba secundraia
+valvula_motobomba va_impulsador(PIN_VALVE,PIN_IMPULSADOR);
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
@@ -198,10 +222,14 @@ void setup() {
 
   // Preparar motor de compuerta
   mo_compuerta.set_up();
+
+  // Preparar la válvula y la motobomba secundaria
+  va_impulsador.set_up();
 }
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
 void loop() {
+  valvula.leer_orden();
   static uint32_t lastPrint = 0;
   const uint32_t now = millis();
   if (now - lastPrint > 1000) {   // Periodicidad ≈ 1 s
