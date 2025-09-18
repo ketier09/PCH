@@ -6,5 +6,6 @@ struct valvula_motobomba {
 
   valvula_motobomba(byte p);
   void set_up();
-  void ejecutar_orden(char comando);
+  void apagar();
+  void encender();
 };
