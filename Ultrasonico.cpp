@@ -19,7 +19,8 @@ void ultrasonico::set_up() {
   // Se activan automáticamente cuando el pin "echo" cambia de estado.
   attachInterrupt(digitalPinToInterrupt(echo), echoChange, CHANGE);
 }
-void ultrasonico::disparo(){
+
+void ultrasonico::disparar(){
   // Enviamos un pequeño pulso ultrasónico (el "disparo").
   digitalWrite(trig, LOW);
   delayMicroseconds(2);
@@ -30,7 +31,8 @@ void ultrasonico::disparo(){
 
 // Mide la distancia y calcula el nivel del agua.
 float ultrasonico::reading() {
-  disparo();
+
+  disparar();
   // Calculamos el tiempo que tardó en regresar el eco
   // y lo convertimos en centímetros.
   portENTER_CRITICAL(&mux);           // Zona protegida para leer la variable
@@ -71,5 +73,4 @@ float ultrasonico::flujo() {
   // Flujo total = velocidad * área
   return velocidadFlujo * areaMojada;
 }
-
 

@@ -35,6 +35,7 @@
 #include "Pantalla.h"
 #include "Motor.h"
 #include "Web.h"
+#include "Valvula_y_motobomba.h"
 
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
@@ -57,6 +58,8 @@ enum : uint8_t {
   // Motor de la compuerta (2 cables de control del puente H)
   PIN_COMPUERTA_1 = 16,
   PIN_COMPUERTA_2 = 17,
+  PIN_VALVE       = 4,
+  PIN_IMPULSADOR  = 5
 };
 
 //----------------- ISRs (funciones ultrarrápidas que reaccionan a señales de los sensores) -----------------
@@ -137,9 +140,11 @@ void IRAM_ATTR ISR_ULTRA_ADU() {
   }
 }
 
-//----------------- Motor de la compuerta -----------------
+//----------------- Actuadores -----------------
 // Este objeto permite encender/girar/detener el motor que mueve la compuerta.
 motor mo_compuerta(PIN_COMPUERTA_1, PIN_COMPUERTA_2);
+//Este objeto permite encender o apagar simultaneamente la válvula y la motobomba secundraia
+valvula_motobomba va_impulsador(PIN_VALVE,PIN_IMPULSADOR);
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
@@ -214,10 +219,14 @@ void setup() {
 
   // Preparar motor de compuerta
   mo_compuerta.set_up();
+
+  // Preparar la válvula y la motobomba secundaria
+  va_impulsador.set_up();
 }
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
 void loop() {
+  valvula.leer_orden();
   static uint32_t lastPrint = 0;
   const uint32_t now = millis();
   if (now - lastPrint > 1000) {   // Periodicidad ≈ 1 s
