@@ -40,6 +40,12 @@
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
 enum : uint8_t {
+  //Pulsadores
+  PIN_PULS_COMPUERTA = 39,
+  PIN_PULS_VALVE = 39,
+  PIN_PULS_NACIMIENTO = 39,
+  PIN_PULS_IMPULSADOR = 39,
+
   // Caudalímetros (miden agua que pasa)
   PIN_CAUD_INI  = 13, // Caudal al inicio
   PIN_CAUD_TURB = 14, // Caudal turbinable (el que va a la turbina)
@@ -51,15 +57,21 @@ enum : uint8_t {
   PIN_US_ECHO_C = 36,
   // Río
   PIN_US_ECHO_R = 35,
-  // Garantía
-  PIN_US_ECHO_G = 34,
-  // Aducción
-  PIN_US_ECHO_A = 39,
+  // Desarenador
+  PIN_US_ECHO_D = 39,
+
+  //SPI
+  PIN_SCK = ,
+  PIN_MOSI = ,
+  PIN_CS = ,
+
+  //Pantalla
+  PIN_PANTALLA = 1,
 
   // Motor de la compuerta (2 cables de control del puente H)
-  PIN_COMPUERTA_1 = 16,
-  PIN_COMPUERTA_2 = 17,
+  PIN_COMPUERTA = 16,
   PIN_VALVE       = 4,
+  PIN_NACIMIENTO  = 4,
   PIN_IMPULSADOR  = 5
 };
 
@@ -71,8 +83,7 @@ void IRAM_ATTR ISR_CAUD_END();
 
 void IRAM_ATTR ISR_ULTRA_CAP();
 void IRAM_ATTR ISR_ULTRA_RIO();
-void IRAM_ATTR ISR_ULTRA_GAR();
-void IRAM_ATTR ISR_ULTRA_ADU();
+void IRAM_ATTR ISR_ULTRA_DES();
 
 //----------------- Creamos los medidores de caudal -----------------
 caudalimetro ca_inicio    (PIN_CAUD_INI,  ISR_CAUD_INI);
@@ -88,10 +99,9 @@ void IRAM_ATTR ISR_CAUD_END()  { ca_final.pulseCount++; }
 // Entre paréntesis: pines TRIG y ECHO, funciones de inicio/fin del eco, y parámetros físicos del canal.
 
 const byte ultrasonico::trig = PIN_US_TRIG;
-ultrasonico ut_captacion(PIN_US_ECHO_C, ISR_ULTRA_DIS_CAP, ISR_ULTRA_REGR_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
-ultrasonico ut_rio      (PIN_US_ECHO_R, ISR_ULTRA_DIS_RIO, ISR_ULTRA_REGR_RIO, 100.0f, 0, 0, 0);
-ultrasonico ut_garantia (PIN_US_ECHO_G, ISR_ULTRA_DIS_GAR, ISR_ULTRA_REGR_GAR, 100.0f, 0.0f, 1.0f, 0.01f);
-ultrasonico ut_aduccion (PIN_US_ECHO_A, ISR_ULTRA_DIS_ADU, ISR_ULTRA_REGR_ADU, 100.0f, 0.0f, 1.0f, 0.01f);}
+ultrasonico ut_captacion(PIN_US_ECHO_C, ISR_ULTRA_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
+ultrasonico ut_rio      (PIN_US_ECHO_R, ISR_ULTRA_RIO, 100.0f, 0, 0, 0);
+ultrasonico ut_desarenador (PIN_US_ECHO_D, ISR_ULTRA_DES, 100.0f, 0.0f, 1.0f, 0.01f);}
 
 // Función auxiliar: diferencia de tiempos en microsegundos
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
@@ -120,9 +130,9 @@ void IRAM_ATTR ISR_ULTRA_RIO() {
     portEXIT_CRITICAL_ISR(&ut_rio.mux);
   }
 }
-// Garantía
-void IRAM_ATTR ISR_ULTRA_GAR() {
-  if (digitalRead(PIN_US_ECHO_G)) {
+// Desarenador
+void IRAM_ATTR ISR_ULTRA_DES() {
+  if (digitalRead(PIN_US_ECHO_D)) {
     ut_garantia.disparo = micros();
   } else {
     const uint32_t regreso = micros();
@@ -131,23 +141,9 @@ void IRAM_ATTR ISR_ULTRA_GAR() {
     portEXIT_CRITICAL_ISR(&ut_garantia.mux);
   }
 }
-// Aducción
-void IRAM_ATTR ISR_ULTRA_ADU() {
-  if (digitalRead(PIN_US_ECHO_A)) {
-    ut_aduccion.disparo = micros();
-  } else {
-    const uint32_t regreso = micros();
-    portENTER_CRITICAL_ISR(&ut_aduccion.mux);
-    ut_aduccion.duracion = regreso - ut_aduccion.disparo;
-    portEXIT_CRITICAL_ISR(&ut_aduccion.mux);
-  }
-}
 
 //----------------- Actuadores -----------------
-// Este objeto permite encender/girar/detener el motor que mueve la compuerta.
-motor mo_compuerta(PIN_COMPUERTA_1, PIN_COMPUERTA_2);
-//Este objeto permite encender o apagar simultaneamente la válvula y la motobomba secundraia
-valvula_motobomba va_impulsador(PIN_VALVE,PIN_IMPULSADOR);
+
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
@@ -284,4 +280,5 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
