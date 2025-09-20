@@ -95,7 +95,7 @@ void IRAM_ATTR ISR_ULTRA_DES();
 const byte ultrasonico::trig = PIN_US_TRIG;
 ultrasonico ut_captacion    (PIN_US_ECHO_C, ISR_ULTRA_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
 ultrasonico ut_rio          (PIN_US_ECHO_R, ISR_ULTRA_RIO, 100.0f, 0, 0, 0);
-ultrasonico ut_desarenador  (PIN_US_ECHO_D, ISR_ULTRA_DES, 100.0f, 0.0f, 1.0f, 0.01f);}
+ultrasonico ut_desarenador  (PIN_US_ECHO_D, ISR_ULTRA_DES, 100.0f, 0.0f, 1.0f, 0.01f);
 
 // Función auxiliar: diferencia de tiempos en microsegundos
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
@@ -283,5 +283,6 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
