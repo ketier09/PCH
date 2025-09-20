@@ -143,10 +143,9 @@ actuador_digital dig_motobombaPrincipal(PIN_NACIMIENTO);
 actuador_digital dig_motobombaSecundaria(PIN_IMPULSADOR);
 
 //----------------- Pulsadores -----------------
-pulsador puls_compuerta           (PIN_PULS_COMPUERTA,  mo_compuerta.cambiar_estado(),     LOW);
-pulsador puls_valvula             (PIN_PULS_VALVE,      dig_valvula.cambiar(),             LOW);
-pulsador puls_motobombaPrincipal  (PIN_PULS_NACIMIENTO  dig_motobombaPrincipal.cambiar(),  LOW);
-pulsador puls_motobombaSecundaria (PIN_PULS_IMPULSADOR  dig_motobombaSecundaria.cambiar(), LOW);
+pulsador puls_valvula              (PIN_PULS_VALVE,      dig_valvula.cambiar(),             LOW);
+pulsador puls_motobombaPrincipal   (PIN_PULS_NACIMIENTO, dig_motobombaPrincipal.cambiar(),  LOW);
+pulsador puls_motobombaSecundaria  (PIN_PULS_IMPULSADOR, dig_motobombaSecundaria.cambiar(), LOW);
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
@@ -283,6 +282,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
