@@ -7,7 +7,7 @@ motor::motor(byte p)
   : pin(p) {}
 
 const int motor::estados[] = {1, 2, 3, 4, 5};
-const size_t motor::n = sizeof(miArray) / sizeof(miArray[0]);
+const size_t motor::n = sizeof(estados) / sizeof(estados[0]);
 
 // Esta función prepara los dos pines para que el Arduino
 // los use como "interruptores" de salida y así poder controlar el motor.
@@ -24,6 +24,7 @@ void motor::siguiente_estado(){
   }
   servo.write(estados[estado]);
 }
+
 
 
 
