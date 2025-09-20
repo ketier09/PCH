@@ -3,7 +3,7 @@
 // Cuando se crea un motor, hay que decirle en qué dos pines (cables)
 // del Arduino está conectado. Un motor necesita dos para poder girar
 // en ambos sentidos.
-motor::MiServo(byte p)
+motor::motor(byte p)
   : pin(p) {}
 
 const int motor::estados[] = {1, 2, 3, 4, 5};
@@ -24,6 +24,7 @@ void motor::siguiente_estado(){
   }
   servo.write(estados[estado]);
 }
+
 
 
 
