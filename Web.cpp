@@ -39,8 +39,8 @@ void web::firebaseInit() {
   unsigned long startTime = millis();
   // Espera hasta 15 segundos a que Firebase quede listo
   while (!Firebase.ready() && millis() - startTime < 15000) {
-      Serial.print(".");
-      delay(500);
+    Serial.print(".");
+    delay(500);
   }
 
   if (Firebase.ready()) {
