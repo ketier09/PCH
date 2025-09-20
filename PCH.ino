@@ -127,12 +127,12 @@ void IRAM_ATTR ISR_ULTRA_RIO() {
 // Desarenador
 void IRAM_ATTR ISR_ULTRA_DES() {
   if (digitalRead(PIN_US_ECHO_D)) {
-    ut_garantia.disparo = micros();
+    ut_desarenador.disparo = micros();  // Cambiar ut_garantia por ut_desarenador
   } else {
     const uint32_t regreso = micros();
-    portENTER_CRITICAL_ISR(&ut_garantia.mux);
-    ut_garantia.duracion = regreso - ut_garantia.disparo;
-    portEXIT_CRITICAL_ISR(&ut_garantia.mux);
+    portENTER_CRITICAL_ISR(&ut_desarenador.mux);
+    ut_desarenador.duracion = regreso - ut_desarenador.disparo;
+    portEXIT_CRITICAL_ISR(&ut_desarenador.mux);
   }
 }
 
@@ -283,6 +283,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
