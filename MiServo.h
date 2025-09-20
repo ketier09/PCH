@@ -10,10 +10,12 @@ struct motor {
   // Constructor:
   motor(byte p);
   servo servo;
-  int estados[4];
+  extern const int estados[];
+  extern const size_t n;
 
   // Métodos (funciones que puede hacer el motor):
   void set_up();     // Prepara los pines del motor para poder usarlos
-  void cambiar_estado(byte estado);
+  void siguiente_estado();
 };
+
 
