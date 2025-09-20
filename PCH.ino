@@ -35,7 +35,7 @@
 #include "Pantalla.h"
 #include "Motor.h"
 #include "Web.h"
-#include "Valvula_y_motobomba.h"
+#include "Actuador_digital.h"
 
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
@@ -53,17 +53,14 @@ enum : uint8_t {
 
   // Ultrasonidos: cada sensor usa 2 pines: TRIG (envía) y ECHO (recibe)
   PIN_US_TRIG = 27,
-  // Captación
   PIN_US_ECHO_C = 36,
-  // Río
   PIN_US_ECHO_R = 35,
-  // Desarenador
   PIN_US_ECHO_D = 39,
 
   //SPI
-  PIN_SCK = ,
-  PIN_MOSI = ,
-  PIN_CS = ,
+  PIN_SCK = 18,
+  PIN_MOSI = 23,
+  PIN_CS = 5,
 
   //Pantalla
   PIN_PANTALLA = 1,
@@ -75,17 +72,11 @@ enum : uint8_t {
   PIN_IMPULSADOR  = 5
 };
 
-//----------------- ISRs (funciones ultrarrápidas que reaccionan a señales de los sensores) -----------------
-// No las llamamos nosotros; el ESP32 las ejecuta solo cuando detecta un “evento” (pulso, eco, etc.).
+//----------------- Creamos los medidores de caudal -----------------
 void IRAM_ATTR ISR_CAUD_INI();
 void IRAM_ATTR ISR_CAUD_TURB();
 void IRAM_ATTR ISR_CAUD_END();
 
-void IRAM_ATTR ISR_ULTRA_CAP();
-void IRAM_ATTR ISR_ULTRA_RIO();
-void IRAM_ATTR ISR_ULTRA_DES();
-
-//----------------- Creamos los medidores de caudal -----------------
 caudalimetro ca_inicio    (PIN_CAUD_INI,  ISR_CAUD_INI);
 caudalimetro ca_turbinable(PIN_CAUD_TURB, ISR_CAUD_TURB);
 caudalimetro ca_final     (PIN_CAUD_END,  ISR_CAUD_END);
@@ -97,11 +88,14 @@ void IRAM_ATTR ISR_CAUD_END()  { ca_final.pulseCount++; }
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 // Entre paréntesis: pines TRIG y ECHO, funciones de inicio/fin del eco, y parámetros físicos del canal.
+void IRAM_ATTR ISR_ULTRA_CAP();
+void IRAM_ATTR ISR_ULTRA_RIO();
+void IRAM_ATTR ISR_ULTRA_DES();
 
 const byte ultrasonico::trig = PIN_US_TRIG;
-ultrasonico ut_captacion(PIN_US_ECHO_C, ISR_ULTRA_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
-ultrasonico ut_rio      (PIN_US_ECHO_R, ISR_ULTRA_RIO, 100.0f, 0, 0, 0);
-ultrasonico ut_desarenador (PIN_US_ECHO_D, ISR_ULTRA_DES, 100.0f, 0.0f, 1.0f, 0.01f);}
+ultrasonico ut_captacion    (PIN_US_ECHO_C, ISR_ULTRA_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
+ultrasonico ut_rio          (PIN_US_ECHO_R, ISR_ULTRA_RIO, 100.0f, 0, 0, 0);
+ultrasonico ut_desarenador  (PIN_US_ECHO_D, ISR_ULTRA_DES, 100.0f, 0.0f, 1.0f, 0.01f);}
 
 // Función auxiliar: diferencia de tiempos en microsegundos
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
@@ -143,7 +137,10 @@ void IRAM_ATTR ISR_ULTRA_DES() {
 }
 
 //----------------- Actuadores -----------------
-
+motor compuerta(PIN_COMPUERTA);
+actuador_digital valvula(PIN_VALVE);
+actuador_digital motobombaPrincipal(PIN_NACIMIENTO);
+actuador_digital motobombSecundaria(PIN_IMPULSADOR);
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
@@ -225,7 +222,6 @@ void setup() {
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
 void loop() {
-  valvula.leer_orden();
   static uint32_t lastPrint = 0;
   const uint32_t now = millis();
   if (now - lastPrint > 1000) {   // Periodicidad ≈ 1 s
@@ -253,6 +249,7 @@ void loop() {
 
       {"Generadores activos", "generadoresActivos",""},
     };
+    static int n = sizeof(data)/sizeof(data[0]);
     // *** ACTUALIZACIÓN DE VALORES EN CADA CICLO ***
     // Niveles (msnm)
     data[IDX_COTA_CAPTACION].valor = ut_captacion.reading();
@@ -273,9 +270,11 @@ void loop() {
     // Recomendación de generadores (0,1,2,3)
     data[IDX_GENERADORES_ACTIVOS].valor = (float)generadoresActivos();
 
+
+
     // Enviar/mostrar en los diferentes “canales”
-    serial_enviar(data, sizeof(data)/sizeof(data[0])); // Al PC por cable
-    pagina.enviar(data, sizeof(data)/sizeof(data[0])); // A la nube (Firebase)
+    serial_enviar(data, n); // Al PC por cable
+    pagina.enviar(data, n); // A la nube (Firebase)
     pa_1.enviar(data);                                  // Pantalla 1 (3 datos)
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }

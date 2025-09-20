@@ -1,16 +1,16 @@
 #include "Actuador_digital.h"
 
-valvula_motobomba::valvula_motobomba(byte p)
+actuador_digital::actuador_digital(byte p)
   : pin(p) {}
 
-void valvula_motobomba::set_up(){
+void actuador_digital::set_up(){
   pinMode(pin, OUTPUT);
 }
 
-void valvula_motobomba::apagar(){
+void actuador_digital::apagar(){
   digitalWrite(pin, LOW);
 }
 
-void valvula_motobomba::encender(){
+void actuador_digital::encender(){
   digitalWrite(pin, HIGH);
 }

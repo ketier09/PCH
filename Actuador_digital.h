@@ -1,10 +1,10 @@
 #pragma once
 #include <Arduino.h>
 
-struct valvula_motobomba {
+struct actuador_digital {
   const byte pin;
 
-  valvula_motobomba(byte p);
+  actuador_digital(byte p);
   void set_up();
   void apagar();
   void encender();
