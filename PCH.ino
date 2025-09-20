@@ -137,10 +137,16 @@ void IRAM_ATTR ISR_ULTRA_DES() {
 }
 
 //----------------- Actuadores -----------------
-motor compuerta(PIN_COMPUERTA);
-actuador_digital valvula(PIN_VALVE);
-actuador_digital motobombaPrincipal(PIN_NACIMIENTO);
-actuador_digital motobombSecundaria(PIN_IMPULSADOR);
+motor mo_compuerta(PIN_COMPUERTA);
+actuador_digital dig_valvula(PIN_VALVE);
+actuador_digital dig_motobombaPrincipal(PIN_NACIMIENTO);
+actuador_digital dig_motobombaSecundaria(PIN_IMPULSADOR);
+
+//----------------- Pulsadores -----------------
+pulsador puls_compuerta           (PIN_PULS_COMPUERTA,  mo_compuerta.cambiar_estado(),     LOW);
+pulsador puls_valvula             (PIN_PULS_VALVE,      dig_valvula.cambiar(),             LOW);
+pulsador puls_motobombaPrincipal  (PIN_PULS_NACIMIENTO  dig_motobombaPrincipal.cambiar(),  LOW);
+pulsador puls_motobombaSecundaria (PIN_PULS_IMPULSADOR  dig_motobombaSecundaria.cambiar(), LOW);
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
@@ -164,15 +170,7 @@ int generadoresActivos() {
 }
 
 // Convierte ese número en un texto fácil de entender
-const char* generadoresActivosExplicacion(int g) {
-  switch (g) {
-    case 0:  return "Apagados";
-    case 1:  return "1 encendido";
-    case 2:  return "2 encendidos";
-    case 3:  return "2 a máxima capacidad";
-    default: return "Error";
-  }
-}
+const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 encendidos", "2 a máxima capacidad", "Error"}
 
 //----------------- Envío por puerto serial (al computador) -----------------
 // Imprime todas las variables con nombre, valor y unidad.
@@ -188,7 +186,7 @@ void serial_enviar(datos data[], int n) {
   const int g = (int)data[IDX_GENERADORES_ACTIVOS].valor;
   Serial.print(data[IDX_GENERADORES_ACTIVOS].etiqueta);
   Serial.print(": ");
-  Serial.println(generadoresActivosExplicacion(g));
+  Serial.println(generadoresActivosExplicacion[g]);
 }
 
 // -------------------- Setup (se ejecuta una vez al encender) --------------------
@@ -213,15 +211,23 @@ void setup() {
   ut_garantia.set_up();
   ut_aduccion.set_up();
 
-  // Preparar motor de compuerta
   mo_compuerta.set_up();
+  dig_valvula.set_up();
+  dig_motobombaPrincipal.set_up();
+  dig_motobombSecundaria.set_up();
 
-  // Preparar la válvula y la motobomba secundaria
-  va_impulsador.set_up();
+  puls_compuerta.set_up();
+  puls_valvula.set_up();
+  puls_motobombaPrincipal.set_up();
+  puls_motobombSecundaria.set_up();
 }
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
 void loop() {
+  puls_compuerta.update();
+  puls_valvula.update();
+  puls_motobombaPrincipal.update();
+  puls_motobombSecundaria.update();
   static uint32_t lastPrint = 0;
   const uint32_t now = millis();
   if (now - lastPrint > 1000) {   // Periodicidad ≈ 1 s
@@ -269,8 +275,6 @@ void loop() {
 
     // Recomendación de generadores (0,1,2,3)
     data[IDX_GENERADORES_ACTIVOS].valor = (float)generadoresActivos();
-
-
 
     // Enviar/mostrar en los diferentes “canales”
     serial_enviar(data, n); // Al PC por cable

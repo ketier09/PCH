@@ -32,7 +32,7 @@ struct ultrasonico {
   // - qué funciones controlan el eco,
   // - y los parámetros físicos del canal.
 
-  ultrasonico(byte e, void (*i1)(), float te, float pi, float a, float pe);
+  ultrasonico(byte e, void (*i)(), float te, float pi, float a, float pe);
 
 
   // Variables que se van actualizando con las mediciones

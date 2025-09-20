@@ -7,8 +7,8 @@
 // - Y también algunos parámetros físicos: nivel máximo (techo),
 //   nivel mínimo (piso), ancho del canal, y la pendiente.
 
-ultrasonico::ultrasonico(byte e, void (*i1)(), void (*i2)(), float te, float pi, float a, float pe)
-  : echo(e), echoRising(i1), echoFalling(i2), techo(te), piso(pi), ancho(a), raizCuadrada_pendiente(pe) {}
+ultrasonico::ultrasonico(byte e, void (*i)(), float te, float pi, float a, float pe)
+  : echo(e), echoChange(i), techo(te), piso(pi), ancho(a), raizCuadrada_pendiente(pe) {}
 
 
 // Prepara el sensor ultrasónico para empezar a trabajar.

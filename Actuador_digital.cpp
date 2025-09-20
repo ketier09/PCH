@@ -5,12 +5,11 @@ actuador_digital::actuador_digital(byte p)
 
 void actuador_digital::set_up(){
   pinMode(pin, OUTPUT);
+  estado = LOW;
+  digitalWrite(pin, estado);
 }
 
-void actuador_digital::apagar(){
-  digitalWrite(pin, LOW);
-}
-
-void actuador_digital::encender(){
-  digitalWrite(pin, HIGH);
+void actuador_digital::cambiar(){
+  estado = !estado;
+  digitalWrite(pin, estado);
 }
