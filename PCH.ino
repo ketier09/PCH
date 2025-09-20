@@ -169,7 +169,7 @@ int generadoresActivos() {
 }
 
 // Convierte ese número en un texto fácil de entender
-const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 encendidos", "2 a máxima capacidad", "Error"}
+const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 encendidos", "2 a máxima capacidad", "Error"};
 
 //----------------- Envío por puerto serial (al computador) -----------------
 // Imprime todas las variables con nombre, valor y unidad.
@@ -282,6 +282,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
