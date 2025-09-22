@@ -40,12 +40,6 @@
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
 enum : uint8_t {
-  //Pulsadores
-  PIN_PULS_COMPUERTA = 39,
-  PIN_PULS_VALVE = 39,
-  PIN_PULS_NACIMIENTO = 39,
-  PIN_PULS_IMPULSADOR = 39,
-
   // Caudalímetros (miden agua que pasa)
   PIN_CAUD_INI  = 13, // Caudal al inicio
   PIN_CAUD_TURB = 14, // Caudal turbinable (el que va a la turbina)
@@ -64,6 +58,12 @@ enum : uint8_t {
 
   //Pantalla
   PIN_PANTALLA = 1,
+
+  //Pulsadores
+  PIN_PULS_COMPUERTA = 39,
+  PIN_PULS_VALVE = 39,
+  PIN_PULS_NACIMIENTO = 39,
+  PIN_PULS_IMPULSADOR = 39,
 
   // Motor de la compuerta (2 cables de control del puente H)
   PIN_COMPUERTA = 16,
@@ -93,9 +93,9 @@ void IRAM_ATTR ISR_ULTRA_RIO();
 void IRAM_ATTR ISR_ULTRA_DES();
 
 const byte ultrasonico::trig = PIN_US_TRIG;
-ultrasonico ut_captacion    (PIN_US_ECHO_C, ISR_ULTRA_CAP, 100.0f/*techo*/, 0.0f/*piso*/, 1.0f/*ancho*/, 0.01f/*√pend.*/);
-ultrasonico ut_rio          (PIN_US_ECHO_R, ISR_ULTRA_RIO, 100.0f, 0, 0, 0);
-ultrasonico ut_desarenador  (PIN_US_ECHO_D, ISR_ULTRA_DES, 100.0f, 0.0f, 1.0f, 0.01f);
+ultrasonico ut_captacion    (PIN_US_ECHO_C, ISR_ULTRA_CAP, 100.0f/*TBD*/, 0.0f/*TBD*/, 1.0f/*TBD*/, 0.01f/*TBD*/);
+ultrasonico ut_rio          (PIN_US_ECHO_R, ISR_ULTRA_RIO, 100.0f/*TBD*/, 0, 0, 0);
+ultrasonico ut_desarenador  (PIN_US_ECHO_D, ISR_ULTRA_DES, 100.0f/*TBD*/, 0.0f/*TBD*/, 1.0f/*TBD*/, 0.01f/*TBD*/);
 
 // Función auxiliar: diferencia de tiempos en microsegundos
 static inline uint32_t diffMicros(uint32_t t1, uint32_t t0) { return t1 - t0; }
@@ -143,14 +143,15 @@ actuador_digital dig_motobombaPrincipal(PIN_NACIMIENTO);
 actuador_digital dig_motobombaSecundaria(PIN_IMPULSADOR);
 
 //----------------- Pulsadores -----------------
+pulsador puls_compuerta            (PIN_PULS_COMPUERTA,  mo_compuerta.siguiente_estado(),   LOW);
 pulsador puls_valvula              (PIN_PULS_VALVE,      dig_valvula.cambiar(),             LOW);
 pulsador puls_motobombaPrincipal   (PIN_PULS_NACIMIENTO, dig_motobombaPrincipal.cambiar(),  LOW);
 pulsador puls_motobombaSecundaria  (PIN_PULS_IMPULSADOR, dig_motobombaSecundaria.cambiar(), LOW);
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
-pantalla pa_1(IDX_CAUDAL_INICIO,   IDX_CAUDAL_GARANTIA,   IDX_CAUDAL_CAPTACION);
-pantalla pa_2(IDX_CAUDAL_ADUCCION, IDX_CAUDAL_TURBINABLE, IDX_CAUDAL_FINAL);
+pantalla pa_1(IDX_CAUDAL_INICIO,      IDX_CAUDAL_CAPTACION,  IDX_CAUDAL_CAPTACION);
+pantalla pa_2(IDX_CAUDAL_DESARENADOR, IDX_CAUDAL_TURBINABLE, IDX_CAUDAL_FINAL);
 
 //----------------- Conexión web/Firebase -----------------
 // “pagina” maneja WiFi, hora de Internet y la base de datos en la nube.
@@ -207,8 +208,7 @@ void setup() {
   // Preparar sensores ultrasónicos
   ut_captacion.set_up();
   ut_rio.set_up();
-  ut_garantia.set_up();
-  ut_aduccion.set_up();
+  ut_desarenador.set_up();
 
   mo_compuerta.set_up();
   dig_valvula.set_up();
@@ -223,10 +223,12 @@ void setup() {
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
 void loop() {
+  
   puls_compuerta.update();
   puls_valvula.update();
   puls_motobombaPrincipal.update();
   puls_motobombSecundaria.update();
+  
   static uint32_t lastPrint = 0;
   const uint32_t now = millis();
   if (now - lastPrint > 1000) {   // Periodicidad ≈ 1 s
@@ -239,33 +241,30 @@ void loop() {
     // Tabla de variables que vamos a mostrar/enviar
     static datos data[] = {
       //   Nombre visible          // Ruta en Firebase       // Unidad
-      {"Cota en captación",   "cotaCaptacion",    "msnm"},
-      {"Cota del río",        "cotaRio",          "msnm"},
-      {"Cota en garantía",    "cotaGarantia",     "msnm"},
-      {"Cota en aducción",    "cotaAduccion",     "msnm"},
+      {"Cota en captación",      "cotaCaptacion",      "msnm"},
+      {"Cota del río",           "cotaRio",            "msnm"},
+      {"Cota en desarenador",    "cotaDesarenador",    "msnm"},
 
-      {"Caudal en captación", "caudalCaptacion",  "m³/s"},
-      {"Caudal en garantía",  "caudalGarantia",   "m³/s"},
-      {"Caudal en aducción",  "caudalAduccion",   "m³/s"},
+      {"Caudal en captación",    "caudalCaptacion",    "m³/s"},
+      {"Caudal en desarenador",  "caudalDesarenador",  "m³/s"},
 
-      {"Caudal inicio",       "caudalInicio",     "L/s"},
-      {"Caudal turbinable",   "caudalTurbinable", "L/s"},
-      {"Caudal final",        "caudalFinal",      "L/s"},
+      {"Caudal inicio",          "caudalInicio",       "L/s"},
+      {"Caudal turbinable",      "caudalTurbinable",   "L/s"},
+      {"Caudal final",           "caudalFinal",        "L/s"},
 
-      {"Generadores activos", "generadoresActivos",""},
+      {"Generadores activos",    "generadoresActivos", "  "},
     };
     static int n = sizeof(data)/sizeof(data[0]);
     // *** ACTUALIZACIÓN DE VALORES EN CADA CICLO ***
     // Niveles (msnm)
     data[IDX_COTA_CAPTACION].valor = ut_captacion.reading();
     data[IDX_COTA_RIO].valor       = ut_rio.reading();
-    data[IDX_COTA_GARANTIA].valor  = ut_garantia.reading();
-    data[IDX_COTA_ADUCCION].valor  = ut_aduccion.reading();
+    data[IDX_COTA_DESARENADOR].valor  = ut_desarenador.reading();
 
     // Caudales calculados por los ultrasonidos (m³/s)
     data[IDX_CAUDAL_CAPTACION].valor = ut_captacion.flujo();
     data[IDX_CAUDAL_GARANTIA].valor  = ut_garantia.flujo();
-    data[IDX_CAUDAL_ADUCCION].valor  = ut_aduccion.flujo();
+    data[IDX_CAUDAL_DESARENADOR].valor  = ut_desarenador.flujo();
 
     // Caudales de los caudalímetros (L/s)
     data[IDX_CAUDAL_INICIO].valor     = ca_inicio.reading();
@@ -282,6 +281,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
