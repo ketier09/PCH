@@ -3,7 +3,7 @@
 // Cuando se crea un motor, hay que decirle en qué dos pines (cables)
 // del Arduino está conectado. Un motor necesita dos para poder girar
 // en ambos sentidos.
-motor::motor(byte p, int e1, int e2, int e3, int e4);
+motor::motor(byte p, int e1, int e2, int e3, int e4)
   : pin(p), estados{e1, e2, e3, e4} {}
 
 // Esta función prepara los dos pines para que el Arduino
