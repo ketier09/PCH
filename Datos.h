@@ -9,12 +9,10 @@
 enum DataIndex {
     IDX_COTA_CAPTACION,     // Altura en el punto de captación
     IDX_COTA_RIO,           // Altura del río
-    IDX_COTA_GARANTIA,      // Altura mínima de seguridad (garantía)
-    IDX_COTA_ADUCCION,      // Altura en el canal de aducción
+    IDX_COTA_DESARENADOR,   // Altura en desarenador
 
     IDX_CAUDAL_CAPTACION,   // Agua captada
-    IDX_CAUDAL_GARANTIA,    // Agua mínima que debe respetarse
-    IDX_CAUDAL_ADUCCION,    // Agua que pasa por el canal de aducción
+    IDX_CAUDAL_DESARENADOR, // Agua en desarenador
 
     IDX_CAUDAL_INICIO,      // Agua al inicio del proceso
     IDX_CAUDAL_TURBINABLE,  // Agua que puede usarse en la turbina
@@ -22,6 +20,7 @@ enum DataIndex {
 
     IDX_GENERADORES_ACTIVOS // Número de generadores que están encendidos
 };
+
 
 // --------------------- Estructura común ---------------------------
 // Aquí definimos una "cajita de información" llamada "datos".
@@ -36,3 +35,4 @@ struct datos {
   const char* unidad;            // Unidad de medida (ejemplo: "m", "L/s")
   float valor = 0.0;             // El valor numérico (inicialmente 0)
 };
+
