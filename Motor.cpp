@@ -1,4 +1,4 @@
-#include "MiServo.h"
+#include "Motor.h"
 
 // Cuando se crea un motor, hay que decirle en qué dos pines (cables)
 // del Arduino está conectado. Un motor necesita dos para poder girar
