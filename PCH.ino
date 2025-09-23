@@ -218,7 +218,7 @@ void setup() {
   puls_compuerta.set_up();
   puls_valvula.set_up();
   puls_motobombaPrincipal.set_up();
-  puls_motobombSecundaria.set_up();
+  puls_motobombaSecundaria.set_up();
 }
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
@@ -281,6 +281,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
