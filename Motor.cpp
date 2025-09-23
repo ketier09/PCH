@@ -9,7 +9,7 @@ motor::motor(byte p, int e1, int e2, int e3, int e4)
 // Esta función prepara los dos pines para que el Arduino
 // los use como "interruptores" de salida y así poder controlar el motor.
 void motor::set_up() {
-  servo.attach(pin, estados[0], estados[n-1]);  // El segundo cable también funcionará como salida
+  servo.attach(pin, 500, 2500);  // El segundo cable también funcionará como salida
 }
 
 void motor::siguiente_estado(){
