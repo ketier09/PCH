@@ -6,21 +6,6 @@
 // (alturas y caudales en distintos puntos del sistema).
 // Estos nombres se usan como atajos para acceder a los datos,
 // en vez de tener que usar números (0, 1, 2, ...).
-enum DataIndex {
-    IDX_COTA_CAPTACION,     // Altura en el punto de captación
-    IDX_COTA_RIO,           // Altura del río
-    IDX_COTA_DESARENADOR,   // Altura en desarenador
-
-    IDX_CAUDAL_CAPTACION,   // Agua captada
-    IDX_CAUDAL_DESARENADOR, // Agua en desarenador
-
-    IDX_CAUDAL_INICIO,      // Agua al inicio del proceso
-    IDX_CAUDAL_TURBINABLE,  // Agua que puede usarse en la turbina
-    IDX_CAUDAL_FINAL,       // Agua al final del proceso
-
-    IDX_GENERADORES_ACTIVOS // Número de generadores que están encendidos
-};
-
 
 // --------------------- Estructura común ---------------------------
 // Aquí definimos una "cajita de información" llamada "datos".
@@ -29,10 +14,35 @@ enum DataIndex {
 // - Una etiqueta para Firebase (nombre usado si se envía a la nube).
 // - La unidad de medida (ejemplo: "m", "L/s").
 // - El valor (número real que representa la medición).
-struct datos {
-  const char* etiqueta;          // Nombre para mostrar (ejemplo: "Caudal captación")
-  const char* etiquetaFirebase;  // Nombre usado para guardar en Firebase
-  const char* unidad;            // Unidad de medida (ejemplo: "m", "L/s")
-  float valor = 0.0;             // El valor numérico (inicialmente 0)
+#define DATOS_X \
+X(CotaCaptacion,     "Cota en captación",    "cotaCaptacion",     "msnm") \
+X(CotaRio,           "Cota del río",         "cotaRio",           "msnm") \
+X(CotaDesarenador,   "Cota en desarenador",  "cotaDesarenador",   "msnm") \
+X(CaudalCaptacion,   "Caudal en captación",  "caudalCaptacion",   "m³/s") \
+X(CaudalDesarenador, "Caudal en desarenador","caudalDesarenador", "m³/s") \
+X(CaudalInicio,      "Caudal inicio",        "caudalInicio",      "m³/s") \
+X(CaudalTurbinable,  "Caudal turbinable",    "caudalTurbinable",  "m³/s") \
+X(CaudalFinal,       "Caudal final",         "caudalFinal",       "m³/s") \
+X(GeneradoresActivos,"Generadores activos",  "generadoresActivos","    ")
+
+enum Dato {
+#define X(ID, NOMBRE, FIRE, UNI) ID,
+    DATOS_X
+#undef X
+    DatoCount
 };
+
+struct dato {
+  const char* etiqueta;
+  const char* etiquetaFirebase;
+  const char* unidad;
+  float valor;
+};
+
+static dato data[DatoCount] = {
+#define X(ID, NOMBRE, FIRE, UNI) { NOMBRE, FIRE, UNI, 0.0 },
+    DATOS_X
+#undef X
+};
+
 
