@@ -137,7 +137,7 @@ void IRAM_ATTR ISR_ULTRA_DES() {
 }
 
 //----------------- Actuadores -----------------
-motor mo_compuerta(PIN_COMPUERTA, 0, 45, 90, 135);
+motor mo_compuerta(PIN_COMPUERTA, 0/*TBD*/, 45/*TBD*/, 90/*TBD*/, 135/*TBD*/);
 actuador_digital dig_valvula(PIN_VALVE);
 actuador_digital dig_motobombaPrincipal(PIN_NACIMIENTO);
 actuador_digital dig_motobombaSecundaria(PIN_IMPULSADOR);
@@ -281,6 +281,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
