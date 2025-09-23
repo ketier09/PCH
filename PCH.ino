@@ -39,6 +39,70 @@
 
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
+enum ESP32_Pins {
+    // ---- ADC1 ----
+    PIN_ADC1_CH0 = 36, // GPIO36, VP
+    PIN_ADC1_CH3 = 39, // GPIO39, VN
+    PIN_ADC1_CH6 = 34, // GPIO34
+    PIN_ADC1_CH7 = 35, // GPIO35
+    PIN_ADC1_CH4 = 32, // GPIO32, TOUCH9
+    PIN_ADC1_CH5 = 33, // GPIO33, TOUCH8
+
+    // ---- ADC2 ----
+    PIN_ADC2_CH9 = 26, // GPIO26, DAC2
+    PIN_ADC2_CH8 = 25, // GPIO25, DAC1
+    PIN_ADC2_CH7 = 27, // GPIO27, TOUCH7
+    PIN_ADC2_CH6 = 14, // GPIO14, TOUCH6
+    PIN_ADC2_CH5 = 12, // GPIO12, TOUCH5
+    PIN_ADC2_CH4 = 13, // GPIO13, TOUCH4
+    PIN_ADC2_CH0 = 4,  // GPIO4,  TOUCH0
+    PIN_ADC2_CH1 = 0,  // GPIO0,  TOUCH1
+    PIN_ADC2_CH2 = 2,  // GPIO2,  TOUCH2
+    PIN_ADC2_CH3 = 15, // GPIO15, TOUCH3
+
+    // ---- DAC ----
+    PIN_DAC1 = 25, // GPIO25
+    PIN_DAC2 = 26, // GPIO26
+
+    // ---- TOUCH ----
+    PIN_TOUCH0 = 4,
+    PIN_TOUCH1 = 0,
+    PIN_TOUCH2 = 2,
+    PIN_TOUCH3 = 15,
+    PIN_TOUCH4 = 13,
+    PIN_TOUCH5 = 12,
+    PIN_TOUCH6 = 14,
+    PIN_TOUCH7 = 27,
+    PIN_TOUCH8 = 33,
+    PIN_TOUCH9 = 32,
+
+    // ---- UART ----
+    PIN_UART0_TX = 1,  // GPIO1
+    PIN_UART0_RX = 3,  // GPIO3
+    PIN_UART1_TX = 10, // GPIO10 (no suele usarse, reservado)
+    PIN_UART1_RX = 9,  // GPIO9 (reservado flash)
+    PIN_UART2_TX = 17, // GPIO17
+    PIN_UART2_RX = 16, // GPIO16
+
+    // ---- I2C ----
+    PIN_I2C_SDA = 21, // GPIO21
+    PIN_I2C_SCL = 22, // GPIO22
+
+    // ---- SPI (VSPI por defecto) ----
+    PIN_SPI_MOSI = 23, // GPIO23
+    PIN_SPI_MISO = 19, // GPIO19
+    PIN_SPI_CLK  = 18, // GPIO18
+    PIN_SPI_CS   = 5,  // GPIO5
+
+    // ---- Pines reservados para Flash (NO usar) ----
+    PIN_FLASH_CLK  = 6, 
+    PIN_FLASH_SD0  = 7, 
+    PIN_FLASH_SD1  = 8, 
+    PIN_FLASH_SD2  = 9, 
+    PIN_FLASH_SD3  = 10,
+    PIN_FLASH_CMD  = 11
+};
+
 enum : uint8_t {
   // Caudalímetros (miden agua que pasa)
   PIN_CAUD_INI  = 13, // Caudal al inicio
@@ -175,16 +239,16 @@ const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 enc
 //----------------- Envío por puerto serial (al computador) -----------------
 // Imprime todas las variables con nombre, valor y unidad.
 // La última (generadores) se imprime como texto, no número.
-void serial_enviar(datos data[], int n) {
-  for (int i = 0; i < n-1; i++) {
+void serial_enviar(datos data[]) {
+  for (int i = 0; i < DatoCount; i++) {
     Serial.print(data[i].etiqueta);
     Serial.print(": ");
     Serial.print(data[i].valor, 2); // 2 decimales (aprox. ±0,005)
     Serial.print(" ");
     Serial.println(data[i].unidad);
   }
-  const int g = (int)data[IDX_GENERADORES_ACTIVOS].valor;
-  Serial.print(data[IDX_GENERADORES_ACTIVOS].etiqueta);
+  const int g = (int)data[GeneradoresActivos].valor;
+  Serial.print(data[GeneradoresActivos].etiqueta);
   Serial.print(": ");
   Serial.println(generadoresActivosExplicacion[g]);
 }
@@ -234,53 +298,30 @@ void loop() {
   if (now - lastPrint > 1000) {   // Periodicidad ≈ 1 s
     lastPrint = now;
 
-    // 1) Leer sensores
-    // 2) Calcular caudales y estado de generadores
-    // 3) Mostrar/enviar resultados (pantallas, web y texto por cable)
-
-    // Tabla de variables que vamos a mostrar/enviar
-    static datos data[] = {
-      //   Nombre visible          // Ruta en Firebase       // Unidad
-      {"Cota en captación",      "cotaCaptacion",      "msnm"},
-      {"Cota del río",           "cotaRio",            "msnm"},
-      {"Cota en desarenador",    "cotaDesarenador",    "msnm"},
-
-      {"Caudal en captación",    "caudalCaptacion",    "m³/s"},
-      {"Caudal en desarenador",  "caudalDesarenador",  "m³/s"},
-
-      {"Caudal inicio",          "caudalInicio",       "L/s"},
-      {"Caudal turbinable",      "caudalTurbinable",   "L/s"},
-      {"Caudal final",           "caudalFinal",        "L/s"},
-
-      {"Generadores activos",    "generadoresActivos", "  "},
-    };
-    static int n = sizeof(data)/sizeof(data[0]);
-    // *** ACTUALIZACIÓN DE VALORES EN CADA CICLO ***
-    // Niveles (msnm)
-    data[IDX_COTA_CAPTACION].valor = ut_captacion.reading();
-    data[IDX_COTA_RIO].valor       = ut_rio.reading();
-    data[IDX_COTA_DESARENADOR].valor  = ut_desarenador.reading();
+    data[CotaCaptacion].valor = ut_captacion.reading();
+    data[CotaRio].valor       = ut_rio.reading();
+    data[CotaDesarenador].valor  = ut_desarenador.reading();
 
     // Caudales calculados por los ultrasonidos (m³/s)
-    data[IDX_CAUDAL_CAPTACION].valor = ut_captacion.flujo();
-    data[IDX_CAUDAL_GARANTIA].valor  = ut_garantia.flujo();
-    data[IDX_CAUDAL_DESARENADOR].valor  = ut_desarenador.flujo();
+    data[CaudalCaptacion].valor = ut_captacion.flujo();
+    data[CaudalDesarenador].valor = ut_desarenador.flujo();
 
     // Caudales de los caudalímetros (L/s)
-    data[IDX_CAUDAL_INICIO].valor     = ca_inicio.reading();
-    data[IDX_CAUDAL_TURBINABLE].valor = ca_turbinable.reading();
-    data[IDX_CAUDAL_FINAL].valor      = ca_final.reading();
+    data[CaudalInicio].valor     = ca_inicio.reading();
+    data[CaudalTurbinable].valor = ca_turbinable.reading();
+    data[CaudalFinal].valor      = ca_final.reading();
 
     // Recomendación de generadores (0,1,2,3)
-    data[IDX_GENERADORES_ACTIVOS].valor = (float)generadoresActivos();
+    data[GeneradoresActivos].valor = (float)generadoresActivos();
 
     // Enviar/mostrar en los diferentes “canales”
-    serial_enviar(data, n); // Al PC por cable
-    pagina.enviar(data, n); // A la nube (Firebase)
+    serial_enviar(data); // Al PC por cable
+    pagina.enviar(data); // A la nube (Firebase)
     pa_1.enviar(data);                                  // Pantalla 1 (3 datos)
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
