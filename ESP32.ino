@@ -111,26 +111,15 @@ constexpr byte PIN_ULTRA_TRIG[] = {};
 constexpr byte PIN_ULTRA_ECHO[] = {};
 
 //----------------- Creamos los medidores de caudal -----------------
-constexpr size_t N_CAUD = sizeof(PIN_CAUD) / sizeof(PIN_CAUD[0]);
-void IRAM_ATTR ISR_CAUD_0();
-void IRAM_ATTR ISR_CAUD_1();
-void IRAM_ATTR ISR_CAUD_2();
-void (*ISR_CAUD[N_CAUD])()= { ISR_CAUD_0, ISR_CAUD_1, ISR_CAUD_2 }; //Asegura que hallan suficientes ISRs
 
-caudalimetro ca_inicio    (PIN_CAUD[0],  ISR_CAUD_0);
-caudalimetro ca_turbinable(PIN_CAUD[1],  ISR_CAUD_1);
-caudalimetro ca_final     (PIN_CAUD[2],  ISR_CAUD_2);
-caudalimetro* ca_[N_CAUD] = {&ca_inicio, &ca_turbinable, &ca_final}; //Asegura que hallan suficientes objetos
-
-// Cada pulso detectado equivale a "un clic" de agua que pasó → sumamos 1.
-void IRAM_ATTR ISR_CAUD_0() { ca_[0]->pulseCount++; }
-void IRAM_ATTR ISR_CAUD_1() { ca_[1]->pulseCount++; }
-void IRAM_ATTR ISR_CAUD_2() { ca_[2]->pulseCount++; }
+// Arreglo estático de objetos, cada uno con su pin
+caudalimetro ca_inicio(PIN_CAUD[0]);
+caudalimetro ca_turbinable(PIN_CAUD[1]);
+caudalimetro ca_final(PIN_CAUD[2]);
+caudalimetro* caudalimetros[] = { &ca_inicio, &ca_turbinable, &ca_final };
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 // Entre paréntesis: pines TRIG y ECHO, funciones de inicio/fin del eco, y parámetros físicos del canal.
-constexpr size_t N_ULTRA_TRIG = sizeof(PIN_ULTRA_TRIG) / sizeof(PIN_ULTRA_TRIG[0]);
-constexpr size_t N_ULTRA_ECHO = sizeof(PIN_ULTRA_ECHO) / sizeof(PIN_ULTRA_ECHO[0]);
 void IRAM_ATTR ISR_ULTRA_CAP();
 void IRAM_ATTR ISR_ULTRA_RIO();
 void IRAM_ATTR ISR_ULTRA_DES();
@@ -244,9 +233,9 @@ void setup() {
   pa_2.set_up();
 
   // Preparar caudalímetros
-  ca_inicio.set_up();
-  ca_turbinable.set_up();
-  ca_final.set_up();
+  for (int i = 0, i<sizeof(PIN_CAUD) / sizeof(PIN_CAUD), i++){
+    caudalimetros[i]->set_up();
+  }
 
   // Preparar sensores ultrasónicos
   ut_captacion.set_up();
@@ -300,6 +289,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
