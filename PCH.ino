@@ -170,7 +170,7 @@ ultrasonico ultrasonicos[] = {
 };
 
 //----------------- Actuadores -----------------
-motor            mo_compuerta(PIN_COMPUERTA, 0/*TBD*/, 45/*TBD*/, 90/*TBD*/, 135/*TBD*/);
+motor            mo_compuerta(PIN_COMPUERTA, 0, 45, 135, 180);
 actuador_digital dig_valvula(PIN_VALVE);
 actuador_digital dig_motobombaPrincipal(PIN_MOTOBOMBA_0);
 actuador_digital dig_motobombaSecundaria(PIN_MOTOBOMBA_1);
@@ -284,19 +284,6 @@ void loop() {
     // Enviar/mostrar en los diferentes “canales”
     serial_enviar(data); // Al PC por cable
     pagina.enviar(data, DatoCount); // A la nube (Firebase)
-    pa_1.enviar(data);                                  // Pantalla 1 (3 datos)
+    pa_1.enviar(data);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
