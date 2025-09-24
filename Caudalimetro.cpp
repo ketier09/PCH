@@ -4,7 +4,7 @@
 caudalimetro::caudalimetro(byte p) : pin(p) {}
 
 void caudalimetro::set_up() {
-  pinMode(pin, INPUT_PULLUP);
+  pinMode(pin, INPUT);
   // Usa attachInterruptArg para pasar "this" a la ISR
   attachInterruptArg(digitalPinToInterrupt(pin), &caudalimetro::isrThunk, this, FALLING);
 }
@@ -32,3 +32,4 @@ float caudalimetro::reading() {
   }
   return flowRate * ESCALA;
 }
+
