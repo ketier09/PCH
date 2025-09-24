@@ -40,118 +40,97 @@
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
 enum ESP32_Pins {
-    // ---- ADC1 ----
-    PIN_ADC1_CH0 = 36, // GPIO36, VP
-    PIN_ADC1_CH3 = 39, // GPIO39, VN
-    PIN_ADC1_CH6 = 34, // GPIO34
-    PIN_ADC1_CH7 = 35, // GPIO35
-    PIN_ADC1_CH4 = 32, // GPIO32, TOUCH9
-    PIN_ADC1_CH5 = 33, // GPIO33, TOUCH8
+    // ---- INPUT ONLY ----
+    PIN_INPUT_ONLY_1 = 34,
+    PIN_INPUT_ONLY_2 = 35,
+    PIN_INPUT_ONLY_3 = 36, // ADC0, VP
+    PIN_INPUT_ONLY_4 = 39, // ADC3, VN
 
-    // ---- ADC2 ----
-    PIN_ADC2_CH9 = 26, // GPIO26, DAC2
-    PIN_ADC2_CH8 = 25, // GPIO25, DAC1
-    PIN_ADC2_CH7 = 27, // GPIO27, TOUCH7
-    PIN_ADC2_CH6 = 14, // GPIO14, TOUCH6
-    PIN_ADC2_CH5 = 12, // GPIO12, TOUCH5
-    PIN_ADC2_CH4 = 13, // GPIO13, TOUCH4
-    PIN_ADC2_CH0 = 4,  // GPIO4,  TOUCH0
-    PIN_ADC2_CH1 = 0,  // GPIO0,  TOUCH1
-    PIN_ADC2_CH2 = 2,  // GPIO2,  TOUCH2
-    PIN_ADC2_CH3 = 15, // GPIO15, TOUCH3
+    // ---- ADC1 ----
+    PIN_ADC0  = 36, // VP, INPUT_ONLY_3
+    PIN_ADC3  = 39, // VN, INPUT_ONLY_4
+    PIN_ADC4  = 32, // TOUCH9
+    PIN_ADC5  = 33, // TOUCH8
+    PIN_ADC6  = 34, // INPUT_ONLY_1
+    PIN_ADC7  = 35, // INPUT_ONLY_2
+    PIN_ADC10 = 4,  // TOUCH0
+    PIN_ADC11 = 0,  // TOUCH1
+    PIN_ADC12 = 2,  // TOUCH2
+    PIN_ADC13 = 15, // TOUCH3
+    PIN_ADC14 = 13, // TOUCH4
+    PIN_ADC15 = 12, // TOUCH5
+    PIN_ADC16 = 14, // TOUCH6
+    PIN_ADC17 = 27, // TOUCH7
+    PIN_ADC18 = 25, // DAC1
+    PIN_ADC19 = 26, // DAC2
 
     // ---- DAC ----
-    PIN_DAC1 = 25, // GPIO25
-    PIN_DAC2 = 26, // GPIO26
+    PIN_DAC1 = 25,  // ADC18
+    PIN_DAC2 = 26,  // ADC19
 
     // ---- TOUCH ----
-    PIN_TOUCH0 = 4,
-    PIN_TOUCH1 = 0,
-    PIN_TOUCH2 = 2,
-    PIN_TOUCH3 = 15,
-    PIN_TOUCH4 = 13,
-    PIN_TOUCH5 = 12,
-    PIN_TOUCH6 = 14,
-    PIN_TOUCH7 = 27,
-    PIN_TOUCH8 = 33,
-    PIN_TOUCH9 = 32,
+    PIN_TOUCH0 = 4,  
+    PIN_TOUCH1 = 0,  
+    PIN_TOUCH2 = 2,  
+    PIN_TOUCH3 = 15, 
+    PIN_TOUCH4 = 13, 
+    PIN_TOUCH5 = 12, 
+    PIN_TOUCH6 = 14, 
+    PIN_TOUCH7 = 27, 
+    PIN_TOUCH8 = 33, 
+    PIN_TOUCH9 = 32, 
 
     // ---- UART ----
-    PIN_UART0_TX = 1,  // GPIO1
-    PIN_UART0_RX = 3,  // GPIO3
-    PIN_UART1_TX = 10, // GPIO10 (no suele usarse, reservado)
-    PIN_UART1_RX = 9,  // GPIO9 (reservado flash)
-    PIN_UART2_TX = 17, // GPIO17
-    PIN_UART2_RX = 16, // GPIO16
+    PIN_UART0_TX = 1,
+    PIN_UART0_RX = 3,
+    PIN_UART1_TX = 10, // FLASH_D3
+    PIN_UART1_RX = 9,  // FLASH_D2
+    PIN_UART2_TX = 17,
+    PIN_UART2_RX = 16,
 
     // ---- I2C ----
-    PIN_I2C_SDA = 21, // GPIO21
-    PIN_I2C_SCL = 22, // GPIO22
+    PIN_I2C_SDA = 21,
+    PIN_I2C_SCL = 22,
 
     // ---- SPI (VSPI por defecto) ----
-    PIN_SPI_MOSI = 23, // GPIO23
-    PIN_SPI_MISO = 19, // GPIO19
-    PIN_SPI_CLK  = 18, // GPIO18
-    PIN_SPI_CS   = 5,  // GPIO5
+    PIN_VSPI_MOSI = 23,
+    PIN_VSPI_MISO = 19,
+    PIN_VSPI_SCK  = 18,
+    PIN_VSPI_SS   = 5,
 
     // ---- Pines reservados para Flash (NO usar) ----
-    PIN_FLASH_CLK  = 6, 
-    PIN_FLASH_SD0  = 7, 
-    PIN_FLASH_SD1  = 8, 
-    PIN_FLASH_SD2  = 9, 
-    PIN_FLASH_SD3  = 10,
-    PIN_FLASH_CMD  = 11
+    PIN_FLASH_CK  = 6, 
+    PIN_FLASH_D0  = 7, 
+    PIN_FLASH_D1  = 8, 
+    PIN_FLASH_D2  = 9, 
+    PIN_FLASH_D3  = 10
 };
 
-enum : uint8_t {
-  // Caudalímetros (miden agua que pasa)
-  PIN_CAUD_INI  = 13, // Caudal al inicio
-  PIN_CAUD_TURB = 14, // Caudal turbinable (el que va a la turbina)
-  PIN_CAUD_END  = 26, // Caudal al final
-
-  // Ultrasonidos: cada sensor usa 2 pines: TRIG (envía) y ECHO (recibe)
-  PIN_US_TRIG = 27,
-  PIN_US_ECHO_C = 36,
-  PIN_US_ECHO_R = 35,
-  PIN_US_ECHO_D = 39,
-
-  //SPI
-  PIN_SCK = 18,
-  PIN_MOSI = 23,
-  PIN_CS = 5,
-
-  //Pantalla
-  PIN_PANTALLA = 1,
-
-  //Pulsadores
-  PIN_PULS_COMPUERTA = 39,
-  PIN_PULS_VALVE = 39,
-  PIN_PULS_NACIMIENTO = 39,
-  PIN_PULS_IMPULSADOR = 39,
-
-  // Motor de la compuerta (2 cables de control del puente H)
-  PIN_COMPUERTA = 16,
-  PIN_VALVE       = 4,
-  PIN_NACIMIENTO  = 4,
-  PIN_IMPULSADOR  = 5
-};
+constexpr byte PIN_CAUD[] = {};
+constexpr byte PIN_ULTRA_TRIG[] = {};
+constexpr byte PIN_ULTRA_ECHO[] = {};
 
 //----------------- Creamos los medidores de caudal -----------------
-void IRAM_ATTR ISR_CAUD_INI();
-void IRAM_ATTR ISR_CAUD_TURB();
-void IRAM_ATTR ISR_CAUD_END();
+constexpr size_t N_CAUD = sizeof(PIN_CAUD) / sizeof(PIN_CAUD[0]);
+void IRAM_ATTR ISR_CAUD_0();
+void IRAM_ATTR ISR_CAUD_1();
+void IRAM_ATTR ISR_CAUD_2();
+void (*ISR_CAUD[N_CAUD])()= { ISR_CAUD_0, ISR_CAUD_1, ISR_CAUD_2 }; //Asegura que hallan suficientes ISRs
 
-caudalimetro ca_inicio    (PIN_CAUD_INI,  ISR_CAUD_INI);
-caudalimetro ca_turbinable(PIN_CAUD_TURB, ISR_CAUD_TURB);
-caudalimetro ca_final     (PIN_CAUD_END,  ISR_CAUD_END);
+caudalimetro ca_inicio    (PIN_CAUD[0],  ISR_CAUD_0);
+caudalimetro ca_turbinable(PIN_CAUD[1],  ISR_CAUD_1);
+caudalimetro ca_final     (PIN_CAUD[2],  ISR_CAUD_2);
+caudalimetro* ca_[N_CAUD] = {&ca_inicio, &ca_turbinable, &ca_final}; //Asegura que hallan suficientes objetos
 
 // Cada pulso detectado equivale a "un clic" de agua que pasó → sumamos 1.
-void IRAM_ATTR ISR_CAUD_INI()  { ca_inicio.pulseCount++; }
-void IRAM_ATTR ISR_CAUD_TURB() { ca_turbinable.pulseCount++; }
-void IRAM_ATTR ISR_CAUD_END()  { ca_final.pulseCount++; }
+void IRAM_ATTR ISR_CAUD_0() { ca_[0]->pulseCount++; }
+void IRAM_ATTR ISR_CAUD_1() { ca_[1]->pulseCount++; }
+void IRAM_ATTR ISR_CAUD_2() { ca_[2]->pulseCount++; }
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 // Entre paréntesis: pines TRIG y ECHO, funciones de inicio/fin del eco, y parámetros físicos del canal.
+constexpr size_t N_ULTRA_TRIG = sizeof(PIN_ULTRA_TRIG) / sizeof(PIN_ULTRA_TRIG[0]);
+constexpr size_t N_ULTRA_ECHO = sizeof(PIN_ULTRA_ECHO) / sizeof(PIN_ULTRA_ECHO[0]);
 void IRAM_ATTR ISR_ULTRA_CAP();
 void IRAM_ATTR ISR_ULTRA_RIO();
 void IRAM_ATTR ISR_ULTRA_DES();
@@ -321,6 +300,7 @@ void loop() {
     pa_2.enviar(data);                                  // Pantalla 2 (3 datos)
   }
 }
+
 
 
 
