@@ -10,7 +10,7 @@ struct caudalimetro {
   static constexpr float FLOW_CALIBRATION_FACTOR =
       450000.0f * (periodo_de_las_mediciones / 1000.0f);
 
-  static constexpr float ESCALA = 1.0f;
+  static constexpr float ESCALA = 100.0f;
 
   const byte pin;
 
