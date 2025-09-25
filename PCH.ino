@@ -242,20 +242,20 @@ void setup() {
   pa_1.set_up();
 
   // Preparar caudalímetros
-  for (int i = 0; i < sizeof(caudalimetros) / sizeof(caudalimetros[0]); i++){
+  for (int i = 0; i < (int)(sizeof(caudalimetros) / sizeof(caudalimetros[0])); i++){
     caudalimetros[i].set_up();
   }
 
   // Preparar sensores ultrasónicos
-  for (int i = 0; i < sizeof(ultrasonicos) / sizeof(ultrasonicos[0]); i++){
+  for (int i = 0; i < (int)(sizeof(ultrasonicos) / sizeof(ultrasonicos[0])); i++){
     ultrasonicos[i].set_up();
   }
     
-  for(int i = 0; i < sizeof(pulsadores) / sizeof(pulsadores[0]); i++){
+  for(int i = 0; i < (int)(sizeof(pulsadores) / sizeof(pulsadores[0])); i++){
     pulsadores[i].set_up();
   }
     
-  for(int i = 0; i < sizeof(actuadores_digitales) / sizeof(actuadores_digitales[0]); i++){
+  for(int i = 0; i < (int)(sizeof(actuadores_digitales) / sizeof(actuadores_digitales[0])); i++){
     actuadores_digitales[i].set_up();
   }
     
@@ -265,7 +265,7 @@ void setup() {
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
 void loop() {
   
-  for(int i = 0, i < sizeof(pulsadores) / sizeof(pulsadores[0]), i++){
+  for (int i = 0; i < (int)(sizeof(pulsadores) / sizeof(pulsadores[0])); ++i) {
     pulsadores[i].update();
   }
   
