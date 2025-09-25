@@ -134,14 +134,14 @@ enum : uint8_t {
   PIN_ULTRA_TRIG_1  = PIN_DAC1,
   PIN_ULTRA_ECHO_1  = PIN_INPUT_ONLY_2,
 
-  PIN_ULTRA_TRIG_2   ,
+  PIN_ULTRA_TRIG_2  = PIN_UART2_RX,
   PIN_ULTRA_ECHO_2  = PIN_INPUT_ONLY_3,
 
   // --- Actuadores (salidas) ---
-  PIN_COMPUERTA     = PIN_TOUCH6,
-  PIN_VALVE         = PIN_TOUCH4,
-  PIN_MOTOBOMBA_0    ,
-  PIN_MOTOBOMBA_1    ,
+  PIN_COMPUERTA     = PIN_TOUCH4,
+  PIN_VALVE         = PIN_TOUCH5,
+  PIN_MOTOBOMBA_0   = PIN_TOUCH6,
+  PIN_MOTOBOMBA_1   = PIN_UART2_TX,
 
   // --- Pulsadores (puedes leerlos como digitales o usar touch) ---
   PIN_PULSADOR_0    = PIN_TOUCH0,
