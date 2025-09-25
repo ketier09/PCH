@@ -36,6 +36,7 @@
 #include "Motor.h"
 #include "Web.h"
 #include "Actuador_digital.h"
+#include "Pulsador.h"
 
 // --------------------- Mapeo de pines (dónde se conecta cada cosa) ---------------------------
 // Usamos nombres claros para no tener que memorizar números de pines.
