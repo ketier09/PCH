@@ -80,8 +80,8 @@ enum ESP32_Pins : uint8_t {
   PIN_INPUT_ONLY_3 = GPIO39,
 
   // ---- DAC ----
-  PIN_DAC1 = GPIO25,
-  PIN_DAC2 = GPIO26,
+  PIN_DAC0 = GPIO25,
+  PIN_DAC1 = GPIO26,
 
   // ---- TOUCH ----
   PIN_TOUCH0 = GPIO4,  
@@ -139,9 +139,9 @@ enum : uint8_t {
 
   // --- Actuadores (salidas) ---
   PIN_COMPUERTA     = PIN_TOUCH4,
-  PIN_VALVE         = PIN_TOUCH5,
-  PIN_MOTOBOMBA_0   = PIN_TOUCH6,
-  PIN_MOTOBOMBA_1   = PIN_UART2_TX,
+  PIN_ACTUADOR_DIGITAL_0  = PIN_TOUCH5,
+  PIN_ACTUADOR_DIGITAL_1  = PIN_TOUCH6,
+  PIN_ACTUADOR_DIGITAL_2  = PIN_UART2_TX,
 
   // --- Pulsadores (puedes leerlos como digitales o usar touch) ---
   PIN_PULSADOR_0    = PIN_TOUCH0,
@@ -164,22 +164,33 @@ caudalimetro caudalimetros[] = {
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 
 ultrasonico ultrasonicos[] = {
-  {PIN_ULTRA_TRIG_0, PIN_ULTRA_ECHO_0, 100.0f/*TBD*/, 0.0f/*TBD*/, 1.0f/*TBD*/, 0.01f/*TBD*/},
-  {PIN_ULTRA_TRIG_1, PIN_ULTRA_ECHO_1, 100.0f/*TBD*/, 0, 0, 0},
-  {PIN_ULTRA_TRIG_2, PIN_ULTRA_ECHO_2, 100.0f/*TBD*/, 0.0f/*TBD*/, 1.0f/*TBD*/, 0.01f/*TBD*/}
+  { PIN_ULTRA_TRIG_0, PIN_ULTRA_ECHO_0, 0, 100.0f,  0.0f, 1.0f, 0.01f },
+  { PIN_ULTRA_TRIG_1, PIN_ULTRA_ECHO_1, 0, 100.0f,  0.0f, 1.0f, 0.01f },
+  { PIN_ULTRA_TRIG_2, PIN_ULTRA_ECHO_2, 0, 100.0f,  0.0f, 1.0f, 0.01f }
 };
 
 //----------------- Actuadores -----------------
-motor            mo_compuerta(PIN_COMPUERTA, 0, 45, 135, 180);
-actuador_digital dig_valvula(PIN_VALVE);
-actuador_digital dig_motobombaPrincipal(PIN_MOTOBOMBA_0);
-actuador_digital dig_motobombaSecundaria(PIN_MOTOBOMBA_1);
+actuador_digital actuadores_digitales[] = {
+  {PIN_ACTUADOR_DIGITAL_0},
+  {PIN_ACTUADOR_DIGITAL_1},
+  {PIN_ACTUADOR_DIGITAL_2}
+};
+
+motor mo_compuerta(PIN_COMPUERTA, 0, 45, 135, 180);
 
 //----------------- Pulsadores -----------------
-pulsador puls_compuerta            (PIN_PULSADOR_0, mo_compuerta.siguiente_estado(),   LOW);
-pulsador puls_valvula              (PIN_PULSADOR_1, dig_valvula.cambiar(),             LOW);
-pulsador puls_motobombaPrincipal   (PIN_PULSADOR_2, dig_motobombaPrincipal.cambiar(),  LOW);
-pulsador puls_motobombaSecundaria  (PIN_PULSADOR_3, dig_motobombaSecundaria.cambiar(), LOW);
+// Wrappers
+void on_0() { actuador_digital[0].cambiar(); }
+void on_1() { actuador_digital[1].cambiar(); }
+void on_2() { actuador_digital[2].cambiar(); }
+void on_3() { mo_compuerta.siguiente_estado(); }
+
+pulsador pulsadores[] = {
+  {PIN_PULSADOR_0, on_0, LOW},
+  {PIN_PULSADOR_1, on_1, LOW},
+  {PIN_PULSADOR_2, on_2, LOW},
+  {PIN_PULSADOR_3, on_3, LOW},
+};
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
@@ -240,25 +251,24 @@ void setup() {
   for (int i = 0, i < sizeof(ultrasonicos) / sizeof(ultrasonicos[0]), i++){
     ultrasonicos[i].set_up();
   }
-
+    
+  for(int i = 0, i < sizeof(pulsadores) / sizeof(pulsadores[0]), i++){
+    pulsadores[i].set_up();
+  }
+    
+  for(int i = 0, i < sizeof(actuadores_digitales) / sizeof(actuadores_digitales[0]), i++){
+    actuadores_digitales[i].set_up();
+  }
+    
   mo_compuerta.set_up();
-  dig_valvula.set_up();
-  dig_motobombaPrincipal.set_up();
-  dig_motobombSecundaria.set_up();
-
-  puls_compuerta.set_up();
-  puls_valvula.set_up();
-  puls_motobombaPrincipal.set_up();
-  puls_motobombaSecundaria.set_up();
 }
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
 void loop() {
   
-  puls_compuerta.update();
-  puls_valvula.update();
-  puls_motobombaPrincipal.update();
-  puls_motobombaSecundaria.update();
+  for(int i = 0, i < sizeof(pulsadores) / sizeof(pulsadores[0]), i++){
+    pulsadores[i].update();
+  }
   
   static uint32_t lastPrint = 0;
   const uint32_t now = millis();
