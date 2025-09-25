@@ -204,12 +204,12 @@ web pagina;
 // Regresa un número: 0, 1, 2 o 3 (cuántos generadores conviene tener activos)
 // según el caudal turbinable (simplificado a umbrales).
 int generadoresActivos() {
-  const float flow = ca_turbinable.reading();  // Lectura rápida (L/s)
-  if (flow <= 3.0f)   return 0;   // Muy poca agua
-  if (flow <= 6.0f)   return 1;   // Agua para 1 generador
-  if (flow <  12.87f) return 2;   // Agua para 2 generadores
-  if (flow <= 13.0f)  return 3;   // Muy cerca del máximo
-  return -1;                      // Fuera de rango (revisar sensor)
+  const float flow = caudalimetros[1].reading();
+  if (flow <= 3.0f)   return 0;
+  if (flow <= 6.0f)   return 1;
+  if (flow <  12.87f) return 2;
+  if (flow <= 13.0f)  return 3;
+  return 4;
 }
 
 // Convierte ese número en un texto fácil de entender
@@ -243,20 +243,20 @@ void setup() {
   pa_1.set_up();
 
   // Preparar caudalímetros
-  for (int i = 0, i < sizeof(caudalimetros) / sizeof(caudalimetros[0]), i++){
+  for (int i = 0; i < sizeof(caudalimetros) / sizeof(caudalimetros[0]); i++){
     caudalimetros[i].set_up();
   }
 
   // Preparar sensores ultrasónicos
-  for (int i = 0, i < sizeof(ultrasonicos) / sizeof(ultrasonicos[0]), i++){
+  for (int i = 0; i < sizeof(ultrasonicos) / sizeof(ultrasonicos[0]); i++){
     ultrasonicos[i].set_up();
   }
     
-  for(int i = 0, i < sizeof(pulsadores) / sizeof(pulsadores[0]), i++){
+  for(int i = 0; i < sizeof(pulsadores) / sizeof(pulsadores[0]); i++){
     pulsadores[i].set_up();
   }
     
-  for(int i = 0, i < sizeof(actuadores_digitales) / sizeof(actuadores_digitales[0]), i++){
+  for(int i = 0; i < sizeof(actuadores_digitales) / sizeof(actuadores_digitales[0]); i++){
     actuadores_digitales[i].set_up();
   }
     
@@ -275,18 +275,16 @@ void loop() {
   if (now - lastPrint > 1000) {   // Periodicidad ≈ 1 s
     lastPrint = now;
 
-    data[CotaCaptacion].valor      = ultrasonico[0].reading();
-    data[CotaDesarenador].valor    = ultrasonico[1].reading();
-    data[CotaRio].valor            = ultrasonico[2].reading();
-
-    // Caudales calculados por los ultrasonidos (m³/s)
-    data[CaudalCaptacion].valor    = ultrasonico[0].flujo();
-    data[CaudalDesarenador].valor  = ultrasonico[1].flujo();
-
-    // Caudales de los caudalímetros (L/s)
-    data[CaudalInicio].valor       = caudalimetro[0].reading();
-    data[CaudalTurbinable].valor   = caudalimetro[1].reading();
-    data[CaudalFinal].valor        = caudalimetro[2].reading();
+    data[CotaCaptacion].valor      = ultrasonicos[0].reading();
+    data[CotaDesarenador].valor    = ultrasonicos[1].reading();
+    data[CotaRio].valor            = ultrasonicos[2].reading();
+    
+    data[CaudalCaptacion].valor    = ultrasonicos[0].flujo();
+    data[CaudalDesarenador].valor  = ultrasonicos[1].flujo();
+    
+    data[CaudalInicio].valor       = caudalimetros[0].reading();
+    data[CaudalTurbinable].valor   = caudalimetros[1].reading();
+    data[CaudalFinal].valor        = caudalimetros[2].reading();
 
     // Recomendación de generadores (0,1,2,3)
     data[GeneradoresActivos].valor = (float)generadoresActivos();
