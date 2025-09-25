@@ -81,7 +81,7 @@ void web::set_up() {
 // 'data' es la lista de mediciones, 'n' es cuántas son.
 // Para cada medición, envía su valor a una ruta de la base de datos.
 // -------------------------------------------
-void web::enviar(datos data[], int n) {
+void web::enviar(dato data[], int n) {
   // Si hay WiFi pero Firebase no está listo, intenta prepararlo de nuevo
   if (WiFi.status() == WL_CONNECTED) {
     if (!Firebase.ready()) {
@@ -109,3 +109,4 @@ void web::enviar(datos data[], int n) {
     Serial.println("-> No se pudieron enviar datos a Firebase. Conexión no lista.");
   }
 }
+
