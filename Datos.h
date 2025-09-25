@@ -45,4 +45,4 @@ static dato data[DatoCount] = {
 #undef X
 };
 
-
+using datos = dato;
