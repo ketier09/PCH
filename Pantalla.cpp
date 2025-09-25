@@ -14,6 +14,7 @@ void pantalla::set_up() {
 // Esta función se encarga de enviar información a la pantalla.
 // Recibe un arreglo (lista) con muchos datos.
 // Solo muestra los 3 que fueron elegidos al crear la pantalla.
-void pantalla::enviar(datos dataArray[]) {
+void pantalla::enviar(dato dataArray[]) {
 
 }
+
