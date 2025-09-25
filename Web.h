@@ -36,5 +36,6 @@ struct web {
 
   // Sube a Firebase una lista de lecturas de sensores.
   // 'data' es el arreglo con las mediciones y 'n' es cuántas son.
-  void enviar(datos data[], int n);
+  void enviar(dato data[], int n);
 };
+
