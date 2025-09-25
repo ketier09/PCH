@@ -179,10 +179,9 @@ actuador_digital actuadores_digitales[] = {
 motor mo_compuerta(PIN_COMPUERTA, 0, 45, 135, 180);
 
 //----------------- Pulsadores -----------------
-// Wrappers
-void on_0() { actuador_digital[0].cambiar(); }
-void on_1() { actuador_digital[1].cambiar(); }
-void on_2() { actuador_digital[2].cambiar(); }
+void on_0() { actuadores_digitales[0].cambiar(); }
+void on_1() { actuadores_digitales[1].cambiar(); }
+void on_2() { actuadores_digitales[2].cambiar(); }
 void on_3() { mo_compuerta.siguiente_estado(); }
 
 pulsador pulsadores[] = {
