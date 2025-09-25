@@ -1,5 +1,9 @@
+#pragma once
+#include <Arduino.h>
+#include <Servo.h>
+
 struct motor {
-  static constexpr int n = 4;     // <-- CAMBIO: explícito y seguro
+  static constexpr int n = 4;
 
   const byte pin;
   const int estados[4];
