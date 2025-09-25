@@ -21,5 +21,6 @@ struct pantalla {
   // Muestra en la pantalla los 3 datos elegidos.
   // 'dataArray' es la lista completa de mediciones;
   // esta función toma solo los 3 indicados en 'indices' y los presenta.
-  void enviar(datos dataArray[]);
+  void enviar(dato dataArray[]);
 };
+
