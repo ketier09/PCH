@@ -6,18 +6,20 @@ struct ultrasonico {
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
   // Factor de ajuste adimensional (1.0 = sin corrección)
-  static constexpr float ESCALA = 1.0f;
+  static constexpr float ESCALA = 1.0f; // m/cm
+  static constexpr float NIVEL_0 = 0.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
 
   const byte trig;
   const byte echo;
 
+  const int capa;
   const float techo;  // m
   const float piso;   // m
   const float ancho;  // m
   const float raizCuadrada_pendiente; // = sqrt(S)
 
-  ultrasonico(byte t, byte e, float te, float pi, float a, float pe);
+  ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe);
 
   float nivel = NAN;
   volatile uint32_t disparo = 0;
@@ -30,3 +32,4 @@ struct ultrasonico {
 
   static void IRAM_ATTR isrThunk(void* arg);
 };
+
