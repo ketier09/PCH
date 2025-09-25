@@ -217,7 +217,7 @@ const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 enc
 //----------------- Envío por puerto serial (al computador) -----------------
 // Imprime todas las variables con nombre, valor y unidad.
 // La última (generadores) se imprime como texto, no número.
-void serial_enviar(datos data[]) {
+void serial_enviar(dato data[]) {
   for (int i = 0; i < DatoCount; i++) {
     Serial.print(data[i].etiqueta);
     Serial.print(": ");
