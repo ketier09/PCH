@@ -4,7 +4,7 @@
 // del Arduino está conectado. Un motor necesita dos para poder girar
 // en ambos sentidos.
 motor::motor(byte p, int e1, int e2, int e3, int e4)
-  : pin(p), estados{e1, e2, e3, e4} {}
+  : pin(p), estados{e1, e2, e3, e4}, n(sizeof(estados) / sizeof(estados[0])) {}
 
 // Esta función prepara los dos pines para que el Arduino
 // los use como "interruptores" de salida y así poder controlar el motor.
