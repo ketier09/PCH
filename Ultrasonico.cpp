@@ -12,8 +12,8 @@ void IRAM_ATTR ultrasonico::isrThunk(void* arg) {
   }
 }
 
-ultrasonico::ultrasonico(byte t, byte e, float te, float pi, float a, float pe)
-  : trig(t), echo(e), techo(te), piso(pi), ancho(a), raizCuadrada_pendiente(pe) {}
+ultrasonico::ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe)
+  : trig(t), echo(e), techo(te*ESCALA + NIVEL_0 + (float)c), piso(pi*ESCALA + NIVEL_0 + (float)c), ancho(a*ESCALA), raizCuadrada_pendiente(pe) {}
 
 void ultrasonico::set_up() {
   pinMode(trig, OUTPUT);
@@ -82,3 +82,4 @@ float ultrasonico::flujo() {
   float velocidad = manningInverso * powf(radioHidraulico, 2.0f/3.0f) * raizCuadrada_pendiente; // m/s
   return velocidad * areaMojada; // m³/s
 }
+
