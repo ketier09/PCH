@@ -13,7 +13,6 @@ struct ultrasonico {
   const byte trig;
   const byte echo;
 
-  const int capa;
   const float techo;  // m
   const float piso;   // m
   const float ancho;  // m
@@ -32,4 +31,5 @@ struct ultrasonico {
 
   static void IRAM_ATTR isrThunk(void* arg);
 };
+
 
