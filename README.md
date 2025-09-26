@@ -217,7 +217,6 @@ Constructor:
 * Implementar control remoto de actuadores vía **Firebase stream**.
 * Endpoint web/app para visualizar `/sensorData` en tiempo real.
 * Hacer **pantalla TFT** más interactiva con gráficos y estados o animaciones.
-* Crear logs históricos en Firebase o SD.
 
 ---
 
