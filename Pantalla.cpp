@@ -1,109 +1,97 @@
 #include "Pantalla.h"
 
-PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst)
-    : tft(cs, dc, rst) {}
-
-void PantallaCustom::set_up() {
-    tft.begin();
-    tft.setRotation(1);
-    tft.fillScreen(ILI9341_BLACK);
-    tft.setTextSize(2);
+Pantalla::Pantalla(uint8_t cs, uint8_t dc, uint8_t rst,
+                               Dato l1, Dato l2, Dato l3,
+                               Dato r1, Dato r2, Dato r3)
+  : tft(cs, dc, rst) {
+  idx[0] = l1; idx[1] = l2; idx[2] = l3;
+  idx[3] = r1; idx[4] = r2; idx[5] = r3;
 }
 
-void PantallaCustom::dibujarTitulos() {
-    // Lado izquierdo
-    tft.setCursor(10, 20);
-    tft.setTextColor(ILI9341_RED);
-    tft.print("Total");
-
-    tft.setCursor(10, 60);
-    tft.setTextColor(ILI9341_GREEN);
-    tft.print("Captacion");
-
-    tft.setCursor(10, 100);
-    tft.setTextColor(ILI9341_BLUE);
-    tft.print("Azud");
-
-    // Lado derecho
-    tft.setCursor(160, 20);
-    tft.setTextColor(ILI9341_YELLOW);
-    tft.print("Vertederos");
-
-    tft.setCursor(160, 60);
-    tft.setTextColor(ILI9341_CYAN);
-    tft.print("Turbina");
-
-    tft.setCursor(160, 100);
-    tft.setTextColor(ILI9341_MAGENTA);
-    tft.print("Desarenador");
+void Pantalla::set_up() {
+  tft.begin();
+  tft.setRotation(1);
+  tft.fillScreen(ILI9341_BLACK);
+  tft.setTextSize(2);
+  dibujarTitulos(data); // primer dibujo inmediato usando global 'data'
 }
 
-void PantallaCustom::mostrarVariables() {
-    // Borra rectángulos
-    tft.fillRect(10, 40, 140, 20, ILI9341_BLACK);
-    tft.fillRect(10, 80, 140, 20, ILI9341_BLACK);
-    tft.fillRect(10, 120, 140, 20, ILI9341_BLACK);
+void Pantalla::dibujarTitulos(const dato data[]) {
+  // Limpia todo el fondo y reescribe títulos y unidades
+  tft.fillScreen(ILI9341_BLACK);
 
-    tft.fillRect(160, 40, 140, 20, ILI9341_BLACK);
-    tft.fillRect(160, 80, 140, 20, ILI9341_BLACK);
-    tft.fillRect(160, 120, 140, 20, ILI9341_BLACK);
+  // IZQUIERDA
+  tft.setTextColor(ILI9341_RED);
+  tft.setCursor(LX, YT[0]); tft.print(data[idx[0]].etiqueta);
 
-    // Izquierda
-    tft.setCursor(10, 40);
-    tft.setTextColor(ILI9341_RED);
-    tft.printf("Var 1: %d", var1);
+  tft.setTextColor(ILI9341_GREEN);
+  tft.setCursor(LX, YT[1]); tft.print(data[idx[1]].etiqueta);
 
-    tft.setCursor(10, 80);
-    tft.setTextColor(ILI9341_GREEN);
-    tft.printf("Var 2: %d", var2);
+  tft.setTextColor(ILI9341_BLUE);
+  tft.setCursor(LX, YT[2]); tft.print(data[idx[2]].etiqueta);
 
-    tft.setCursor(10, 120);
-    tft.setTextColor(ILI9341_BLUE);
-    tft.printf("Var 3: %d", var3);
+  // DERECHA
+  tft.setTextColor(ILI9341_YELLOW);
+  tft.setCursor(RX, YT[0]); tft.print(data[idx[3]].etiqueta);
 
-    // Derecha
-    tft.setCursor(160, 40);
-    tft.setTextColor(ILI9341_YELLOW);
-    tft.printf("Var 4: %d", var4);
+  tft.setTextColor(ILI9341_CYAN);
+  tft.setCursor(RX, YT[1]); tft.print(data[idx[4]].etiqueta);
 
-    tft.setCursor(160, 80);
-    tft.setTextColor(ILI9341_CYAN);
-    tft.printf("Var 5: %d", var5);
-
-    tft.setCursor(160, 120);
-    tft.setTextColor(ILI9341_MAGENTA);
-    tft.printf("Var 6: %d", var6);
+  tft.setTextColor(ILI9341_MAGENTA);
+  tft.setCursor(RX, YT[2]); tft.print(data[idx[5]].etiqueta);
 }
 
-void PantallaCustom::actualizar() {
-    unsigned long tiempoActual = millis();
-
-    // Actualizar datos principales cada 10s
-    if (tiempoActual - tiempoAnterior >= intervalo) {
-        tiempoAnterior = tiempoActual;
-
-        // Números aleatorios de ejemplo
-        dato1 = random(0, 100);
-        dato2 = random(0, 100);
-        dato3 = random(0, 100);
-        dato4 = random(0, 100);
-        dato5 = random(0, 100);
-        dato6 = random(0, 100);
-
-        tft.fillScreen(ILI9341_BLACK);
-        dibujarTitulos();
-    }
-
-    // Variables secundarias aleatorias
-    var1 = random(0, 100);
-    var2 = random(0, 100);
-    var3 = random(0, 100);
-    var4 = random(0, 100);
-    var5 = random(0, 100);
-    var6 = random(0, 100);
-
-    mostrarVariables();
-
-    delay(300); // Evita parpadeo excesivo
+void Pantalla::borrarCajaValor(bool derecha, int fila) {
+  int x = derecha ? RX : LX;
+  tft.fillRect(x, YV[fila], W, H, ILI9341_BLACK);
 }
 
+void Pantalla::imprimirValor(int x, int y, const dato& d) {
+  // Si la unidad está vacía/espaciada (GeneradoresActivos), imprime entero
+  bool sinUnidad = true;
+  for (const char* p = d.unidad; *p; ++p) { if (!isspace(*p)) { sinUnidad = false; break; } }
+
+  tft.setCursor(x, y);
+  if (sinUnidad) {
+    // entero “bonito”
+    tft.print((int)d.valor);
+  } else {
+    // valor con 2 decimales + unidad
+    tft.print(d.valor, 2);
+    tft.print(" ");
+    tft.print(d.unidad);
+  }
+}
+
+void Pantalla::mostrarValores(const dato data[]) {
+  // IZQUIERDA
+  tft.setTextColor(ILI9341_RED);
+  borrarCajaValor(false, 0); imprimirValor(LX, YV[0], data[idx[0]]);
+
+  tft.setTextColor(ILI9341_GREEN);
+  borrarCajaValor(false, 1); imprimirValor(LX, YV[1], data[idx[1]]);
+
+  tft.setTextColor(ILI9341_BLUE);
+  borrarCajaValor(false, 2); imprimirValor(LX, YV[2], data[idx[2]]);
+
+  // DERECHA
+  tft.setTextColor(ILI9341_YELLOW);
+  borrarCajaValor(true, 0);  imprimirValor(RX, YV[0], data[idx[3]]);
+
+  tft.setTextColor(ILI9341_CYAN);
+  borrarCajaValor(true, 1);  imprimirValor(RX, YV[1], data[idx[4]]);
+
+  tft.setTextColor(ILI9341_MAGENTA);
+  borrarCajaValor(true, 2);  imprimirValor(RX, YV[2], data[idx[5]]);
+}
+
+void Pantalla::actualizar(const dato data[]) {
+  unsigned long ahora = millis();
+  if (ahora - tiempoAnterior >= intervalo) {
+    tiempoAnterior = ahora;
+    dibujarTitulos(data);
+  }
+
+  mostrarValores(data);
+  delay(300); // limitar parpadeo/cpu
+}
