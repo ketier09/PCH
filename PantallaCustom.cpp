@@ -1,6 +1,6 @@
-#include "Pantalla.h"
+#include "PantallaCustom.h"
 
-Pantalla::Pantalla(uint8_t cs, uint8_t dc, uint8_t rst,
+PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
                                Dato l1, Dato l2, Dato l3,
                                Dato r1, Dato r2, Dato r3)
   : tft(cs, dc, rst) {
@@ -8,7 +8,7 @@ Pantalla::Pantalla(uint8_t cs, uint8_t dc, uint8_t rst,
   idx[3] = r1; idx[4] = r2; idx[5] = r3;
 }
 
-void Pantalla::set_up() {
+void PantallaCustom::set_up() {
   tft.begin();
   tft.setRotation(1);
   tft.fillScreen(ILI9341_BLACK);
@@ -16,7 +16,7 @@ void Pantalla::set_up() {
   dibujarTitulos(data); // primer dibujo inmediato usando global 'data'
 }
 
-void Pantalla::dibujarTitulos(const dato data[]) {
+void PantallaCustom::dibujarTitulos(const dato data[]) {
   // Limpia todo el fondo y reescribe títulos y unidades
   tft.fillScreen(ILI9341_BLACK);
 
@@ -41,12 +41,12 @@ void Pantalla::dibujarTitulos(const dato data[]) {
   tft.setCursor(RX, YT[2]); tft.print(data[idx[5]].etiqueta);
 }
 
-void Pantalla::borrarCajaValor(bool derecha, int fila) {
+void PantallaCustom::borrarCajaValor(bool derecha, int fila) {
   int x = derecha ? RX : LX;
   tft.fillRect(x, YV[fila], W, H, ILI9341_BLACK);
 }
 
-void Pantalla::imprimirValor(int x, int y, const dato& d) {
+void PantallaCustom::imprimirValor(int x, int y, const dato& d) {
   // Si la unidad está vacía/espaciada (GeneradoresActivos), imprime entero
   bool sinUnidad = true;
   for (const char* p = d.unidad; *p; ++p) { if (!isspace(*p)) { sinUnidad = false; break; } }
@@ -63,7 +63,7 @@ void Pantalla::imprimirValor(int x, int y, const dato& d) {
   }
 }
 
-void Pantalla::mostrarValores(const dato data[]) {
+void PantallaCustom::mostrarValores(const dato data[]) {
   // IZQUIERDA
   tft.setTextColor(ILI9341_RED);
   borrarCajaValor(false, 0); imprimirValor(LX, YV[0], data[idx[0]]);
@@ -85,7 +85,7 @@ void Pantalla::mostrarValores(const dato data[]) {
   borrarCajaValor(true, 2);  imprimirValor(RX, YV[2], data[idx[5]]);
 }
 
-void Pantalla::actualizar(const dato data[]) {
+void PantallaCustom::actualizar(const dato data[]) {
   unsigned long ahora = millis();
   if (ahora - tiempoAnterior >= intervalo) {
     tiempoAnterior = ahora;
