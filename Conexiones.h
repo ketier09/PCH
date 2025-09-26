@@ -110,4 +110,9 @@ enum : uint8_t {
   PIN_PULSADOR_1    = PIN_TOUCH2,
   PIN_PULSADOR_2    = PIN_TOUCH3,
   PIN_PULSADOR_3    = PIN_TOUCH7,
+
+  // --- Pantalla TFT ILI9341 (SPI) ---
+  PIN_TFT_CS   = PIN_VSPI_SS,
+  PIN_TFT_DC   = PIN_I2C_SDA,
+  PIN_TFT_RST  = PIN_I2C_SCL
 };
