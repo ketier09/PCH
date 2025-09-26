@@ -1,26 +1,29 @@
 #pragma once
 #include <Arduino.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
+#include <SPI.h>
 
-#include "Datos.h"          // Aquí está la definición de la estructura 'datos'
+class PantallaCustom {
+public:
+    PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst);
 
-// "pantalla" es como un pequeño panel que muestra 3 datos.
-// Al crearla, le diremos cuáles 3 datos (por su posición/índice) queremos mostrar.
-struct pantalla {
-  const byte mosi;
-  const byte sck;
-  const byte ss;
-  // Constructor:
-  // Cuando hacemos una "pantalla", elegimos qué 3 datos mostrará
-  // (por ejemplo: 0 = nivel del río, 1 = caudal, 2 = generadores activos).
-  pantalla(byte m, byte k, byte s);
+    void set_up();
+    void actualizar();
 
-  // Prepara la pantalla antes de usarla (encenderla, configurarla, etc.).
-  // De momento solo es el "lugar" donde pondremos esa preparación.
-  void set_up();
+private:
+    Adafruit_ILI9341 tft;
+    unsigned long tiempoAnterior;
+    static constexpr unsigned long intervalo = 10000; // 10s
 
-  // Muestra en la pantalla los 3 datos elegidos.
-  // 'dataArray' es la lista completa de mediciones;
-  // esta función toma solo los 3 indicados en 'indices' y los presenta.
-  void enviar(dato dataArray[]);
+    // Datos principales
+    int dato1, dato2, dato3;
+    int dato4, dato5, dato6;
+
+    // Variables secundarias
+    int var1, var2, var3;
+    int var4, var5, var6;
+
+    void dibujarTitulos();
+    void mostrarVariables();
 };
-
