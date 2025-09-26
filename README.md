@@ -224,7 +224,6 @@ Constructor:
 
 * **Documentación viva**: mantener README con cambios reales de hardware/software.
 * **Tests de campo**: comparar lecturas con mediciones manuales.
-* **Seguridad**: mover claves sensibles fuera del código (ej. variables de entorno).
 * **Escalabilidad**: pensar en MQTT además de Firebase.
 * **UX**: añadir menús básicos en la pantalla TFT.
 * **Mantenimiento**: dividir lógicas largas (ej. `loop`) en funciones pequeñas.
