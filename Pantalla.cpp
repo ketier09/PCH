@@ -1,7 +1,7 @@
 #include "Pantalla.h"
 
 PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst)
-    : tft(cs, dc, rst), tiempoAnterior(0) {}
+    : tft(cs, dc, rst) {}
 
 void PantallaCustom::set_up() {
     tft.begin();
@@ -106,3 +106,4 @@ void PantallaCustom::actualizar() {
 
     delay(300); // Evita parpadeo excesivo
 }
+
