@@ -6,10 +6,10 @@
 
 #include "Datos.h"   // trae enum Dato, struct dato y el arreglo data[]
 
-class PantallaCustom {
+class Pantalla {
 public:
   // l1..l3 (izq), r1..r3 (der) son índices del enum Dato
-  PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
+  Pantalla(uint8_t cs, uint8_t dc, uint8_t rst,
                  Dato l1, Dato l2, Dato l3,
                  Dato r1, Dato r2, Dato r3);
 
@@ -38,3 +38,4 @@ private:
   // imprime valor con formato: 2 decimales salvo unidades "    " (entero)
   void imprimirValor(int x, int y, const dato& d);
 };
+
