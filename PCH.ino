@@ -32,7 +32,7 @@
 #include "Datos.h"
 #include "Caudalimetro.h"
 #include "Ultrasonico.h"
-#include "Pantalla.h"
+#include "PantallaCustom.h"
 #include "Motor.h"
 #include "Web.h"
 #include "Actuador_digital.h"
@@ -80,7 +80,9 @@ pulsador pulsadores[] = {
 
 //----------------- Pantallas -----------------
 // Cada pantalla mostrará 3 datos (elegidos por su índice).
-pantalla pa_1(PIN_VSPI_MOSI, PIN_VSPI_SCK, PIN_VSPI_SS);
+PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST,
+                        CotaCaptacion, CaudalTurbinable, CotaDesarenador,
+                        CaudalCaptacion, CaudalFinal, GeneradoresActivos);
 
 //----------------- Conexión web/Firebase -----------------
 // “pagina” maneja WiFi, hora de Internet y la base de datos en la nube.
@@ -126,7 +128,7 @@ void setup() {
   pagina.set_up();
 
   // Preparar pantallas
-  pa_1.set_up();
+  pantalla.set_up();
 
   // Preparar caudalímetros
   for (int i = 0; i < (int)(sizeof(caudalimetros) / sizeof(caudalimetros[0])); i++){
@@ -178,6 +180,6 @@ void loop() {
     // Enviar/mostrar en los diferentes “canales”
     serial_enviar(data); // Al PC por cable
     pagina.enviar(data, DatoCount); // A la nube (Firebase)
-    pa_1.enviar(data);
+    pantalla.actualizar(data);
   }
 }
