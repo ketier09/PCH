@@ -93,5 +93,5 @@ void PantallaCustom::actualizar(const dato data[]) {
   }
 
   mostrarValores(data);
-  delay(300); // limitar parpadeo/cpu
 }
+
