@@ -1,33 +1,3 @@
-/*
-  ¿Qué es este programa?
-  Un sistema con un ESP32 que:
-  - Mide niveles de agua y caudales (flujo) en varios puntos de una pequeña central hidroeléctrica (PCH).
-  - Decide cuántos generadores deberían estar encendidos.
-  - Muestra y envía esos datos cada segundo.
-
-  ¿Qué sensores usa?
-  - 4 sensores ultrasónicos (miden distancia → nivel de agua).
-  - 3 medidores de caudal (cuentan "clics" → cantidad de agua que pasa).
-
-  ¿Qué hace con las mediciones?
-  - Calcula caudales y niveles.
-  - Decide cuántos generadores conviene encender.
-  - Muestra en 2 pantallas.
-  - Envía por cable al computador y a una página web (Firebase).
-  - Puede mover una compuerta (motor) si es necesario.
-
-  ¿Cada cuánto?
-  - Aproximadamente cada 1 segundo repite: leer → calcular → mostrar/enviar.
-
-  Glosario rápido:
-   - Caudalímetro: mide cuánta agua pasa por un punto.
-   - Ultrasonido: lanza un “grito” y mide el tiempo del eco para saber la distancia.
-   - ISR: función muy rápida que se ejecuta automáticamente cuando llega una señal.
-   - Puente H: circuito que hace girar un motor hacia un lado o hacia el otro.
-   - msnm: metros sobre el nivel del mar.
-   - Puerto serial: “cable de datos” virtual para ver mensajes en el computador.
-*/
-
 #include "secrets.h" 
 #include "Datos.h"
 #include "Caudalimetro.h"
