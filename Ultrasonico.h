@@ -5,7 +5,6 @@
 struct ultrasonico {
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
-  // Factor de ajuste adimensional (1.0 = sin corrección)
   static constexpr float ESCALA = 1.0f; // m/cm
   static constexpr float NIVEL_0 = 0.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
@@ -26,7 +25,7 @@ struct ultrasonico {
 
   void set_up();
   void disparar();
-  float reading(uint32_t timeout_us = 30000); // ~5 m máx (ajusta a necesidad)
+  float reading(uint32_t timeout_us = 30000); // ~5 m máx
   float flujo();
 
   static void IRAM_ATTR isrThunk(void* arg);

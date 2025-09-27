@@ -1,10 +1,5 @@
 #include "Web.h"
 
-// -------------------------------------------
-// syncTime()
-// Pide la hora correcta a servidores de Internet (NTP)
-// para que el dispositivo sepa la hora y fecha actuales.
-// -------------------------------------------
 void web::syncTime() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // Servidores de hora
   Serial.println("\nSincronizando hora...");
@@ -17,12 +12,6 @@ void web::syncTime() {
   Serial.println("\nHora sincronizada.");
 }
 
-// -------------------------------------------
-// firebaseInit()
-// Inicia la conexión con Firebase (la base de datos en la nube).
-// Coloca las llaves (API key), la dirección del proyecto y el usuario,
-// y luego intenta conectarse y abrir un "canal" para leer comandos.
-// -------------------------------------------
 void web::firebaseInit() {
   // Credenciales y configuración del proyecto
   config.api_key = key;
@@ -54,11 +43,6 @@ void web::firebaseInit() {
   }
 }
 
-// -------------------------------------------
-// set_up()
-// Conecta el dispositivo a la red WiFi, muestra su IP,
-// sincroniza la hora y prepara Firebase.
-// -------------------------------------------
 void web::set_up() {
   Serial.print("Conectando a WiFi");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // Intento de conexión con tu red
@@ -75,12 +59,6 @@ void web::set_up() {
   firebaseInit();    // Prepara la conexión con Firebase
 }
 
-// -------------------------------------------
-// enviar()
-// Sube a Firebase un conjunto de mediciones (datos de sensores).
-// 'data' es la lista de mediciones, 'n' es cuántas son.
-// Para cada medición, envía su valor a una ruta de la base de datos.
-// -------------------------------------------
 void web::enviar(dato data[], int n) {
   // Si hay WiFi pero Firebase no está listo, intenta prepararlo de nuevo
   if (WiFi.status() == WL_CONNECTED) {

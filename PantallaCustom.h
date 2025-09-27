@@ -8,13 +8,11 @@
 
 class PantallaCustom {
 public:
-  // l1..l3 (izq), r1..r3 (der) son índices del enum Dato
   PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
                  Dato l1, Dato l2, Dato l3,
                  Dato r1, Dato r2, Dato r3);
 
   void set_up();
-  // Llama esto en loop pasando el arreglo global 'data'
   void actualizar(const dato data[]);
 
 private:

@@ -7,7 +7,7 @@ void IRAM_ATTR ultrasonico::isrThunk(void* arg) {
   } else {
     const uint32_t regreso = micros(); // FALLING
     portENTER_CRITICAL_ISR(&self->mux);
-    self->duracion = regreso - self->disparo; // unsigned wrap-safe
+    self->duracion = regreso - self->disparo;
     portEXIT_CRITICAL_ISR(&self->mux);
   }
 }
@@ -19,7 +19,6 @@ void ultrasonico::set_up() {
   pinMode(trig, OUTPUT);
   pinMode(echo, INPUT);
   digitalWrite(trig, LOW);
-  // En ESP32 no hace falta digitalPinToInterrupt()
   attachInterruptArg(echo, &ultrasonico::isrThunk, this, CHANGE);
 }
 
@@ -34,14 +33,12 @@ void ultrasonico::disparar() {
 }
 
 float ultrasonico::reading(uint32_t timeout_us) {
-  // Reset duracion antes de disparar
   portENTER_CRITICAL(&mux);
   duracion = 0;
   portEXIT_CRITICAL(&mux);
 
   disparar();
 
-  // Esperar a que ISR fije 'duracion' o que venza el timeout
   const uint32_t t0 = micros();
   while (true) {
     portENTER_CRITICAL(&mux);
@@ -59,7 +56,7 @@ float ultrasonico::reading(uint32_t timeout_us) {
   float distancia_cm = duracion / 58.0f;
   portEXIT_CRITICAL(&mux);
 
-  // A metros y factor de escala (adimensional)
+  // A metros y factor de escala (m/cm)
   float distancia_m = (distancia_cm / 100.0f) * ESCALA;
 
   nivel = techo - distancia_m;
