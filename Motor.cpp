@@ -3,9 +3,8 @@
 motor::motor(byte p, int e1, int e2, int e3, int e4)
   : pin(p), estados{e1, e2, e3, e4}{}
 
-
 void motor::set_up() {
-  servo.attach(pin, 500, 2500);
+  servo.attach(pin, 500, 2500); // ESP32Servo soporta los mismos parámetros
 }
 
 void motor::siguiente_estado(){
@@ -16,8 +15,3 @@ void motor::siguiente_estado(){
   }
   servo.write(estados[estado]);
 }
-
-
-
-
-
