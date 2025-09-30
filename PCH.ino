@@ -19,6 +19,8 @@ caudalimetro caudalimetros[] = {
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
 
+
+
 ultrasonico ultrasonicos[] = {
   { PIN_ULTRA_TRIG_0, PIN_ULTRA_ECHO_0, 0, 100.0f,  0.0f, 1.0f, 0.01f },
   { PIN_ULTRA_TRIG_1, PIN_ULTRA_ECHO_1, 0, 100.0f,  0.0f, 1.0f, 0.01f },

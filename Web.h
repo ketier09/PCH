@@ -1,7 +1,8 @@
 #pragma once
 #include <Arduino.h>
 #include <WiFi.h>
-#include <Firebase_ESP_Client.h>
+#include <ExampleFunctions.h>
+#include <FirebaseClient.h>
 #include <time.h>
 
 #include "secrets.h"
@@ -18,4 +19,3 @@ struct web {
   void set_up();
   void enviar(dato data[], int n);
 };
-
