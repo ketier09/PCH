@@ -9,6 +9,7 @@ struct motor {
   const int estados[n];
 
   motor(byte p, int e1, int e2, int e3, int e4);
+
   ESP32Servo servo;  // CAMBIAR Servo por ESP32Servo
 
   int estado = 0;
