@@ -10,7 +10,7 @@ struct motor {
 
   motor(byte p, int e1, int e2, int e3, int e4);
 
-  ESP32Servo servo;  // CAMBIAR Servo por ESP32Servo
+  Servo servo;
 
   int estado = 0;
   void set_up();
