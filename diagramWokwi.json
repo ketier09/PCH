@@ -9,46 +9,48 @@
     { "type": "wokwi-pulse-generator", "id": "caud1", "top": 200, "left": -200, "attrs": { "frequency": "5" } },
     { "type": "wokwi-pulse-generator", "id": "caud2", "top": 250, "left": -200, "attrs": { "frequency": "5" } },
 
-    { "type": "wokwi-ultrasonic-sensor", "id": "ultra0", "top": 400, "left": 50 },
-    { "type": "wokwi-ultrasonic-sensor", "id": "ultra1", "top": 480, "left": 50 },
-    { "type": "wokwi-ultrasonic-sensor", "id": "ultra2", "top": 560, "left": 50 },
+    { "type": "wokwi-hc-sr04", "id": "ultra0", "top": 400, "left": 50 },
+    { "type": "wokwi-hc-sr04", "id": "ultra1", "top": 480, "left": 50 },
+    { "type": "wokwi-hc-sr04", "id": "ultra2", "top": 560, "left": 50 },
 
-    { "type": "wokwi-led", "id": "compuerta", "top": 150, "left": 400, "attrs": { "color": "yellow" } },
+    { "type": "wokwi-servo", "id": "compuerta", "top": 150, "left": 400, "attrs": { "color": "yellow" } },
     { "type": "wokwi-led", "id": "act0", "top": 200, "left": 400, "attrs": { "color": "red" } },
     { "type": "wokwi-led", "id": "act1", "top": 250, "left": 400, "attrs": { "color": "green" } },
     { "type": "wokwi-led", "id": "act2", "top": 300, "left": 400, "attrs": { "color": "blue" } },
 
-    { "type": "wokwi-button", "id": "btn0", "top": 180, "left": -50 },
-    { "type": "wokwi-button", "id": "btn1", "top": 230, "left": -50 },
-    { "type": "wokwi-button", "id": "btn2", "top": 280, "left": -50 },
-    { "type": "wokwi-button", "id": "btn3", "top": 330, "left": -50 },
+    { "type": "wokwi-pushbutton-6mm", "id": "btn0", "top": 180, "left": -50 },
+    { "type": "wokwi-pushbutton-6mm", "id": "btn1", "top": 230, "left": -50 },
+    { "type": "wokwi-pushbutton-6mm", "id": "btn2", "top": 280, "left": -50 },
+    { "type": "wokwi-pushbutton-6mm", "id": "btn3", "top": 330, "left": -50 },
 
-    { "type": "ili9341", "id": "tft", "top": -50, "left": 350, "attrs": { "width": 240, "height": 320 } }
+    { "type": "wokwi-ili9341", "id": "tft", "top": -50, "left": 350, "attrs": {} }
   ],
 
   "connections": [
-    ["caud0:OUT", "esp32:32"], ["caud1:OUT", "esp32:33"], ["caud2:OUT", "esp32:34"],
+    ["caud0:OUT", "esp32:32", "green", []],
+	["caud1:OUT", "esp32:33", "green", []],
+	["caud2:OUT", "esp32:34", "green", []],
 
-    ["ultra0:trig", "esp32:25"], ["ultra0:echo", "esp32:35"],
-    ["ultra1:trig", "esp32:26"], ["ultra1:echo", "esp32:36"],
-    ["ultra2:trig", "esp32:16"], ["ultra2:echo", "esp32:39"],
+    ["ultra0:trig", "esp32:25", "green", []], ["ultra0:echo", "esp32:35", "green", []],
+    ["ultra1:trig", "esp32:26", "green", []], ["ultra1:echo", "esp32:36", "green", []],
+    ["ultra2:trig", "esp32:16", "green", []], ["ultra2:echo", "esp32:39", "green", []],
 
-    ["ultra0:vcc", "esp32:5V"], ["ultra0:gnd", "esp32:GND"],
-    ["ultra1:vcc", "esp32:5V"], ["ultra1:gnd", "esp32:GND"],
-    ["ultra2:vcc", "esp32:5V"], ["ultra2:gnd", "esp32:GND"],
+    ["ultra0:vcc", "esp32:5V", "red", []], ["ultra0:gnd", "esp32:GND", "black", []],
+    ["ultra1:vcc", "esp32:5V", "red", []], ["ultra1:gnd", "esp32:GND", "black", []],
+    ["ultra2:vcc", "esp32:5V", "red", []], ["ultra2:gnd", "esp32:GND", "black", []],
 
-    ["compuerta:1", "esp32:13"], ["compuerta:2", "esp32:GND"],
-    ["act0:1", "esp32:12"], ["act0:2", "esp32:GND"],
-    ["act1:1", "esp32:14"], ["act1:2", "esp32:GND"],
-    ["act2:1", "esp32:17"], ["act2:2", "esp32:GND"],
+    ["compuerta:1", "esp32:13", "green", []], ["compuerta:2", "esp32:GND", "black", []],
+    ["act0:1", "esp32:12", "green", []], ["act0:2", "esp32:GND", "black", []],
+    ["act1:1", "esp32:14", "green", []], ["act1:2", "esp32:GND", "black", []],
+    ["act2:1", "esp32:17", "green", []], ["act2:2", "esp32:GND", "black", []],
 
-    ["btn0:1", "esp32:4"], ["btn0:2", "esp32:GND"],
-    ["btn1:1", "esp32:2"], ["btn1:2", "esp32:GND"],
-    ["btn2:1", "esp32:15"], ["btn2:2", "esp32:GND"],
-    ["btn3:1", "esp32:27"], ["btn3:2", "esp32:GND"],
+    ["btn0:1", "esp32:4", "green", []], ["btn0:2", "esp32:GND", "black", []],
+    ["btn1:1", "esp32:2", "green", []], ["btn1:2", "esp32:GND", "black", []],
+    ["btn2:1", "esp32:15", "green", []], ["btn2:2", "esp32:GND", "black", []],
+    ["btn3:1", "esp32:27", "green", []], ["btn3:2", "esp32:GND", "black", []],
 
-    ["tft:cs", "esp32:5"], ["tft:dc", "esp32:21"], ["tft:rst", "esp32:22"],
-    ["tft:mosi", "esp32:23"], ["tft:miso", "esp32:19"], ["tft:sck", "esp32:18"],
-    ["tft:led", "esp32:3.3V"], ["tft:vcc", "esp32:3.3V"], ["tft:gnd", "esp32:GND"]
+    ["tft:cs", "esp32:5", "green", []], ["tft:dc", "esp32:21", "green", []], ["tft:rst", "esp32:22", "green", []],
+    ["tft:mosi", "esp32:23", "green", []], ["tft:miso", "esp32:19", "green", []], ["tft:sck", "esp32:18", "green", []],
+    ["tft:led", "esp32:3.3V", "red", []], ["tft:vcc", "esp32:3.3V", "red", []], ["tft:gnd", "esp32:GND", "black", []]
   ]
 }
