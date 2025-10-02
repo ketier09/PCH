@@ -38,19 +38,19 @@
 
 ### Sensores de caudal (entradas con interrupción)
 
-| Nombre lógico |        Pin | Comentario   |
-| ------------- | ---------: | ------------ |
-| `PIN_CAUD_0`  | **GPIO32** | `PIN_TOUCH9` |
-| `PIN_CAUD_1`  | **GPIO33** | `PIN_TOUCH8` |
-| `PIN_CAUD_2`  | **GPIO34** | `INPUT ONLY` |
+| Sensor |        Pin   |
+| ------------- | ------------------- |
+| CAUD-0  | **GPIO32** (`PIN_TOUCH9`) |
+| CAUD-1  | **GPIO33** (`PIN_TOUCH8`) |
+| CAUD-2  | **GPIO34** (`INPUT ONLY`) |
 
 ### Sensores ultrasónicos (TRIG salida, ECHO entrada)
 
 | Sensor |                    TRIG |       ECHO |
 | ------ | ----------------------: | ---------: |
-| US-0   | **GPIO25** (`PIN_DAC0`) | **GPIO35** |
-| US-1   | **GPIO26** (`PIN_DAC1`) | **GPIO36** |
-| US-2   | **GPIO16** (`UART2_RX`) | **GPIO39** |
+| US-0   | **GPIO25** (`PIN_DAC0`) | **GPIO35** (`PIN`)|
+| US-1   | **GPIO26** (`PIN_DAC1`) | **GPIO36** (`PIN`)|
+| US-2   | **GPIO16** (`UART2_RX`) | **GPIO39** (`PIN`)|
 
 ### Actuadores
 
@@ -78,7 +78,7 @@
 | SCK   | **GPIO18** |
 | SS    |  **GPIO5** |
 
-> ℹ️ El archivo define también aliases para buses UART/I2C y pines “input only”. Evita usar los pines de **Flash** (GPIO6–10). Además, **GPIO2 y GPIO4 no están libres** por uso en pulsadores.
+> ℹ️ El archivo define también aliases para buses UART/I2C y pines “input only”. Evita usar los pines de **Flash** (GPIO6–10).
 
 ---
 
@@ -102,15 +102,19 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 
 | ID (enum)            | Etiqueta              | Clave Firebase       | Unidad  |
 | -------------------- | --------------------- | -------------------- | ------- |
-| `CotaCaptacion`      | Cota en captación     | `cotaCaptacion`      | msnm    |
-| `CotaRio`            | Cota del río          | `cotaRio`            | msnm    |
-| `CotaDesarenador`    | Cota en desarenador   | `cotaDesarenador`    | msnm    |
-| `CaudalCaptacion`    | Caudal en captación   | `caudalCaptacion`    | m³/s    |
-| `CaudalDesarenador`  | Caudal en desarenador | `caudalDesarenador`  | m³/s    |
-| `CaudalInicio`       | Caudal inicio         | `caudalInicio`       | m³/s    |
-| `CaudalTurbinable`   | Caudal turbinable     | `caudalTurbinable`   | m³/s    |
-| `CaudalFinal`        | Caudal final          | `caudalFinal`        | m³/s    |
-| `GeneradoresActivos` | Generadores activos   | `generadoresActivos` | (texto) |
+| `caudalRio`              | Caudal del río                 | `caudalRio`                | m³/s   |
+| `caudalCaptacion`        | Caudal de captación            | `caudalCaptacion`          | m³/s   |
+| `caudalNoCaptado`        | Caudal no captado              | `caudalNoCaptado`          | m³/s   |
+| `caudalGarantíaAmbiental`| Caudal de garantía ambiental   | `caudalGarantíaAmbiental`  | m³/s   |
+| `caudalAduccion`         | Caudal de aducción             | `caudalAduccion`           | m³/s   |
+| `caudalTurbinable`       | Caudal turbinable              | `caudalTurbinable`         | m³/s   |
+| `caudalDevuelto`         | Caudal devuelto                | `caudalDevuelto`           | m³/s   |
+| `caudalRetorno`          | Caudal de retorno              | `caudalRetorno`            | m³/s   |
+| `cotaCaptacion`          | Cota en captación              | `cotaCaptacion`            | msnm   |
+| `cotaRio`                | Cota del río                   | `cotaRio`                  | msnm   |
+| `cotaAduccion`           | Cota en aducción               | `cotaAduccion`             | msnm   |
+| `cotaGarantíaAmbiental`  | Cota de garantía ambiental     | `cotaGarantíaAmbiental`    | msnm   |
+| `generadoresActivos`     | Generadores activos            | `generadoresActivos`       |(texto) |
 
 > En serie, `GeneradoresActivos` se muestra como texto: **Apagados | 1 encendido | 2 encendidos | 2 a máxima capacidad | Error**.
 
