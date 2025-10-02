@@ -3,15 +3,17 @@
 
 // --------------------- Estructura común ---------------------------
 #define DATOS_X \
-X(CotaCaptacion,     "Cota en captación",    "cotaCaptacion",     "msnm") \
-X(CotaRio,           "Cota del río",         "cotaRio",           "msnm") \
-X(CotaDesarenador,   "Cota en desarenador",  "cotaDesarenador",   "msnm") \
-X(CaudalCaptacion,   "Caudal en captación",  "caudalCaptacion",   "m³/s") \
-X(CaudalDesarenador, "Caudal en desarenador","caudalDesarenador", "m³/s") \
-X(CaudalInicio,      "Caudal inicio",        "caudalInicio",      "m³/s") \
-X(CaudalTurbinable,  "Caudal turbinable",    "caudalTurbinable",  "m³/s") \
-X(CaudalFinal,       "Caudal final",         "caudalFinal",       "m³/s") \
-X(GeneradoresActivos,"Generadores activos",  "generadoresActivos","    ")
+X(caudalRio,               "Caudal del río",                 "caudalRio",               "m³/s") \
+X(caudalCaptacion,         "Caudal de captación",            "caudalCaptacion",         "m³/s") \
+X(caudalNoCaptado,         "Caudal no captado",              "caudalNoCaptado",         "m³/s") \
+X(caudalGarantíaAmbiental, "Caudal de garantía ambiental",   "caudalGarantíaAmbiental", "m³/s") \
+X(caudalAduccion,          "Caudal de aducción",             "caudalAduccion",          "m³/s") \
+X(caudalTurbinable,        "Caudal turbinable",              "caudalTurbinable",        "m³/s") \
+X(cotaCaptacion,           "Cota en captación",              "cotaCaptacion",           "msnm") \
+X(cotaRio,                 "Cota del río",                   "cotaRio",                 "msnm") \
+X(cotaAduccion,            "Cota en aducción",               "cotaAduccion",            "msnm") \
+X(generadoresActivos,      "Generadores activos",            "generadoresActivos",      "    ") \
+
 
 //--------------------- enum ---------------------------
 enum Dato {

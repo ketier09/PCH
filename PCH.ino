@@ -127,18 +127,18 @@ void loop() {
   if (now - lastPrint > 1000) {
     lastPrint = now;
 
-    data[CotaCaptacion].valor      = ultrasonicos[0].reading();
-    data[CotaDesarenador].valor    = ultrasonicos[1].reading();
-    data[CotaRio].valor            = ultrasonicos[2].reading();
-    
-    data[CaudalCaptacion].valor    = ultrasonicos[0].flujo();
-    data[CaudalDesarenador].valor  = ultrasonicos[1].flujo();
-    
-    data[CaudalInicio].valor       = caudalimetros[0].reading();
-    data[CaudalTurbinable].valor   = caudalimetros[1].reading();
-    data[CaudalFinal].valor        = caudalimetros[2].reading();
-
-    data[GeneradoresActivos].valor = (float)generadoresActivos();
+	data[caudalRio].valor                = 0.0;
+	data[caudalCaptacion].valor          = 0.0;
+	data[caudalNoCaptado].valor          = 0.0;
+	data[caudalGarantíaAmbiental].valor  = 0.0;
+	data[caudalAduccion].valor           = 0.0;
+	data[caudalTurbinable].valor         = 0.0;
+	
+	data[cotaCaptacion].valor            = ultrasonicos[0].reading();
+	data[cotaRio].valor                  = ultrasonicos[1].reading();
+	data[cotaAduccion].valor             = ultrasonicos[2].reading();
+	
+	data[generadoresActivos].valor       = (float)generadoresActivos();
 
     serial_enviar(data);
     pagina.enviar(data, DatoCount);
