@@ -9,9 +9,11 @@ X(caudalNoCaptado,         "Caudal no captado",              "caudalNoCaptado", 
 X(caudalGarantíaAmbiental, "Caudal de garantía ambiental",   "caudalGarantíaAmbiental", "m³/s") \
 X(caudalAduccion,          "Caudal de aducción",             "caudalAduccion",          "m³/s") \
 X(caudalTurbinable,        "Caudal turbinable",              "caudalTurbinable",        "m³/s") \
+X(caudalDevuelto,          "Caudal devuelto",                "caudalDevuelto",          "m³/s") \
 X(cotaCaptacion,           "Cota en captación",              "cotaCaptacion",           "msnm") \
 X(cotaRio,                 "Cota del río",                   "cotaRio",                 "msnm") \
 X(cotaAduccion,            "Cota en aducción",               "cotaAduccion",            "msnm") \
+X(cotaGarantíaAmbiental,   "Cota de garantía ambiental",     "cotaGarantíaAmbiental",   "msnm") \
 X(generadoresActivos,      "Generadores activos",            "generadoresActivos",      "    ") \
 
 
