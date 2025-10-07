@@ -127,12 +127,12 @@ void loop() {
   if (now - lastPrint > 1000) {
     lastPrint = now;
 
-	data[caudalRio].valor                = 0.0;
-	data[caudalCaptacion].valor          = 0.0;
-	data[caudalNoCaptado].valor          = 0.0;
-	data[caudalGarantíaAmbiental].valor  = 0.0;
-	data[caudalAduccion].valor           = 0.0;
-	data[caudalTurbinable].valor         = 0.0;
+	data[caudalRio].valor                = caudalimetros[0].reading();
+	data[caudalCaptacion].valor          = caudalimetros[1].reading();
+	data[caudalNoCaptado].valor          = caudalimetros[2].reading();
+	data[caudalGarantíaAmbiental].valor  = ultrasonicos[0].flujo();
+	data[caudalAduccion].valor           = ultrasonicos[1].flujo();
+	data[caudalTurbinable].valor         = ultrasonicos[2].flujo();
 	
 	data[cotaCaptacion].valor            = ultrasonicos[0].reading();
 	data[cotaRio].valor                  = ultrasonicos[1].reading();
