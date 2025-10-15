@@ -1,7 +1,6 @@
 #pragma once
 #include <Arduino.h>
 #include <WiFi.h>
-#include <ExampleFunctions.h>
 #include <FirebaseClient.h>
 #include <time.h>
 

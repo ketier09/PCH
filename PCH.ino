@@ -12,9 +12,9 @@
 //----------------- Creamos los medidores de caudal -----------------
 
 caudalimetro caudalimetros[] = {
-  {PCH_CAUD_0},
-  {PCH_CAUD_1},
-  {PCH_CAUD_2}
+  {CAUD_0},
+  {CAUD_1},
+  {CAUD_2}
 };
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
@@ -22,19 +22,19 @@ caudalimetro caudalimetros[] = {
 
 
 ultrasonico ultrasonicos[] = {
-  { PCH_ULTRA_TRIG_0, PCH_ULTRA_ECHO_0, 0, 100.0f,  0.0f, 1.0f, 0.01f },
-  { PCH_ULTRA_TRIG_1, PCH_ULTRA_ECHO_1, 0, 100.0f,  0.0f, 1.0f, 0.01f },
-  { PCH_ULTRA_TRIG_2, PCH_ULTRA_ECHO_2, 0, 100.0f,  0.0f, 1.0f, 0.01f }
+  { ULTRA_TRIG_0, ULTRA_ECHO_0, 0, 100.0f,  0.0f, 1.0f, 0.01f },
+  { ULTRA_TRIG_1, ULTRA_ECHO_1, 0, 100.0f,  0.0f, 1.0f, 0.01f },
+  { ULTRA_TRIG_2, ULTRA_ECHO_2, 0, 100.0f,  0.0f, 1.0f, 0.01f }
 };
 
 //----------------- Actuadores -----------------
 
 actuador_digital actuadores_digitales[] = {
-  {PCH_ACTUADOR_DIGITAL_0},
-  {PCH_ACTUADOR_DIGITAL_1},
-  {PCH_ACTUADOR_DIGITAL_2}
+  {ACTUADOR_DIGITAL_0},
+  {ACTUADOR_DIGITAL_1},
+  {ACTUADOR_DIGITAL_2}
 };
-motor mo_compuerta(PCH_COMPUERTA, 0, 45, 135, 180);
+motor mo_compuerta(COMPUERTA, 0, 45, 135, 180);
 
 //----------------- Pulsadores -----------------
 
@@ -44,17 +44,17 @@ void on_2() { actuadores_digitales[2].cambiar(); }
 void on_3() { mo_compuerta.siguiente_estado(); }
 
 pulsador pulsadores[] = {
-  {PCH_PULSADOR_0, on_0, LOW},
-  {PCH_PULSADOR_1, on_1, LOW},
-  {PCH_PULSADOR_2, on_2, LOW},
-  {PCH_PULSADOR_3, on_3, LOW},
+  {PULSADOR_0, on_0, LOW},
+  {PULSADOR_1, on_1, LOW},
+  {PULSADOR_2, on_2, LOW},
+  {PULSADOR_3, on_3, LOW},
 };
 
 //----------------- Pantallas -----------------
 
 PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST,
-                        CotaCaptacion, CaudalTurbinable, CotaDesarenador,
-                        CaudalCaptacion, CaudalFinal, GeneradoresActivos);
+                        cotaCaptacion,   caudalTurbinable, cotaDesarenador,
+                        caudalCaptacion, caudalFinal,      cantidadGeneradoresActivos);
 
 //----------------- Conexión web/Firebase -----------------
 
@@ -82,8 +82,8 @@ void serial_enviar(dato data[]) {
     Serial.print(" ");
     Serial.println(data[i].unidad);
   }
-  const int g = (int)data[GeneradoresActivos].valor;
-  Serial.print(data[GeneradoresActivos].etiqueta);
+  const int g = (int)data[cantidadGeneradoresActivos].valor;
+  Serial.print(data[cantidadGeneradoresActivos].etiqueta);
   Serial.print(": ");
   Serial.println(generadoresActivosExplicacion[g]);
 }
@@ -138,7 +138,7 @@ void loop() {
 	data[cotaRio].valor                  = ultrasonicos[1].reading();
 	data[cotaAduccion].valor             = ultrasonicos[2].reading();
 	
-	data[generadoresActivos].valor       = (float)generadoresActivos();
+	data[cantidadGeneradoresActivos].valor       = (float)generadoresActivos();
 
     serial_enviar(data);
     pagina.enviar(data, DatoCount);

@@ -85,34 +85,34 @@ enum PCH_Pines : uint8_t {
 
 enum Devices_Pines: uint8_t {
   // --- Caudalímetros (entradas con interrupción) ---
-  PCH_CAUD_0        = PCH_TOUCH9,
-  PCH_CAUD_1        = PCH_TOUCH8,
-  PCH_CAUD_2        = PCH_INPUT_ONLY_0,
+  CAUD_0        = PCH_TOUCH9,
+  CAUD_1        = PCH_TOUCH8,
+  CAUD_2        = PCH_INPUT_ONLY_0,
 
   // --- Ultrasonidos: TRIG = salida, ECHO = entrada ---
-  PCH_ULTRA_TRIG_0  = PCH_DAC0,
-  PCH_ULTRA_ECHO_0  = PCH_INPUT_ONLY_1,
+  ULTRA_TRIG_0  = PCH_DAC0,
+  ULTRA_ECHO_0  = PCH_INPUT_ONLY_1,
 
-  PCH_ULTRA_TRIG_1  = PCH_DAC1,
-  PCH_ULTRA_ECHO_1  = PCH_INPUT_ONLY_2,
+  ULTRA_TRIG_1  = PCH_DAC1,
+  ULTRA_ECHO_1  = PCH_INPUT_ONLY_2,
 
-  PCH_ULTRA_TRIG_2  = PCH_UART2_RX,
-  PCH_ULTRA_ECHO_2  = PCH_INPUT_ONLY_3,
+  ULTRA_TRIG_2  = PCH_UART2_RX,
+  ULTRA_ECHO_2  = PCH_INPUT_ONLY_3,
 
   // --- Actuadores (salidas) ---
-  PCH_COMPUERTA     = PCH_TOUCH4,
-  PCH_ACTUADOR_DIGITAL_0  = PCH_TOUCH5,
-  PCH_ACTUADOR_DIGITAL_1  = PCH_TOUCH6,
-  PCH_ACTUADOR_DIGITAL_2  = PCH_UART2_TX,
+  COMPUERTA           = PCH_TOUCH4,
+  ACTUADOR_DIGITAL_0  = PCH_TOUCH5,
+  ACTUADOR_DIGITAL_1  = PCH_TOUCH6,
+  ACTUADOR_DIGITAL_2  = PCH_UART2_TX,
 
   // --- Pulsadores (puedes leerlos como digitales o usar touch) ---
-  PCH_PULSADOR_0    = PCH_TOUCH0,
-  PCH_PULSADOR_1    = PCH_TOUCH2,
-  PCH_PULSADOR_2    = PCH_TOUCH3,
-  PCH_PULSADOR_3    = PCH_TOUCH7,
+  PULSADOR_0    = PCH_TOUCH0,
+  PULSADOR_1    = PCH_TOUCH2,
+  PULSADOR_2    = PCH_TOUCH3,
+  PULSADOR_3    = PCH_TOUCH7,
 
   // --- Pantalla TFT ILI9341 (SPI) ---
-  PCH_TFT_CS   = PCH_VSPI_SS,
-  PCH_TFT_DC   = PCH_I2C_SDA,
-  PCH_TFT_RST  = PCH_I2C_SCL
+  TFT_CS   = PCH_VSPI_SS,
+  TFT_DC   = PCH_I2C_SDA,
+  TFT_RST  = PCH_I2C_SCL
 };
