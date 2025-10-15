@@ -12,9 +12,9 @@
 //----------------- Creamos los medidores de caudal -----------------
 
 caudalimetro caudalimetros[] = {
-  {PIN_CAUD_0},
-  {PIN_CAUD_1},
-  {PIN_CAUD_2}
+  {PCH_CAUD_0},
+  {PCH_CAUD_1},
+  {PCH_CAUD_2}
 };
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
@@ -22,19 +22,19 @@ caudalimetro caudalimetros[] = {
 
 
 ultrasonico ultrasonicos[] = {
-  { PIN_ULTRA_TRIG_0, PIN_ULTRA_ECHO_0, 0, 100.0f,  0.0f, 1.0f, 0.01f },
-  { PIN_ULTRA_TRIG_1, PIN_ULTRA_ECHO_1, 0, 100.0f,  0.0f, 1.0f, 0.01f },
-  { PIN_ULTRA_TRIG_2, PIN_ULTRA_ECHO_2, 0, 100.0f,  0.0f, 1.0f, 0.01f }
+  { PCH_ULTRA_TRIG_0, PCH_ULTRA_ECHO_0, 0, 100.0f,  0.0f, 1.0f, 0.01f },
+  { PCH_ULTRA_TRIG_1, PCH_ULTRA_ECHO_1, 0, 100.0f,  0.0f, 1.0f, 0.01f },
+  { PCH_ULTRA_TRIG_2, PCH_ULTRA_ECHO_2, 0, 100.0f,  0.0f, 1.0f, 0.01f }
 };
 
 //----------------- Actuadores -----------------
 
 actuador_digital actuadores_digitales[] = {
-  {PIN_ACTUADOR_DIGITAL_0},
-  {PIN_ACTUADOR_DIGITAL_1},
-  {PIN_ACTUADOR_DIGITAL_2}
+  {PCH_ACTUADOR_DIGITAL_0},
+  {PCH_ACTUADOR_DIGITAL_1},
+  {PCH_ACTUADOR_DIGITAL_2}
 };
-motor mo_compuerta(PIN_COMPUERTA, 0, 45, 135, 180);
+motor mo_compuerta(PCH_COMPUERTA, 0, 45, 135, 180);
 
 //----------------- Pulsadores -----------------
 
@@ -44,10 +44,10 @@ void on_2() { actuadores_digitales[2].cambiar(); }
 void on_3() { mo_compuerta.siguiente_estado(); }
 
 pulsador pulsadores[] = {
-  {PIN_PULSADOR_0, on_0, LOW},
-  {PIN_PULSADOR_1, on_1, LOW},
-  {PIN_PULSADOR_2, on_2, LOW},
-  {PIN_PULSADOR_3, on_3, LOW},
+  {PCH_PULSADOR_0, on_0, LOW},
+  {PCH_PULSADOR_1, on_1, LOW},
+  {PCH_PULSADOR_2, on_2, LOW},
+  {PCH_PULSADOR_3, on_3, LOW},
 };
 
 //----------------- Pantallas -----------------
