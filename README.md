@@ -38,45 +38,45 @@
 
 ### Sensores de caudal (entradas con interrupción)
 
-| Sensor |        Pin   |
-| ------------- | ------------------- |
-| CAUD-0  | **GPIO32** (`PIN_TOUCH9`) |
-| CAUD-1  | **GPIO33** (`PIN_TOUCH8`) |
-| CAUD-2  | **GPIO34** (`INPUT ONLY`) |
+| Sensor  |            Pin                  |
+| ------- | -------------------             |
+| CAUD-0  | **GPIO32** (`PCH_TOUCH9`)       |
+| CAUD-1  | **GPIO33** (`PCH_TOUCH8`)       |
+| CAUD-2  | **GPIO34** (`PCH_INPUT_ONLY_0`) |
 
 ### Sensores ultrasónicos (TRIG salida, ECHO entrada)
 
 | Sensor |                    TRIG |       ECHO |
 | ------ | ----------------------: | ---------: |
-| US-0   | **GPIO25** (`PIN_DAC0`) | **GPIO35** (`PIN`)|
-| US-1   | **GPIO26** (`PIN_DAC1`) | **GPIO36** (`PIN`)|
-| US-2   | **GPIO16** (`UART2_RX`) | **GPIO39** (`PIN`)|
+| US-0   | **GPIO25** (`PCH_DAC0`) | **GPIO35** (`PCH_INPUT_ONLY_1`)|
+| US-1   | **GPIO26** (`PCH_DAC1`) | **GPIO36** (`PCH_INPUT_ONLY_2`)|
+| US-2   | **GPIO16** (`PCH_UART2_RX`) | **GPIO39** (`PCH_INPUT_ONLY_3`)|
 
 ### Actuadores
 
 | Dispositivo        |                       Pin |
 | ------------------ | ------------------------: |
-| Compuerta (servo)  | **GPIO13** (`PIN_TOUCH4`) |
-| Actuador digital 0 | **GPIO12** (`PIN_TOUCH5`) |
-| Actuador digital 1 | **GPIO14** (`PIN_TOUCH6`) |
-| Actuador digital 2 |   **GPIO17** (`UART2_TX`) |
+| Compuerta (servo)  | **GPIO13** (`PCH_TOUCH4`) |
+| Actuador digital 0 | **GPIO12** (`PCH_TOUCH5`) |
+| Actuador digital 1 | **GPIO14** (`PCH_TOUCH6`) |
+| Actuador digital 2 | **GPIO17** (`PCH_UART2_TX`) |
 
 ### Pulsadores
 
 | Pulsador |                       Pin |
 | -------- | ------------------------: |
-| P0       |  **GPIO4** (`PIN_TOUCH0`) |
-| P1       |  **GPIO2** (`PIN_TOUCH2`) |
-| P2       | **GPIO15** (`PIN_TOUCH3`) |
-| P3       | **GPIO27** (`PIN_TOUCH7`) |
+| P0       |  **GPIO4** (`PCH_TOUCH0`) |
+| P1       |  **GPIO2** (`PCH_TOUCH2`) |
+| P2       | **GPIO15** (`PCH_TOUCH3`) |
+| P3       | **GPIO27** (`PCH_TOUCH7`) |
 
 ### SPI (pantalla local)
 
-| Señal |        Pin |
+|Pin de la pantalla| Pin |
 | ----- | ---------: |
-| MOSI  | **GPIO23** |
-| SCK   | **GPIO18** |
-| SS    |  **GPIO5** |
+| CS  | **GPIO23** (`PCH_VSPI_SS`) |
+| DC  | **GPIO18** (`PCH_I2C_SDA`)|
+| RST |  **GPIO5** (`PCH_I2C_SCL`)|
 
 > ℹ️ El archivo define también aliases para buses UART/I2C y pines “input only”. Evita usar los pines de **Flash** (GPIO6–10).
 
@@ -127,10 +127,10 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 1. **Placa**: instala *ESP32 by Espressif Systems* (Gestor de tarjetas).
 2. **Librerías**:
 
-   * `Firebase_ESP_Client`
-   * `Servo`
-   * `Adafruit_GFX`
-   * `Adafruit_ILI9341`
+   * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)](https://github.com/mobizt/Firebase-ESP-Client)
+   * `ESP32Servo`
+   * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
+   * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
 3. **Abrir** el sketch principal (`PCH.ino`).
 4. **Velocidad Serial**: 115200.
 5. **Compila y sube**.
