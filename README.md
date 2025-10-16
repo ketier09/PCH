@@ -4,7 +4,7 @@
 
 ---
 
-## 🚀 Resumen rápido (TL;DR)
+## 🚀 Resumen rápido
 
 * **Sensores**: 3 ultrasónicos (niveles) + 3 caudalímetros (flujo).
 * **Actuadores**: 1 servomotor para **compuerta** + 3 **salidas digitales**.
@@ -36,47 +36,56 @@
 
 ## 🔌 Mapa de pines (ESP32)
 
-### Sensores de caudal (entradas con interrupción)
+### 🧮 Sensores de caudal (entradas con interrupción)
 
-| Sensor  |            Pin                  |
-| ------- | -------------------             |
-| CAUD-0  | **GPIO32** (`PCH_TOUCH9`)       |
-| CAUD-1  | **GPIO33** (`PCH_TOUCH8`)       |
-| CAUD-2  | **GPIO34** (`PCH_INPUT_ONLY_0`) |
+| Sensor | Pin                        |
+|:-------|:----------------------------|
+| CAUD-0 | **GPIO32** (`PCH_TOUCH9`)   |
+| CAUD-1 | **GPIO33** (`PCH_TOUCH8`)   |
+| CAUD-2 | **GPIO34** (`PCH_INPUT_ONLY_0`) |
 
-### Sensores ultrasónicos (TRIG salida, ECHO entrada)
+---
 
-| Sensor |                    TRIG |       ECHO |
-| ------ | ----------------------: | ---------: |
-| US-0   | **GPIO25** (`PCH_DAC0`) | **GPIO35** (`PCH_INPUT_ONLY_1`)|
-| US-1   | **GPIO26** (`PCH_DAC1`) | **GPIO36** (`PCH_INPUT_ONLY_2`)|
-| US-2   | **GPIO16** (`PCH_UART2_RX`) | **GPIO39** (`PCH_INPUT_ONLY_3`)|
+### 📏 Sensores ultrasónicos (TRIG salida, ECHO entrada)
 
-### Actuadores
+| Sensor | TRIG                         | ECHO                         |
+|:-------|:-----------------------------|:------------------------------|
+| US-0   | **GPIO25** (`PCH_DAC0`)      | **GPIO35** (`PCH_INPUT_ONLY_1`) |
+| US-1   | **GPIO26** (`PCH_DAC1`)      | **GPIO36** (`PCH_INPUT_ONLY_2`) |
+| US-2   | **GPIO16** (`PCH_UART2_RX`)  | **GPIO39** (`PCH_INPUT_ONLY_3`) |
 
-| Dispositivo        |                       Pin |
-| ------------------ | ------------------------: |
-| Compuerta (servo)  | **GPIO13** (`PCH_TOUCH4`) |
-| Actuador digital 0 | **GPIO12** (`PCH_TOUCH5`) |
-| Actuador digital 1 | **GPIO14** (`PCH_TOUCH6`) |
-| Actuador digital 2 | **GPIO17** (`PCH_UART2_TX`) |
+---
 
-### Pulsadores
+### ⚙️ Actuadores
 
-| Pulsador |                       Pin |
-| -------- | ------------------------: |
-| P0       |  **GPIO4** (`PCH_TOUCH0`) |
-| P1       |  **GPIO2** (`PCH_TOUCH2`) |
-| P2       | **GPIO15** (`PCH_TOUCH3`) |
-| P3       | **GPIO27** (`PCH_TOUCH7`) |
+| Dispositivo         | Pin                        |
+|:--------------------|:---------------------------|
+| Compuerta (servo)   | **GPIO13** (`PCH_TOUCH4`)  |
+| Actuador digital 0  | **GPIO12** (`PCH_TOUCH5`)  |
+| Actuador digital 1  | **GPIO14** (`PCH_TOUCH6`)  |
+| Actuador digital 2  | **GPIO17** (`PCH_UART2_TX`) |
 
-### SPI (pantalla local)
+---
 
-|Pin de la pantalla| Pin |
-| ----- | ---------: |
-| CS  | **GPIO23** (`PCH_VSPI_SS`) |
-| DC  | **GPIO18** (`PCH_I2C_SDA`)|
-| RST |  **GPIO5** (`PCH_I2C_SCL`)|
+### 🔘 Pulsadores
+
+| Pulsador | Pin                      |
+|:----------|:-------------------------|
+| P0        | **GPIO4**  (`PCH_TOUCH0`) |
+| P1        | **GPIO2**  (`PCH_TOUCH2`) |
+| P2        | **GPIO15** (`PCH_TOUCH3`) |
+| P3        | **GPIO27** (`PCH_TOUCH7`) |
+
+---
+
+### 🖥️ SPI (pantalla local)
+
+| Pin de la pantalla | Pin                     |
+|:--------------------|:------------------------|
+| CS   | **GPIO23** (`PCH_VSPI_SS`) |
+| DC   | **GPIO18** (`PCH_I2C_SDA`) |
+| RST  | **GPIO5**  (`PCH_I2C_SCL`) |
+
 
 > ℹ️ El archivo define también aliases para buses UART/I2C y pines “input only”. Evita usar los pines de **Flash** (GPIO6–10).
 
