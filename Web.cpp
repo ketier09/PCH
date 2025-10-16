@@ -14,10 +14,10 @@ void web::syncTime() {
 
 void web::firebaseInit() {
   // Credenciales y configuración del proyecto
-  config.api_key = key;
+  config.api_key      = key;
   config.database_url = url;
-  auth.user.email = email;
-  auth.user.password = password;
+  auth.user.email     = email;
+  auth.user.password  = password;
 
   Firebase.reconnectWiFi(true);  // Si se corta el WiFi, intenta reconectar
   fbdo.setResponseSize(4096);    // Tamaño máximo de respuesta

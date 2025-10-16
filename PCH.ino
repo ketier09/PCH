@@ -53,8 +53,8 @@ pulsador pulsadores[] = {
 //----------------- Pantallas -----------------
 
 PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST,
-                        cotaCaptacion,   caudalTurbinable, cotaDesarenador,
-                        caudalCaptacion, caudalFinal,      cantidadGeneradoresActivos);
+                        cotaCaptacion,   caudalTurbinable, cotaRio,
+                        caudalCaptacion, caudalRetorno,    cantidadGeneradoresActivos);
 
 //----------------- Conexión web/Firebase -----------------
 

@@ -1,10 +1,10 @@
 #pragma once
 #include <Arduino.h>
 #include <WiFi.h>
-#include <FirebaseClient.h>
+#include <Firebase_ESP_Client.h>
 #include <time.h>
 
-#include "secrets.h"
+#include "Secrets.h"
 #include "Datos.h"
 
 struct web {
