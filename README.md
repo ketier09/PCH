@@ -28,8 +28,8 @@
 ├─ PantallaCustom.h/.cpp     ← Interfaz TFT para mostrar 3 datos por lado
 ├─ Web.h/.cpp                ← WiFi + NTP + Firebase
 ├─ Conexiones.h              ← Mapa de pines ESP32
-├─ secrets.h                 ← Declaraciones de credenciales
-└─ secrets.cpp               ← **Definiciones** de credenciales (lo creas tú)
+├─ Secrets.h                 ← Declaraciones de credenciales
+└─ Secrets.cpp               ← **Definiciones** de credenciales (lo creas tú)
 ```
 
 ---
@@ -163,11 +163,11 @@ lib_deps =
 
 ## 🔐 Configuración de credenciales
 
-En el repo ya está `secrets.h` con **declaraciones**. Debes crear **`secrets.cpp`** con las **definiciones** reales.
+En el repo ya está `Secrets.h` con **declaraciones**. Debes crear **`Secrets.cpp`** con las **definiciones** reales.
 
 ```cpp
-// secrets.cpp
-#include "secrets.h"
+// Secrets.cpp
+#include "Secrets.h"
 
 const char WIFI_SSID[]     = "TU_SSID";
 const char WIFI_PASSWORD[] = "TU_PASSWORD";
@@ -210,7 +210,7 @@ Constructor:
 
 * **No compila**:
 
-  * Asegúrate de tener `secrets.cpp` y librerías.
+  * Asegúrate de tener `Secrets.cpp` y librerías.
   * Si ves errores con `datos`, confirma `using datos = dato;` en `Datos.h`.
 * **Firebase no conecta**:
 
