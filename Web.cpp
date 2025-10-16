@@ -46,7 +46,8 @@ void web::firebaseInit() {
 void web::set_up() {
   Serial.print("Conectando a WiFi");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // Intento de conexión con tu red
-  while (WiFi.status() != WL_CONNECTED) {
+  unsigned long startTime = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 15000) {
     Serial.print(".");                   // Muestra progreso
     delay(500);
   }
@@ -87,4 +88,5 @@ void web::enviar(dato data[], int n) {
     Serial.println("-> No se pudieron enviar datos a Firebase. Conexión no lista.");
   }
 }
+
 
