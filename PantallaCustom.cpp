@@ -1,97 +1,92 @@
-#include "PantallaCustom.h"
+#include "DisplayUI.h"
+#include "Images.h"
 
-PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
-                               Dato l1, Dato l2, Dato l3,
-                               Dato r1, Dato r2, Dato r3)
-  : tft(cs, dc, rst) {
-  idx[0] = l1; idx[1] = l2; idx[2] = l3;
-  idx[3] = r1; idx[4] = r2; idx[5] = r3;
-}
+#include <SPI.h>
+#include <Fonts/FreeSansBold18pt7b.h>
 
-void PantallaCustom::set_up() {
+// Colores ILI9341_*
+#ifndef ILI9341_BLACK
+  #include <Adafruit_ILI9341.h>
+#endif
+
+DisplayUI::DisplayUI(uint8_t cs, uint8_t dc, uint8_t rst)
+: tft(cs, dc, rst) {}
+
+void DisplayUI::begin() {
   tft.begin();
-  tft.setRotation(1);
+  tft.setRotation(3);
+  tft.setFont(&FreeSansBold18pt7b);
   tft.fillScreen(ILI9341_BLACK);
-  tft.setTextSize(2);
-  dibujarTitulos(data); // primer dibujo inmediato usando global 'data'
+  drawStatic();
 }
 
-void PantallaCustom::dibujarTitulos(const dato data[]) {
-  // Limpia todo el fondo y reescribe títulos y unidades
-  tft.fillScreen(ILI9341_BLACK);
-
-  // IZQUIERDA
-  tft.setTextColor(ILI9341_RED);
-  tft.setCursor(LX, YT[0]); tft.print(data[idx[0]].etiqueta);
-
-  tft.setTextColor(ILI9341_GREEN);
-  tft.setCursor(LX, YT[1]); tft.print(data[idx[1]].etiqueta);
-
-  tft.setTextColor(ILI9341_BLUE);
-  tft.setCursor(LX, YT[2]); tft.print(data[idx[2]].etiqueta);
-
-  // DERECHA
-  tft.setTextColor(ILI9341_YELLOW);
-  tft.setCursor(RX, YT[0]); tft.print(data[idx[3]].etiqueta);
-
-  tft.setTextColor(ILI9341_CYAN);
-  tft.setCursor(RX, YT[1]); tft.print(data[idx[4]].etiqueta);
-
-  tft.setTextColor(ILI9341_MAGENTA);
-  tft.setCursor(RX, YT[2]); tft.print(data[idx[5]].etiqueta);
+void DisplayUI::setLabels(const char* const* labels, uint8_t count) {
+  etiquetas = labels;
+  etiquetasCount = count;
 }
 
-void PantallaCustom::borrarCajaValor(bool derecha, int fila) {
-  int x = derecha ? RX : LX;
-  tft.fillRect(x, YV[fila], W, H, ILI9341_BLACK);
+void DisplayUI::setInterval(uint32_t ms) {
+  intervalo = ms;
 }
 
-void PantallaCustom::imprimirValor(int x, int y, const dato& d) {
-  // Si la unidad está vacía/espaciada (GeneradoresActivos), imprime entero
-  bool sinUnidad = true;
-  for (const char* p = d.unidad; *p; ++p) { if (!isspace(*p)) { sinUnidad = false; break; } }
+void DisplayUI::tick() {
+  uint32_t now = millis();
+  if (now - tPrev < intervalo) return;
+  tPrev = now;
 
-  tft.setCursor(x, y);
-  if (sinUnidad) {
-    // entero “bonito”
-    tft.print((int)d.valor);
-  } else {
-    // valor con 2 decimales + unidad
-    tft.print(d.valor, 2);
-    tft.print(" ");
-    tft.print(d.unidad);
+  // Genera valores aleatorios (puedes reemplazarlos por lecturas reales)
+  int cota  = random(1, 99);  // metros
+  int flujo = random(1, 99);  // m3/s
+
+  if (etiquetas && etiquetasCount > 0) {
+    drawFrame(etiquetas[idx], cota, flujo);
+    idx = (idx + 1) % etiquetasCount;
   }
 }
 
-void PantallaCustom::mostrarValores(const dato data[]) {
-  // IZQUIERDA
-  tft.setTextColor(ILI9341_RED);
-  borrarCajaValor(false, 0); imprimirValor(LX, YV[0], data[idx[0]]);
+void DisplayUI::drawStatic() {
+  // Limpia zonas
+  tft.fillRect(PANEL_X, PANEL_Y, PANEL_W, PANEL_H, ILI9341_BLACK);
+  tft.fillRect(0, 0, PANEL_X, PANEL_H, ILI9341_BLACK);
 
-  tft.setTextColor(ILI9341_GREEN);
-  borrarCajaValor(false, 1); imprimirValor(LX, YV[1], data[idx[1]]);
-
-  tft.setTextColor(ILI9341_BLUE);
-  borrarCajaValor(false, 2); imprimirValor(LX, YV[2], data[idx[2]]);
-
-  // DERECHA
-  tft.setTextColor(ILI9341_YELLOW);
-  borrarCajaValor(true, 0);  imprimirValor(RX, YV[0], data[idx[3]]);
-
-  tft.setTextColor(ILI9341_CYAN);
-  borrarCajaValor(true, 1);  imprimirValor(RX, YV[1], data[idx[4]]);
-
-  tft.setTextColor(ILI9341_MAGENTA);
-  borrarCajaValor(true, 2);  imprimirValor(RX, YV[2], data[idx[5]]);
+  // Logo (70x70)
+  tft.drawRGBBitmap(LOGO_X, LOGO_Y, sanBartLogo, SANBART_W, SANBART_H);
 }
 
-void PantallaCustom::actualizar(const dato data[]) {
-  unsigned long ahora = millis();
-  if (ahora - tiempoAnterior >= intervalo) {
-    tiempoAnterior = ahora;
-    dibujarTitulos(data);
-  }
-
-  mostrarValores(data);
+void DisplayUI::pickColors(int cota, uint16_t& fondo, uint16_t& texto) {
+  if (cota <= 30)       { fondo = ILI9341_RED;    texto = ILI9341_WHITE; }
+  else if (cota <= 70)  { fondo = ILI9341_YELLOW; texto = ILI9341_BLACK; }
+  else                  { fondo = ILI9341_GREEN;  texto = ILI9341_WHITE; }
 }
 
+void DisplayUI::drawFrame(const char* etiqueta, int cota, int flujo) {
+  // Redibuja base estática
+  drawStatic();
+
+  // Etiqueta del sistema
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setCursor(85, 40);
+  tft.print(etiqueta);
+
+  // Tarjeta de estado
+  uint16_t fondo, texto;
+  pickColors(cota, fondo, texto);
+  tft.fillRect(CARD_X, CARD_Y, CARD_W, CARD_H, fondo);
+
+  // Textos
+  tft.setTextColor(texto);
+
+  // Cota
+  tft.setCursor(130, 110);
+  tft.print("Cota:");
+  tft.setCursor(130, 145);
+  tft.print(cota);
+  tft.print(" m");
+
+  // Flujo
+  tft.setCursor(130, 190);
+  tft.print("Flujo:");
+  tft.setCursor(130, 225);
+  tft.print(flujo);
+  tft.print(" m3/s");
+}
