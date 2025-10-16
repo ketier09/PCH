@@ -2,26 +2,20 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 #include <stdint.h>
+#include "Datos.h"
+#include "Images.h"
 
-class DisplayUI {
+class PantallaCustom {
 public:
-  // Pines por defecto (puedes cambiarlos al crear el objeto)
-  DisplayUI(uint8_t cs = 5, uint8_t dc = 2, uint8_t rst = 4);
+  PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
+                 int cotaCaptacion, int caudalTurbinable, int cotaRio,
+                 int caudalCaptacion, int caudalRetorno, int generadoresActivos);
 
-  void begin();                  // Inicializa pantalla, rotación, fuente, limpia, dibuja logo
-  void setLabels(const char* const* labels, uint8_t count);
-  void tick();                   // Llama frecuentemente desde loop(); actualiza cada intervalo
-
-  // Opcional: cambia el intervalo de refresco (ms)
-  void setInterval(uint32_t ms);
-
-private:
-  void drawStatic();             // Logo, etc.
-  void drawFrame(const char* etiqueta, int cota, int flujo);
-
-  // Lógica de colores segun cota
-  void pickColors(int cota, uint16_t& fondo, uint16_t& texto);
+  void set_up();
+  void actualizar(dato data[]);
 
 private:
   Adafruit_ILI9341 tft;
-  const char* const* etiquetas = null
+  void dibujarBase();
+  void dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad);
+};
