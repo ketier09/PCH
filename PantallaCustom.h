@@ -3,7 +3,9 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 #include <SPI.h>
+#include <Fonts/FreeSansBold18pt7b.h>
 
+#include "Images.h"
 #include "Datos.h"   // trae enum Dato, struct dato y el arreglo data[]
 
 struct PantallaCustom {
@@ -28,4 +30,5 @@ struct PantallaCustom {
   void set_up();
   void actualizar(const dato data[]);
 };
+
 
