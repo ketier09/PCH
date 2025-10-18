@@ -19,12 +19,24 @@ void web::syncTime() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // Servidores de hora
   Serial.println("\nSincronizando hora...");
   struct tm timeinfo;
-  // Espera hasta que llegue la hora correcta.
-  while (!getLocalTime(&timeinfo)) {
+  
+  int intentos = 0; 
+  // Establece un máximo de 10 segundos de espera (20 intentos * 500ms)
+  const int max_intentos = 20; 
+  
+  // Espera hasta que llegue la hora correcta o se agoten los intentos.
+  while (!getLocalTime(&timeinfo) && intentos < max_intentos) {
     Serial.print(".");      // Muestra puntos para indicar que sigue intentando
     delay(500);             // Pausa medio segundo entre intentos
+    intentos++;             // Incrementa el contador
   }
-  Serial.println("\nHora sincronizada.");
+
+  if (intentos < max_intentos) {
+    Serial.println("\nHora sincronizada.");
+  } else {
+    // El programa continuará sin la hora NTP.
+    Serial.println("\nAviso: La sincronización de la hora falló o tardó demasiado. El programa continúa sin hora NTP.");
+  }
 }
 
 void web::firebaseInit() {
@@ -92,6 +104,7 @@ void web::enviar(dato data[], int n) {
     Serial.println("-> No se pudieron enviar datos a Firebase. Conexión no lista.");
   }
 }
+
 
 
 
