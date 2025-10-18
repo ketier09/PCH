@@ -1,10 +1,14 @@
 #pragma once
 #include <stdint.h>
-#include <Arduino.h>   // para PROGMEM
+#include <Arduino.h>
 
-// Dimensiones del logo
-constexpr int SANBART_W = 70;
-constexpr int SANBART_H = 70;
+struct image {
+  const int width;
+  const int height;
+  const uint16_t*  pixels;
 
-// Declaración del arreglo en PROGMEM
-extern const uint16_t sanBartLogo[] PROGMEM;
+  constexpr image(int w, int h, const uint16_t* p)
+  : width(w), height(h), pixels(p) {}
+};
+
+extern const image sanBartolomeLogo;
