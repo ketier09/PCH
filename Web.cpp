@@ -59,7 +59,7 @@ void web::firebaseInit() {
 }
 
 void web::set_up() {
-  wifiInit()         //Prepara la conexión al WiFi
+  wifiInit();        //Prepara la conexión al WiFi
   syncTime();        // Pide la hora correcta a Internet
   firebaseInit();    // Prepara la conexión con Firebase
 }
@@ -92,5 +92,6 @@ void web::enviar(dato data[], int n) {
     Serial.println("-> No se pudieron enviar datos a Firebase. Conexión no lista.");
   }
 }
+
 
 
