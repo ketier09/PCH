@@ -26,6 +26,7 @@
 ├─ Actuador_digital.h/.cpp   ← Salidas digitales ON/OFF
 ├─ Motor.h/.cpp              ← Servo que mueve la compuerta (posiciones)
 ├─ PantallaCustom.h/.cpp     ← Interfaz TFT para mostrar 3 datos por lado
+├─ Images.h/.cpp             ← Imágenes que serán usadas en la pantalla
 ├─ Web.h/.cpp                ← WiFi + NTP + Firebase
 ├─ Conexiones.h              ← Mapa de pines ESP32
 ├─ Secrets.h                 ← Declaraciones de credenciales
@@ -87,7 +88,7 @@
 | RST  | **GPIO5**  (`PCH_I2C_SCL`) |
 
 
-> ℹ️ El archivo define también aliases para buses UART/I2C y pines “input only”. Evita usar los pines de **Flash** (GPIO6–10).
+> ℹ️ Evita usar los pines de **Flash** (GPIO6–10).
 
 ---
 
@@ -111,19 +112,19 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 
 | ID (enum)            | Etiqueta              | Clave Firebase       | Unidad  |
 | -------------------- | --------------------- | -------------------- | ------- |
-| `caudalRio`              | Caudal del río                 | `caudalRio`                | m³/s   |
-| `caudalCaptacion`        | Caudal de captación            | `caudalCaptacion`          | m³/s   |
-| `caudalNoCaptado`        | Caudal no captado              | `caudalNoCaptado`          | m³/s   |
-| `caudalGarantíaAmbiental`| Caudal de garantía ambiental   | `caudalGarantíaAmbiental`  | m³/s   |
-| `caudalAduccion`         | Caudal de aducción             | `caudalAduccion`           | m³/s   |
-| `caudalTurbinable`       | Caudal turbinable              | `caudalTurbinable`         | m³/s   |
-| `caudalDevuelto`         | Caudal devuelto                | `caudalDevuelto`           | m³/s   |
-| `caudalRetorno`          | Caudal de retorno              | `caudalRetorno`            | m³/s   |
-| `cotaCaptacion`          | Cota en captación              | `cotaCaptacion`            | msnm   |
-| `cotaRio`                | Cota del río                   | `cotaRio`                  | msnm   |
-| `cotaAduccion`           | Cota en aducción               | `cotaAduccion`             | msnm   |
-| `cotaGarantíaAmbiental`  | Cota de garantía ambiental     | `cotaGarantíaAmbiental`    | msnm   |
-| `generadoresActivos`     | Generadores activos            | `generadoresActivos`       |(texto) |
+| `caudalRio`                      | Caudal del río                 | `caudalRio`                        | m³/s   |
+| `caudalCaptacion`                | Caudal de captación            | `caudalCaptacion`                  | m³/s   |
+| `caudalNoCaptado`                | Caudal no captado              | `caudalNoCaptado`                  | m³/s   |
+| `caudalGarantíaAmbiental`        | Caudal de garantía ambiental   | `caudalGarantíaAmbiental`          | m³/s   |
+| `caudalAduccion`                 | Caudal de aducción             | `caudalAduccion`                   | m³/s   |
+| `caudalTurbinable`               | Caudal turbinable              | `caudalTurbinable`                 | m³/s   |
+| `caudalDevuelto`                 | Caudal devuelto                | `caudalDevuelto`                   | m³/s   |
+| `caudalRetorno`                  | Caudal de retorno              | `caudalRetorno`                    | m³/s   |
+| `cotaCaptacion`                  | Cota en captación              | `cotaCaptacion`                    | msnm   |
+| `cotaRio`                        | Cota del río                   | `cotaRio`                          | msnm   |
+| `cotaAduccion`                   | Cota en aducción               | `cotaAduccion`                     | msnm   |
+| `cotaGarantíaAmbiental`          | Cota de garantía ambiental     | `cotaGarantíaAmbiental`            | msnm   |
+| `cantidagGeneradoresActivos`     | Generadores activos            | `cantidadGeneradoresActivos`       |(texto) |
 
 > En serie, `GeneradoresActivos` se muestra como texto: **Apagados | 1 encendido | 2 encendidos | 2 a máxima capacidad | Error**.
 
@@ -137,7 +138,7 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 2. **Librerías**:
 
    * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)](https://github.com/mobizt/Firebase-ESP-Client)
-   * `ESP32Servo`
+   * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington,John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
    * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
    * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
 3. **Abrir** el sketch principal (`PCH.ino`).
