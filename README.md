@@ -124,7 +124,7 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 | `cotaRio`                        | Cota del río                   | `cotaRio`                          | msnm   |
 | `cotaAduccion`                   | Cota en aducción               | `cotaAduccion`                     | msnm   |
 | `cotaGarantíaAmbiental`          | Cota de garantía ambiental     | `cotaGarantíaAmbiental`            | msnm   |
-| `cantidagGeneradoresActivos`     | Generadores activos            | `cantidadGeneradoresActivos`       |(texto) |
+| `cantidadGeneradoresActivos`     | Generadores activos            | `cantidadGeneradoresActivos`       |(texto) |
 
 > En serie, `GeneradoresActivos` se muestra como texto: **Apagados | 1 encendido | 2 encendidos | 2 a máxima capacidad | Error**.
 
