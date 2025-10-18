@@ -111,6 +111,7 @@ void setup() {
   }
     
   mo_compuerta.set_up();
+  delay(100);
 }
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
