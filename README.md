@@ -18,7 +18,7 @@
 
 ```
 /src (o raíz del sketch)
-├─ PCH.ino (antes PCH.txt)  ← Sketch principal
+├─ PCH-_.ino                 ← Sketch principal
 ├─ Datos.h                   ← Definición de variables y arreglo `data[]`
 ├─ Caudalimetro.h/.cpp       ← Sensor de caudal por pulsos (con ISR)
 ├─ Ultrasonico.h/.cpp        ← Sensor de nivel + cálculo de caudal (Manning)
@@ -37,7 +37,7 @@
 
 ## 🔌 Mapa de pines (ESP32)
 
-### 🧮 Sensores de caudal (entradas con interrupción)
+### Sensores de caudal (entradas con interrupción)
 
 | Sensor | Pin                        |
 |:-------|:----------------------------|
@@ -47,7 +47,7 @@
 
 ---
 
-### 📏 Sensores ultrasónicos (TRIG salida, ECHO entrada)
+### Sensores ultrasónicos (TRIG salida, ECHO entrada)
 
 | Sensor | TRIG                         | ECHO                         |
 |:-------|:-----------------------------|:------------------------------|
@@ -57,7 +57,7 @@
 
 ---
 
-### ⚙️ Actuadores
+### Actuadores
 
 | Dispositivo         | Pin                        |
 |:--------------------|:---------------------------|
@@ -68,7 +68,7 @@
 
 ---
 
-### 🔘 Pulsadores
+### Pulsadores
 
 | Pulsador | Pin                      |
 |:----------|:-------------------------|
@@ -79,7 +79,7 @@
 
 ---
 
-### 🖥️ SPI (pantalla local)
+### SPI (pantalla local)
 
 | Pin de la pantalla | Pin                     |
 |:--------------------|:------------------------|
@@ -101,7 +101,7 @@
 
    * **Serial**: imprime etiquetas, valores y unidades.
    * **Pantalla TFT**: interfaz `PantallaCustom::actualizar(...)`.
-   * **Firebase**: `Web::enviar(...)` sube `data[]` a `/sensorData/...`.
+   * **Firebase**: `web::enviar(...)` sube `data[]` a `/sensorData/...`.
    * **Actuación**: servo **compuerta** y **actuadores digitales**, además de 4 **pulsadores** con callbacks.
 
 ---
@@ -124,7 +124,7 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 | `cotaRio`                        | Cota del río                   | `cotaRio`                          | msnm   |
 | `cotaAduccion`                   | Cota en aducción               | `cotaAduccion`                     | msnm   |
 | `cotaGarantíaAmbiental`          | Cota de garantía ambiental     | `cotaGarantíaAmbiental`            | msnm   |
-| `cantidadGeneradoresActivos`     | Generadores activos            | `cantidadGeneradoresActivos`       |(texto) |
+| `cantidadGeneradoresActivos`     | Generadores activos            | `cantidadGeneradoresActivos`       | texto  |
 
 > En serie, `GeneradoresActivos` se muestra como texto: **Apagados | 1 encendido | 2 encendidos | 2 a máxima capacidad | Error**.
 
@@ -140,7 +140,7 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
    * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)](https://github.com/mobizt/Firebase-ESP-Client)
    * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington,John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
    * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
-   * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
+   * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit_ILI9341)
 3. **Abrir** el sketch principal (`PCH.ino`).
 4. **Velocidad Serial**: 115200.
 5. **Compila y sube**.
