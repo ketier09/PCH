@@ -12,3 +12,9 @@ struct image {
 };
 
 extern const image sanBartolomeLogo;
+extern const image ;
+extern const image ;
+extern const image ;
+extern const image ;
+extern const image ;
+extern const image ;

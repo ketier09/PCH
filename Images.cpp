@@ -309,3 +309,21 @@ const uint16_t pixeles1[] PROGMEM = {
 	0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 0xffff, 
 	0xffff, 0xffff, 0xffff, 0xffff
 }; const image sanBartolomeLogo PROGMEM = {70, 70, pixeles1};
+
+const uint16_t pixeles2[] PROGMEM = {
+}; const image sanBartolomeLogo PROGMEM = {pixeles2};
+
+const uint16_t pixeles3[] PROGMEM = {
+}; const image sanBartolomeLogo PROGMEM = {pixeles3};
+
+const uint16_t pixeles4[] PROGMEM = {
+}; const image sanBartolomeLogo PROGMEM = {pixeles4};
+
+const uint16_t pixeles5[] PROGMEM = {
+}; const image sanBartolomeLogo PROGMEM = {pixeles5};
+
+const uint16_t pixeles6[] PROGMEM = {
+}; const image sanBartolomeLogo PROGMEM = {pixeles6};
+
+const uint16_t pixeles7[] PROGMEM = {
+}; const image sanBartolomeLogo PROGMEM = {pixeles7};
