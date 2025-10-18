@@ -1,4 +1,4 @@
-#include "secrets.h"
+#include "Secrets.h"
 #include "Datos.h"
 #include "Caudalimetro.h"
 #include "Ultrasonico.h"
@@ -18,8 +18,6 @@ caudalimetro caudalimetros[] = {
 };
 
 //----------------- Creamos los sensores ultrasónicos (niveles) -----------------
-
-
 
 ultrasonico ultrasonicos[] = {
   { ULTRA_TRIG_0, ULTRA_ECHO_0, 0, 100.0f,  0.0f, 1.0f, 0.01f },
