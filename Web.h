@@ -13,6 +13,7 @@ struct web {
   FirebaseAuth auth;
   FirebaseConfig config;
 
+  void wifiInit();
   void syncTime();
   void firebaseInit();
   void set_up();
