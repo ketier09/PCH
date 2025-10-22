@@ -35,6 +35,58 @@
 ```
 
 ---
+# 🌐 `WiFiConfigManager`: Gestión de Conexión WiFi en ESP32
+
+El módulo `WiFiConfigManager` es la herramienta central que permite a nuestro sistema **ESP32** conectarse de manera persistente a una red WiFi, sin necesidad de reprogramar las credenciales. Si no encuentra una red guardada o falla la conexión, automáticamente inicia un **Portal de Configuración** para que puedas introducir las credenciales de forma inalámbrica.
+
+---
+
+## 🚀 Flujo de Conexión
+
+Al iniciar el dispositivo, el módulo sigue esta secuencia lógica:
+
+1.  **Carga de Credenciales (Modo STA):**
+    * Intenta leer las credenciales (`SSID` y `Password`) guardadas en el sistema de archivos **LittleFS** (o SPIFFS) en el archivo `/wifi.json`.
+    * Si las encuentra, intenta conectarse al WiFi con esas credenciales.
+2.  **Conexión Exitosa:**
+    * El dispositivo se conecta (`WL_CONNECTED`) y continúa con la lógica principal (sincronización NTP, Firebase, etc.).
+3.  **Conexión Fallida / Sin Credenciales:**
+    * Si falla la conexión después de 10 segundos, o si no hay credenciales, el dispositivo entra en **Modo Punto de Acceso (AP)**.
+    * Se inicia el **Portal de Configuración** (`startConfigPortal()`).
+
+---
+
+## 🛠️ Modo de Configuración (Portal Web)
+
+Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que puedas configurarlo desde tu teléfono o computador:
+
+| Parámetro | Valor |
+| :--- | :--- |
+| **Nombre de la Red (SSID)** | `ESP_Config` |
+| **Contraseña de la Red** | *Sin contraseña* |
+| **Dirección IP del Portal** | `http://192.168.4.1` (IP por defecto del ESP32 en modo AP) |
+
+### Pasos para configurar el WiFi:
+
+1.  **Desconecta** tu dispositivo (PC, móvil) de tu WiFi normal.
+2.  Busca y conéctate a la red WiFi llamada **`ESP_Config`**.
+3.  Abre un navegador y navega a la dirección **`http://192.168.4.1`**.
+4.  Aparecerá la página de configuración para ingresar el **SSID** y la **Contraseña** de tu red.
+5.  Pulsa **"Guardar"**.
+6.  El ESP32 guardará las credenciales y se **reiniciará** (`ESP.restart()`) para intentar conectarse con la nueva configuración.
+
+---
+
+## 💾 Detalle Técnico (Para Desarrolladores)
+
+* **Persistencia:** Utiliza la librería **`LittleFS`** (o SPIFFS) para guardar las credenciales, asegurando que persistan incluso después de reinicios.
+* **Servidor Web:** Utiliza la librería **`WebServer`** para levantar el portal de configuración en el puerto 80.
+* **Rutas de manejo:**
+    * `/`: Muestra el formulario HTML (`handleRoot()`).
+    * `/save`: Recibe las credenciales por método POST, las guarda en `wifi.json` y reinicia el dispositivo (`handleSave()`).
+* **Desconexión:** Si el usuario presiona el botón de reinicio (físico o programado), se puede optar por borrar las credenciales para forzar el portal en el próximo inicio (`eraseCredentials()` no se usa en el flujo principal, pero está disponible).
+
+---
 
 ## 🔌 Mapa de pines (ESP32)
 
