@@ -174,8 +174,6 @@ En el repo ya está `Secrets.h` con **declaraciones**. Debes crear **`Secrets.cp
 // Secrets.cpp
 #include "Secrets.h"
 
-const char WIFI_SSID[]     = "TU_SSID";
-const char WIFI_PASSWORD[] = "TU_PASSWORD";
 const char key[]           = "TU_API_KEY_FIREBASE";
 const char url[]           = "https://TU_PROYECTO.firebaseio.com";
 const char email[]         = "usuario@ejemplo.com";
