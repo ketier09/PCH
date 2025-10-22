@@ -5,6 +5,7 @@
 struct ultrasonico {
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
+  static constexpr float kappa = 1.0f;
   static constexpr float ESCALA = 1.0f; // m/cm
   static constexpr float NIVEL_0 = 1268.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
@@ -30,3 +31,4 @@ struct ultrasonico {
 
   static void IRAM_ATTR isrThunk(void* arg);
 };
+
