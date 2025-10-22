@@ -14,10 +14,10 @@ struct web {
   FirebaseAuth auth;
   FirebaseConfig config;
 
-  void wifiInit();
   void syncTime();
   void firebaseInit();
   void set_up();
   void enviar(dato data[], int n);
 };
+
 
