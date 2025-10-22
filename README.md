@@ -27,7 +27,8 @@
 ├─ Motor.h/.cpp              ← Servo que mueve la compuerta (posiciones)
 ├─ PantallaCustom.h/.cpp     ← Interfaz TFT para mostrar 3 datos por lado
 ├─ Images.h/.cpp             ← Imágenes que serán usadas en la pantalla
-├─ Web.h/.cpp                ← WiFi + NTP + Firebase
+├─ Web.h/.cpp                ← NTP + Firebase
+├─ WiFiConfigManager.h/.cpp  ← WiFi
 ├─ Conexiones.h              ← Mapa de pines ESP32
 ├─ Secrets.h                 ← Declaraciones de credenciales
 └─ Secrets.cpp               ← **Definiciones** de credenciales (lo creas tú)
