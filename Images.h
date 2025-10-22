@@ -3,12 +3,12 @@
 #include <Arduino.h>
 
 struct image {
+  const uint16_t*  pixels;
   const int width;
   const int height;
-  const uint16_t*  pixels;
 
-  constexpr image(int w, int h, const uint16_t* p)
-  : width(w), height(h), pixels(p) {}
+  constexpr image(const uint16_t* p, int w = 120, int h = 120)
+  : pixels(p), width(w), height(h) {}
 };
 
 enum coleccionImagenes : uint8_t {
