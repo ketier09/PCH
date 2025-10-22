@@ -11,7 +11,7 @@ void motor::siguiente_estado(){
   int m = 2*n;
   estado = (estado + 1) % m;
   if(estado >= n){
-    estado = m-estado-2;
+    estado = m - 1 - estado; // (8 - 1 - 7 = 0)
   }
   servo.write(estados[estado]);
 }
