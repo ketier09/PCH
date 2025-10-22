@@ -77,6 +77,7 @@ float ultrasonico::flujo() {
   float radioHidraulico = areaMojada / perimetroMojado; // m
 
   float velocidad = manningInverso * powf(radioHidraulico, 2.0f/3.0f) * raizCuadrada_pendiente; // m/s
-  return velocidad * areaMojada; // m³/s
+  return velocidad * areaMojada * kappa; // m³/s
 }
+
 
