@@ -141,9 +141,8 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
   * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington, John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
   * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
   * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit_ILI9341)
-  * `WebServer` WebServer Library for ESP32 (autor: Espressif Systems)
-  * `LittleFS` LittleFS for ESP32 (autor: lorol)
-  * `ArduinoJson` ArduinoJson (autor: Benoît Blanchon)
+  * `LittleFS` [LittleFS for ESP32 (autor: lorol)](https://github.com/lorol/LITTLEFS)
+  * `ArduinoJson` [ArduinoJson (autor: Benoît Blanchon)](https://github.com/bblanchon/ArduinoJson)
    
 4. **Abrir** el sketch principal (`PCH.ino`).
 5. **Velocidad Serial**: 115200.
