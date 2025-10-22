@@ -6,6 +6,7 @@
 
 #include "Secrets.h"
 #include "Datos.h"
+#include "WiFiConfigManager.h"
 
 struct web {
   FirebaseData fbdo;
@@ -19,3 +20,4 @@ struct web {
   void set_up();
   void enviar(dato data[], int n);
 };
+
