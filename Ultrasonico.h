@@ -9,6 +9,7 @@ struct ultrasonico {
   static constexpr float ESCALA = 1.0f; // m/cm
   static constexpr float NIVEL_0 = 1268.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
+  static constexpr float suavizador = 0.30f; //Para evitar transiciones drásticas
 
   const byte trig;
   const byte echo;
@@ -21,6 +22,7 @@ struct ultrasonico {
   ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe);
 
   float nivel = NAN;
+  float nivel_f = NAN;
   volatile uint32_t disparo = 0;
   volatile uint32_t duracion = 0;
 
@@ -31,4 +33,5 @@ struct ultrasonico {
 
   static void IRAM_ATTR isrThunk(void* arg);
 };
+
 
