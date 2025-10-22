@@ -1,20 +1,5 @@
 #include "Web.h"
 
-void web::wifiInit() {
-  Serial.print("Conectando a WiFi");
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // Intento de conexión con tu red
-  unsigned long startTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 15000) {
-    Serial.print(".");                   // Muestra progreso
-    delay(500);
-  }
-
-  Serial.println();
-  Serial.print("Conectado! IP: ");
-  Serial.println(WiFi.localIP());        // Muestra la dirección IP asignada
-
-}
-
 void web::syncTime() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // Servidores de hora
   Serial.println("\nSincronizando hora...");
@@ -71,7 +56,7 @@ void web::firebaseInit() {
 }
 
 void web::set_up() {
-  wifiInit();        //Prepara la conexión al WiFi
+  wifiManager.begin();        //Prepara la conexión al WiFi
   syncTime();        // Pide la hora correcta a Internet
   firebaseInit();    // Prepara la conexión con Firebase
 }
@@ -104,6 +89,7 @@ void web::enviar(dato data[], int n) {
     Serial.println(F("-> No se pudieron enviar datos a Firebase. Conexión no lista."));
   }
 }
+
 
 
 
