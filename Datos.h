@@ -35,10 +35,7 @@ struct dato {
   float valor;
 };
 
-static dato data[DatoCount] = {
-#define X(ID, NOMBRE, FIRE, UNI) { NOMBRE, FIRE, UNI, 0.0 },
-    DATOS_X
-#undef X
-};
+extern dato data[DatoCount];
 
 using datos = dato;
+
