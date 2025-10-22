@@ -26,16 +26,16 @@ void web::syncTime() {
   
   // Espera hasta que llegue la hora correcta o se agoten los intentos.
   while (!getLocalTime(&timeinfo) && intentos < max_intentos) {
-    Serial.print(".");      // Muestra puntos para indicar que sigue intentando
+    Serial.print(F("."));      // Muestra puntos para indicar que sigue intentando
     delay(500);             // Pausa medio segundo entre intentos
     intentos++;             // Incrementa el contador
   }
 
   if (intentos < max_intentos) {
-    Serial.println("\nHora sincronizada.");
+    Serial.println(F("\nHora sincronizada."));
   } else {
     // El programa continuará sin la hora NTP.
-    Serial.println("\nAviso: La sincronización de la hora falló o tardó demasiado. El programa continúa sin hora NTP.");
+    Serial.println(F("\nAviso: La sincronización de la hora falló o tardó demasiado. El programa continúa sin hora NTP."));
   }
 }
 
@@ -51,22 +51,22 @@ void web::firebaseInit() {
 
   Firebase.begin(&config, &auth); // Empieza la conexión con Firebase
 
-  Serial.println("Conectando a Firebase...");
+  Serial.println(F("Conectando a Firebase..."));
   unsigned long startTime = millis();
   // Espera hasta 15 segundos a que Firebase quede listo
   while (!Firebase.ready() && millis() - startTime < 15000) {
-    Serial.print(".");
+    Serial.print(F("."));
     delay(500);
   }
 
   if (Firebase.ready()) {
-    Serial.println("\nConexión con Firebase establecida.");
+    Serial.println(F("\nConexión con Firebase establecida."));
     // Abre un "stream": una especie de escucha en vivo de un valor en la nube
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-      Serial.println("Error al iniciar el stream: " + stream.errorReason());
+      Serial.println(F("Error al iniciar el stream: ") + stream.errorReason());
     }
   } else {
-    Serial.println("\nNo se pudo conectar con Firebase. Verifica API Key, URL y credenciales.");
+    Serial.println(F("\nNo se pudo conectar con Firebase. Verifica API Key, URL y credenciales."));
   }
 }
 
@@ -80,7 +80,7 @@ void web::enviar(dato data[], int n) {
   // Si hay WiFi pero Firebase no está listo, intenta prepararlo de nuevo
   if (WiFi.status() == WL_CONNECTED) {
     if (!Firebase.ready()) {
-      Serial.println("Reconectando a Firebase...");
+      Serial.println(F("Reconectando a Firebase..."));
       firebaseInit();
     }
   }
@@ -99,9 +99,9 @@ void web::enviar(dato data[], int n) {
       snprintf(path, sizeof(path), "/sensorData/%s", data[i].etiquetaFirebase);
       Firebase.RTDB.setFloat(&fbdo, path, data[i].valor);  // Envía el número
     }
-    Serial.println("-> Datos de sensores enviados a Firebase.");
+    Serial.println(F("-> Datos de sensores enviados a Firebase."));
   } else {
-    Serial.println("-> No se pudieron enviar datos a Firebase. Conexión no lista.");
+    Serial.println(F("-> No se pudieron enviar datos a Firebase. Conexión no lista."));
   }
 }
 

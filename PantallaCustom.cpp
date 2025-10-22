@@ -15,7 +15,7 @@ void PantallaCustom::set_up() {
 }
 
 void PantallaCustom::dibujarBase() {
-  tft.drawRGBBitmap(10, 10, sanBartolomeLogo.pixels, sanBartolomeLogo.width, sanBartolomeLogo.height);
+  tft.drawRGBBitmap(10, 10, imagenes[sanBartLogo].pixels, imagenes[sanBartLogo].width, imagenes[sanBartLogo].height);
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(100, 30);
   tft.print("MONITOREO PCH");

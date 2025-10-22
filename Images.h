@@ -11,10 +11,16 @@ struct image {
   : width(w), height(h), pixels(p) {}
 };
 
-extern const image sanBartolomeLogo;
-extern const image ;
-extern const image ;
-extern const image ;
-extern const image ;
-extern const image ;
-extern const image ;
+enum coleccionImagenes : uint8_t {
+  sanBartLogo,
+  total,
+  captacion,
+  azud,
+  vertederos,
+  turbina,
+  desarenador,
+
+  cantidadImagenes
+};
+
+extern const image imagenes[cantidadImagenes];
