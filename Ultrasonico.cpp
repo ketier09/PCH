@@ -57,27 +57,32 @@ float ultrasonico::reading(uint32_t timeout_us) {
   portEXIT_CRITICAL(&mux);
 
   // A metros y factor de escala (m/cm)
-  float distancia_m = (distancia_cm / 100.0f) * ESCALA;
+  float distancia_m = distancia_cm * ESCALA;
 
   nivel = techo - distancia_m;
 
   if (!isnan(nivel)) {
     if (nivel < piso)  nivel = piso;
     if (nivel > techo) nivel = techo;
+    
+    if (isnan(nivel_f)) nivel_f = nivel;
+    nivel_f = suavizador * nivel + (1.0f - suavizador) * nivel_f; //suavizado
   }
+  
   return nivel;
 }
 
 float ultrasonico::flujo() {
-  float h = nivel - piso;   // m
+  float h = (isnan(nivel_f) ? nivel : nivel_f) - piso;   // m
   if (!(h > 0)) return 0.0f;
 
   float areaMojada = ancho * h;        // m²
   float perimetroMojado = ancho + 2*h; // m
   float radioHidraulico = areaMojada / perimetroMojado; // m
-
-  float velocidad = manningInverso * powf(radioHidraulico, 2.0f/3.0f) * raizCuadrada_pendiente; // m/s
+  float R23 = cbrtf(radioHidraulico * radioHidraulico); //³√(m)²
+  float velocidad = manningInverso * R23 * raizCuadrada_pendiente; // m/s
   return velocidad * areaMojada * kappa; // m³/s
 }
+
 
 
