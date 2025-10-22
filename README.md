@@ -138,7 +138,7 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 2. **Librerías**:
 
    * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)](https://github.com/mobizt/Firebase-ESP-Client)
-   * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington,John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
+   * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington, John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
    * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
    * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit_ILI9341)
 3. **Abrir** el sketch principal (`PCH.ino`).
