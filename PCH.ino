@@ -73,17 +73,24 @@ const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 enc
 //----------------- Envío por puerto serial (al computador) -----------------
 
 void serial_enviar(dato data[]) {
+  Serial.println(F("\n===================== DATOS DEL SISTEMA ====================="));
+  
   for (int i = 0; i < DatoCount; i++) {
+    Serial.print(F(" - "));
     Serial.print(data[i].etiqueta);
-    Serial.print(": ");
+    Serial.print(F(": "));
     Serial.print(data[i].valor, 2);
-    Serial.print(" ");
+    Serial.print(F(" "));
     Serial.println(data[i].unidad);
   }
+
+  Serial.println(F("-------------------------------------------------------------"));
+
   const int g = (int)data[cantidadGeneradoresActivos].valor;
-  Serial.print(data[cantidadGeneradoresActivos].etiqueta);
-  Serial.print(": ");
+  Serial.print(F(" Generadores Activos: "));
   Serial.println(generadoresActivosExplicacion[g]);
+
+  Serial.println(F("=============================================================\n"));
 }
 
 // -------------------- Setup (se ejecuta una vez al encender) --------------------
