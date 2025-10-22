@@ -22,7 +22,7 @@ struct ultrasonico {
   ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe);
 
   float nivel = NAN;
-  float nivel_f = NAN;
+  float nivel_f = nivel;
   volatile uint32_t disparo = 0;
   volatile uint32_t duracion = 0;
 
@@ -33,5 +33,6 @@ struct ultrasonico {
 
   static void IRAM_ATTR isrThunk(void* arg);
 };
+
 
 
