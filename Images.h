@@ -2,8 +2,9 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-struct image {
-  const uint16_t*  pixels;
+class image {
+public:
+  const uint16_t* pixels;
   const int width;
   const int height;
 
