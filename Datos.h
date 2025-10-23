@@ -28,7 +28,8 @@ enum Dato {
 };
 
 //--------------------- estructura ---------------------------
-struct dato {
+class dato {
+public:
   const char* etiqueta;
   const char* etiquetaFirebase;
   const char* unidad;
@@ -38,4 +39,3 @@ struct dato {
 extern dato data[DatoCount];
 
 using datos = dato;
-
