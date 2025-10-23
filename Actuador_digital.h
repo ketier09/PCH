@@ -1,11 +1,13 @@
 #pragma once
 #include <Arduino.h>
 
-struct actuador_digital {
-  const byte pin;
-
+class actuador_digital {
+public:
   actuador_digital(byte p);
-  bool estado;
   void set_up();
   void cambiar();
+
+private:
+  const byte pin;
+  bool estado;
 };
