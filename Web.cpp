@@ -63,7 +63,7 @@ void web::set_up() {
 
 void web::enviar(dato data[], int n) {
   // Si hay WiFi pero Firebase no está listo, intenta prepararlo de nuevo
-  if (WiFi.status() == WL_CONNECTED) {
+  if (WiFiConfigManager.isConnected()) {
     if (!Firebase.ready()) {
       Serial.println(F("Reconectando a Firebase..."));
       firebaseInit();
