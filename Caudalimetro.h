@@ -15,8 +15,8 @@ private:
   // 450 pulsos/L → 450000 pulsos/m^3. Resultado: m^3/s
   static constexpr float FLOW_CALIBRATION_FACTOR =
       450000.0f * (periodo_de_las_mediciones / 1000.0f);
-
   static constexpr float ESCALA = 100.0f; // Se mantiene por ser constante de diseño
+
   const byte pin;
 
   uint32_t lastMillis = 0;
