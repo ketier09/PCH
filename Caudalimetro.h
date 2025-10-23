@@ -3,12 +3,6 @@
 
 class caudalimetro {
 public:
-  static constexpr float periodo_de_las_mediciones = 2000; // ms
-  // 450 pulsos/L → 450000 pulsos/m^3. Resultado: m^3/s
-  static constexpr float FLOW_CALIBRATION_FACTOR =
-      450000.0f * (periodo_de_las_mediciones / 1000.0f);
-
-  static constexpr float ESCALA = 100.0f; // Se mantiene por ser constante de diseño
 
   caudalimetro(byte p);
 
@@ -19,6 +13,12 @@ public:
   static void IRAM_ATTR isrThunk(void* arg);
 
 private:
+static constexpr float periodo_de_las_mediciones = 2000; // ms
+  // 450 pulsos/L → 450000 pulsos/m^3. Resultado: m^3/s
+  static constexpr float FLOW_CALIBRATION_FACTOR =
+      450000.0f * (periodo_de_las_mediciones / 1000.0f);
+
+  static constexpr float ESCALA = 100.0f; // Se mantiene por ser constante de diseño
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
   const byte pin;
 
