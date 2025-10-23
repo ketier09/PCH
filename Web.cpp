@@ -56,7 +56,7 @@ void web::firebaseInit() {
 }
 
 void web::set_up() {
-  wifiManager.begin();        //Prepara la conexión al WiFi
+  WiFiConfigManager.begin();        //Prepara la conexión al WiFi
   syncTime();        // Pide la hora correcta a Internet
   firebaseInit();    // Prepara la conexión con Firebase
 }
