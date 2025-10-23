@@ -1,11 +1,9 @@
 #pragma once
 #include <Arduino.h>
 
-struct pulsador {
+class pulsador {
+public:
   static constexpr unsigned long debounce = 50;
-  const byte pin;
-  const bool pressed;
-  void (*orden)();
 
   pulsador(byte p, void (*i)(), bool pr);
 
@@ -13,6 +11,10 @@ struct pulsador {
   void update();
 
 private:
+  const byte pin;
+  const bool pressed;
+  void (*orden)();
+
   bool lastRaw;
   unsigned long lastTrigger;
 };
