@@ -8,16 +8,16 @@
 #include "Datos.h"
 #include "WiFiConfigManager.h"
 
-struct web {
-  FirebaseData fbdo;
-  FirebaseData stream;
-  FirebaseAuth auth;
-  FirebaseConfig config;
-
+class web {
+public:
   void syncTime();
   void firebaseInit();
   void set_up();
   void enviar(dato data[], int n);
+
+private:
+  FirebaseData fbdo;
+  FirebaseData stream;
+  FirebaseAuth auth;
+  FirebaseConfig config;
 };
-
-
