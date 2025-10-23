@@ -17,7 +17,7 @@ private:
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
   static constexpr float kappa = 1.0f;
-  static constexpr float ESCALA = 1.0f; // m/cm (Se mantiene 1.0f para no romper el código, ver sugerencia 2)
+  static constexpr float ESCALA = 1.0f; // m/cm
   static constexpr float NIVEL_0 = 1268.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
   static constexpr float suavizador = 0.30f; //Para evitar transiciones drásticas
