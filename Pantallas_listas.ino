@@ -29,6 +29,10 @@ unsigned long tiempoAnterior = 0;
 const unsigned long intervalo = 5000;
 int indiceActual = 0;
 
+void dibujarIcono(int i){
+  tft.drawRGBBitmap(imagenes[i].x_index, imagenes[i].y_index, imagenes[i].pixels, imagenes[i].width, imagenes[i].height);
+}
+
 void setup() {
   tft.begin();
   tft.setRotation(3);
@@ -37,9 +41,7 @@ void setup() {
 
   // Dibuja el logo una vez
   for (int i = 0; i < cantidadImagenes; i++){
-    int j = 0;
-    if (i > 0) j = 90;
-    tft.drawRGBBitmap(0, j, imagenes[i].pixels, imagenes[i].width, imagenes[i].height);
+    dibujarIcono(i);
   }
 }
 
@@ -55,33 +57,33 @@ void loop() {
     tft.fillRect(70, 0, 240, 240, ILI9341_BLACK);  // Ajusta según tu layout
     tft.fillRect(0, 0, 320, 320, ILI9341_BLACK);
     // Redibuja el logo
-    tft.drawRGBBitmap(0, 0, imagenes[iconoLogo].pixels, imagenes[iconoLogo].width, imagenes[iconoLogo].height);
+    dibujarIcono(iconoLogo);
     
     // Muestra etiqueta del sistema
     tft.setCursor(130, 40);
     tft.setTextColor(ILI9341_WHITE);
     tft.print(lugares[indiceActual]);
-    tft.drawRGBBitmap(0, 90, imagenes[indiceActual].pixels, imagenes[indiceActual].width, imagenes[indiceActual].height);
+    dibujarIcono(indiceActual);
     
     tft.fillRect(120, 70, 320, 240, fondoColor);
 
-
-tft.setCursor(130, 100);
-tft.setTextColor(ILI9341_WHITE);
-tft.setCursor(130, 100);
-tft.print("Cota: ");
-tft.print(cotas[indiceActual]);
-tft.print(" msnm");
-
-// Fondo para “Flujo”
-
-tft.setCursor(130, 180);  // Primera línea
-tft.setTextColor(ILI9341_WHITE);
-tft.print("Flujo: ");
-tft.print(flujo);
-tft.print(" m3/s");
+  
+    tft.setCursor(130, 100);
+    tft.setTextColor(ILI9341_WHITE);
+    tft.setCursor(130, 100);
+    tft.print(F("Cota: "));
+    tft.print(cotas[indiceActual]);
+    tft.print(F(" msnm"));
+    
+    // Fondo para “Flujo”
+    
+    tft.setCursor(130, 180);  // Primera línea
+    tft.setTextColor(ILI9341_WHITE);
+    tft.print(F("Flujo: "));
+    tft.print(flujos[indiceActual]);
+    tft.print(F(" m3/s"));
+    
     // Avanza al siguiente índice
-    indiceActual++;
-    if (indiceActual >= 6) indiceActual = 0;
+    indiceActual = (indiceActual + 1) % 6;
   }
 }
