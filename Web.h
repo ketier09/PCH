@@ -10,8 +10,6 @@
 
 class web {
 public:
-  void syncTime();
-  void firebaseInit();
   void set_up();
   void enviar(dato data[], int n);
 
@@ -20,4 +18,7 @@ private:
   FirebaseData stream;
   FirebaseAuth auth;
   FirebaseConfig config;
+
+  void syncTime();
+  void firebaseInit();
 };
