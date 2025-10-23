@@ -8,7 +8,6 @@ public:
   ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe);
 
   void set_up();
-  void disparar();
   float reading(uint32_t timeout_us = 30000); // ~5 m máx
   float flujo();
 
@@ -35,4 +34,6 @@ private:
   float nivel_f = nivel;
   volatile uint32_t disparo = 0;
   volatile uint32_t duracion = 0;
+
+  void disparar();
 };
