@@ -5724,7 +5724,7 @@ const uint16_t pixeles7[] PROGMEM = {
 };
 
 const image imagenes[cantidadImagenes] = {
-  {  pixeles1, 70, 70 },
+  {  pixeles1, 0, 0, 70, 70 },
   {  pixeles2 },
   {  pixeles3 },
   {  pixeles4 },
