@@ -15,16 +15,4 @@ private:
   const int height;
 };
 
-enum coleccionImagenes : uint8_t {
-  sanBartLogo,
-  total,
-  captacion,
-  azud,
-  vertederos,
-  turbina,
-  desarenador,
-
-  cantidadImagenes
-};
-
-extern const image imagenes[cantidadImagenes];
+extern const image imagenes[7];
