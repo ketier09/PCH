@@ -97,8 +97,6 @@ void serial_enviar(dato data[]) {
 void setup() {
   Serial.begin(115200);
 
-  pagina.set_up();
-
   pantalla.set_up();
 
   for (int i = 0; i < (int)(sizeof(caudalimetros) / sizeof(caudalimetros[0])); i++){
@@ -118,7 +116,39 @@ void setup() {
   }
     
   mo_compuerta.set_up();
+
+  xTaskCreatePinnedToCore(
+    TaskLenta,         // Función que implementa la tarea
+    "TaskLenta",       // Nombre de la tarea
+    10000,             // Tamaño de la pila (Stack size) en bytes (10KB es un buen inicio para WiFi/Firebase)
+    NULL,              // Parámetros de la tarea (no se usan)
+    1,                 // Prioridad (0 es la menor, 1 es baja, 2 es media, etc.)
+    NULL,              // Task Handle (no se usa)
+    0                  // **Core 0** (núcleo para tareas lentas/de red)
+  );
+
   delay(100);
+}
+
+// --- Función que ejecutará la "Tarea Lenta" en el Core 0 ---
+void TaskLenta(void *pvParameters) {
+  // Inicialización de la Web y Firebase
+  pagina.set_up();
+
+  // Bucle infinito que se ejecuta en el Core 0
+  for (;;) {
+    // 1. Enviar datos a Firebase (Lento)
+    pagina.enviar(data, DatoCount);
+
+    // 2. Actualizar la Pantalla (Lento)
+    pantalla.actualizar(data);
+
+    // 3. Control de Actuadores (También lento si hay lógica compleja)
+    // mo_compuerta.siguiente_estado();
+
+    // Pausa para no saturar el CPU
+    vTaskDelay(pdMS_TO_TICKS(5000)); // Espera 5 segundos
+  }
 }
 
 // -------------------- Loop (se repite aprox. cada 1 segundo) --------------------
@@ -133,21 +163,19 @@ void loop() {
   if (now - lastPrint > 1000) {
     lastPrint = now;
 
-	data[caudalRio].valor                = caudalimetros[0].reading();
-	data[caudalCaptacion].valor          = caudalimetros[1].reading();
-	data[caudalNoCaptado].valor          = caudalimetros[2].reading();
-	data[caudalGarantíaAmbiental].valor  = ultrasonicos[0].flujo();
-	data[caudalAduccion].valor           = ultrasonicos[1].flujo();
-	data[caudalTurbinable].valor         = ultrasonicos[2].flujo();
-	
-	data[cotaCaptacion].valor            = ultrasonicos[0].reading();
-	data[cotaRio].valor                  = ultrasonicos[1].reading();
-	data[cotaAduccion].valor             = ultrasonicos[2].reading();
-	
-	data[cantidadGeneradoresActivos].valor       = (float)generadoresActivos();
+    data[caudalRio].valor                = caudalimetros[0].reading();
+    data[caudalCaptacion].valor          = caudalimetros[1].reading();
+    data[caudalNoCaptado].valor          = caudalimetros[2].reading();
+    data[caudalGarantíaAmbiental].valor  = ultrasonicos[0].flujo();
+    data[caudalAduccion].valor           = ultrasonicos[1].flujo();
+    data[caudalTurbinable].valor         = ultrasonicos[2].flujo();
+    
+    data[cotaCaptacion].valor            = ultrasonicos[0].reading();
+    data[cotaRio].valor                  = ultrasonicos[1].reading();
+    data[cotaAduccion].valor             = ultrasonicos[2].reading();
+    
+    data[cantidadGeneradoresActivos].valor       = (float)generadoresActivos();
 
     serial_enviar(data);
-    pagina.enviar(data, DatoCount);
-    pantalla.actualizar(data);
   }
 }
