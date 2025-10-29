@@ -10,14 +10,16 @@
 
 class web {
 public:
-  void set_up();
-  void enviar(dato data[], int n);
 
-private:
   FirebaseData fbdo;
   FirebaseData stream;
   FirebaseAuth auth;
   FirebaseConfig config;
+  
+  void set_up();
+  void enviar(dato data[], int n);
+
+private:
 
   void syncTime();
   void firebaseInit();

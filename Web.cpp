@@ -1,5 +1,7 @@
 #include "Web.h"
 
+WiFiConfigManager WiFiConfig;
+
 void web::syncTime() {
   configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // Servidores de hora
   Serial.println("\nSincronizando hora...");

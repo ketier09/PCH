@@ -24,4 +24,3 @@ class WiFiConfigManager {
     void handleRoot();
     void handleSave();
 };
-WiFiConfigManager WiFiConfig
