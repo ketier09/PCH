@@ -48,7 +48,8 @@ void web::firebaseInit() {
     Serial.println(F("\nConexión con Firebase establecida."));
     // Abre un "stream": una especie de escucha en vivo de un valor en la nube
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-      Serial.println(F("Error al iniciar el stream: ") + stream.errorReason());
+      Serial.print(F("Error al iniciar el stream: "));
+      Serial.println(stream.errorReason().c_str());
     }
   } else {
     Serial.print(F("Error al iniciar el stream: "));
