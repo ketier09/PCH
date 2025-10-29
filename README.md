@@ -2,6 +2,10 @@
 
 > Monitorea **niveles** y **caudales** en una **pequeña central hidroeléctrica (PCH)**, decide cuántos **generadores** activar y publica los datos **localmente** y en la **nube (Firebase)**.
 
+## Build Status
+
+![Build](https://github.com/ketier09/PCH/actions/workflows/compile.yml/badge.svg)
+
 ---
 
 ## 🚀 Resumen rápido
