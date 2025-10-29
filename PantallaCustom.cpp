@@ -15,7 +15,7 @@ void PantallaCustom::set_up() {
 }
 
 void PantallaCustom::dibujarBase() {
-  tft.drawRGBBitmap(10, 10, imagenes[sanBartLogo].pixels, imagenes[sanBartLogo].width, imagenes[sanBartLogo].height);
+  tft.drawRGBBitmap(10, 10, imagenes[0].pixels, imagenes[0].width, imagenes[0].height);
   tft.setTextColor(ILI9341_WHITE);
   tft.setCursor(100, 30);
   tft.print("MONITOREO PCH");
@@ -24,7 +24,7 @@ void PantallaCustom::dibujarBase() {
 void PantallaCustom::actualizar(dato data[]) {
   tft.fillRect(0, 60, 320, 180, ILI9341_BLACK);
 
-  dibujarDato(10, 80, data[cotaCaptacion].etiqueta, data[cotaCaptacion].valor, data[cotaCaptacion].unidad);
+  dibujarDato(10, 80,  data[cotaCaptacion].etiqueta, data[cotaCaptacion].valor, data[cotaCaptacion].unidad);
   dibujarDato(10, 120, data[caudalTurbinable].etiqueta, data[caudalTurbinable].valor, data[caudalTurbinable].unidad);
   dibujarDato(10, 160, data[cotaRio].etiqueta, data[cotaRio].valor, data[cotaRio].unidad);
   dibujarDato(10, 200, data[cantidadGeneradoresActivos].etiqueta, data[cantidadGeneradoresActivos].valor, "");

@@ -9,8 +9,8 @@ public:
 
 private:
   const uint16_t* pixels;
-  const x_index;
-  const y_index;
+  const int x_index;
+  const int y_index;
   const int width;
   const int height;
 };

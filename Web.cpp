@@ -51,7 +51,8 @@ void web::firebaseInit() {
       Serial.println(F("Error al iniciar el stream: ") + stream.errorReason());
     }
   } else {
-    Serial.println(F("\nNo se pudo conectar con Firebase. Verifica API Key, URL y credenciales."));
+    Serial.print(F("Error al iniciar el stream: "));
+    Serial.println(stream.errorReason().c_str());
   }
 }
 
