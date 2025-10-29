@@ -58,14 +58,14 @@ void web::firebaseInit() {
 }
 
 void web::set_up() {
-  WiFiConfigManager.begin();        //Prepara la conexión al WiFi
+  WiFiConfig.begin();        //Prepara la conexión al WiFi
   syncTime();        // Pide la hora correcta a Internet
   firebaseInit();    // Prepara la conexión con Firebase
 }
 
 void web::enviar(dato data[], int n) {
   // Si hay WiFi pero Firebase no está listo, intenta prepararlo de nuevo
-  if (WiFiConfigManager.isConnected()) {
+  if (WiFiConfig.isConnected()) {
     if (!Firebase.ready()) {
       Serial.println(F("Reconectando a Firebase..."));
       firebaseInit();
