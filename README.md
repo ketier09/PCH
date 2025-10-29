@@ -1,7 +1,7 @@
 # 🌊⚡ PCH — Sistema de Monitoreo y Control con ESP32
 
 > Monitorea **niveles** y **caudales** en una **pequeña central hidroeléctrica (PCH)**, decide cuántos **generadores** activar y publica los datos **localmente** y en la **nube (Firebase)**.
-![Build](https://github.com/ketier09/PCH/actions/workflows/compile.yml/badge.svg)
+<br>![Build](https://github.com/ketier09/PCH/actions/workflows/compile.yml/badge.svg)
 
 ---
 
