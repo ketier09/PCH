@@ -21,11 +21,10 @@ void IRAM_ATTR ultrasonico::isrThunk(void* arg) {
 // El constructor se simplifica ligeramente usando la nueva constante ESCALA
 ultrasonico::ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe)
   : trig(t), echo(e), 
-    techo(te * ESCALA + NIVEL_0 + (float)c * ESCALA), // Multiplicar c por ESCALA
-    piso(pi * ESCALA + NIVEL_0 + (float)c * ESCALA),  // Multiplicar c por ESCALA
+    techo(te * ESCALA + NIVEL_0 + (float)c),
+    piso(pi * ESCALA + NIVEL_0 + (float)c), 
     ancho(a * ESCALA), 
     raizCuadrada_pendiente(pe) {}
-// NOTA: Se asume que 'c' (corrección) está en cm, de ahí el * ESCALA. Si 'c' está en metros, se quita el * ESCALA.
 
 void ultrasonico::set_up() {
   pinMode(trig, OUTPUT);
@@ -127,6 +126,7 @@ float ultrasonico::flujo() {
   // Flujo Q = V * A * kappa
   return velocidad * areaMojada * kappa; // m³/s
 }
+
 
 
 
