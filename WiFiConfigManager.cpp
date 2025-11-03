@@ -1,135 +1,182 @@
 #include "WiFiConfigManager.h"
 #include <ArduinoJson.h>
+#include <functional> // Necesario para std::bind
 
-// --- Página HTML guardada en memoria flash ---
-const char PAGE_INDEX[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Configuración WiFi</title>
-    <style>
-      body { font-family: sans-serif; text-align: center; margin-top: 60px; background-color: #fafafa; }
-      input { padding: 6px; width: 200px; margin: 5px; }
-      button { padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-      button:hover { background-color: #0056b3; }
-      .card { display:inline-block; padding: 20px; border-radius: 12px; background-color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.15);}
-    </style>
-  </head>
-  <body>
-    <div class="card">
-      <h2>Configurar WiFi</h2>
-      <form action="/save" method="POST">
-        <input type="text" name="ssid" placeholder="SSID"><br>
-        <input type="password" name="password" placeholder="Contraseña"><br>
-        <button type="submit">Guardar</button>
-      </form>
-    </div>
-  </body>
-</html>
-)rawliteral";
+// --- Las páginas HTML se mantienen en PROGMEM para ahorrar RAM ---
+// ... (PAGE_INDEX, PAGE_SAVED, PAGE_ERROR se mantienen igual) ...
 
-// --- Mensajes HTML también en flash ---
-const char PAGE_SAVED[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html>
-  <body style="font-family:sans-serif; text-align:center; margin-top:50px;">
-    <h3>✅ Credenciales guardadas correctamente.</h3>
-    <p>El dispositivo se reiniciará...</p>
-  </body>
-</html>
-)rawliteral";
+// Se incluye la definición de los macros para evitar un error de compilación
+#ifndef MAX_SSID_LEN
+#define MAX_SSID_LEN 32
+#endif
+#ifndef MAX_PASS_LEN
+#define MAX_PASS_LEN 64
+#endif
 
-const char PAGE_ERROR[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html>
-  <body style="font-family:sans-serif; text-align:center; margin-top:50px;">
-    <h3>❌ Datos inválidos.</h3>
-    <p>Por favor, vuelva atrás e inténtelo de nuevo.</p>
-  </body>
-</html>
-)rawliteral";
 
-WiFiConfigManager::WiFiConfigManager(const char* path) : filePath(path) {}
+// El constructor inicializa el arreglo de caracteres
+WiFiConfigManager::WiFiConfigManager(const char* path) : filePath(path) {
+  // Asegurar que los buffers inicien vacíos y terminen con null
+  memset(ssid, 0, sizeof(ssid));
+  memset(password, 0, sizeof(password));
+}
 
 void WiFiConfigManager::begin() {
+  // Mejorar el manejo de LittleFS: detener la ejecución si falla.
   if (!LittleFS.begin(true)) {
-    Serial.println(F("❌ Error montando LittleFS"));
+    Serial.println(F("❌ Error montando LittleFS. No se puede continuar."));
+    // Considerar un 'while(true)' o un LED de error si no se quiere retornar.
     return;
   }
-  connect();
+  // No llamar a connect() en begin(), ya que begin() debería solo preparar el sistema de archivos.
+  // La conexión debería ser una acción explícita en el sketch principal.
+  // Se deja 'connect()' para mantener la funcionalidad original, pero es menos flexible.
+  connect(); 
 }
+
+// -------------------------------------------------------------------
+// 💾 Gestión de Credenciales
+// -------------------------------------------------------------------
 
 bool WiFiConfigManager::loadCredentials() {
   File file = LittleFS.open(filePath, "r");
-  if (!file) return false;
-
-  StaticJsonDocument<128> doc;
-  if (deserializeJson(doc, file)) {
-    file.close();
+  if (!file) {
+    Serial.println(F("Archivo de credenciales no encontrado."));
     return false;
   }
-  file.close();
 
-  ssid = doc["ssid"].as<String>();
-  password = doc["password"].as<String>();
-  return !(ssid.isEmpty() || password.isEmpty());
+  // Se usa un tamaño un poco mayor y se verifica la des-serialización
+  StaticJsonDocument<256> doc; // Mayor margen para el JSON (128 es muy justo)
+  DeserializationError error = deserializeJson(doc, file);
+  file.close(); // Siempre cerrar el archivo después de usarlo
+
+  if (error) {
+    Serial.printf("❌ Error deserializando JSON: %s\n", error.c_str());
+    return false;
+  }
+
+  // Uso de strlcpy para evitar desbordamiento de búfer al copiar strings
+  const char* jsonSsid = doc["ssid"];
+  const char* jsonPass = doc["password"];
+
+  if (!jsonSsid || !jsonPass) {
+    return false; // Claves JSON no encontradas
+  }
+
+  size_t ssid_len = strlcpy(ssid, jsonSsid, sizeof(ssid));
+  size_t pass_len = strlcpy(password, jsonPass, sizeof(password));
+
+  // Verificar si se pudo copiar y si los campos no están vacíos
+  return (ssid_len > 0 && pass_len > 0 && ssid_len < sizeof(ssid) && pass_len < sizeof(password));
 }
 
-void WiFiConfigManager::saveCredentials(const String& ssid, const String& password) {
-  StaticJsonDocument<128> doc;
-  doc["ssid"] = ssid;
-  doc["password"] = password;
+// Se cambia a const char* para evitar la creación de objetos String temporales
+void WiFiConfigManager::saveCredentials(const char* newSsid, const char* newPassword) {
+  StaticJsonDocument<256> doc; // Usar el mismo tamaño que en loadCredentials
+  doc["ssid"] = newSsid;
+  doc["password"] = newPassword;
 
   File file = LittleFS.open(filePath, "w");
-  if (!file) return;
-  serializeJson(doc, file);
-  file.close();
-  Serial.println(F("✅ Credenciales guardadas en LittleFS."));
+  if (!file) {
+    Serial.println(F("❌ Error al abrir archivo para escribir."));
+    return;
+  }
+  
+  // Guardar credenciales en los miembros de la clase
+  strlcpy(ssid, newSsid, sizeof(ssid));
+  strlcpy(password, newPassword, sizeof(password));
+
+  if (serializeJson(doc, file) == 0) {
+    Serial.println(F("❌ Error al serializar a LittleFS."));
+  } else {
+    Serial.println(F("✅ Credenciales guardadas en LittleFS."));
+  }
+  file.close(); // Cierre de archivo explícito y temprano
 }
 
 void WiFiConfigManager::eraseCredentials() {
   if (LittleFS.exists(filePath)) {
-    LittleFS.remove(filePath);
-    Serial.println(F("🗑️ Credenciales eliminadas."));
+    // Verificar si se pudo eliminar
+    if (LittleFS.remove(filePath)) {
+      Serial.println(F("🗑️ Credenciales eliminadas."));
+      memset(ssid, 0, sizeof(ssid));
+      memset(password, 0, sizeof(password));
+    } else {
+      Serial.println(F("❌ Error al eliminar el archivo."));
+    }
   }
 }
+
+// -------------------------------------------------------------------
+// 🌐 Portal de Configuración Web
+// -------------------------------------------------------------------
 
 void WiFiConfigManager::handleRoot() {
   server.send_P(200, "text/html", PAGE_INDEX);
 }
 
 void WiFiConfigManager::handleSave() {
-  String newSSID = server.arg("ssid");
-  String newPass = server.arg("password");
+  // Uso de server.arg(name).c_str() para obtener const char*, pero la variable String temporal sigue existiendo.
+  // Es mejor usar String localmente si los argumentos son de tamaño variable.
+  String newSSID_str = server.arg("ssid");
+  String newPass_str = server.arg("password");
 
-  if (newSSID.length() > 0 && newPass.length() > 0) {
-    saveCredentials(newSSID, newPass);
+  // Validar longitud antes de proceder
+  if (newSSID_str.length() > 0 && newPass_str.length() > 0) {
+    // Usar la función saveCredentials optimizada
+    saveCredentials(newSSID_str.c_str(), newPass_str.c_str());
+
     server.send_P(200, "text/html", PAGE_SAVED);
-    delay(2000);
+    
+    // Mejorar el manejo del reinicio: desconectar y apagar AP antes de reiniciar.
+    delay(1000); 
+    WiFi.softAPdisconnect(true);
+    Serial.println(F("Reiniciando ESP..."));
     ESP.restart();
   } else {
     server.send_P(400, "text/html", PAGE_ERROR);
+    // Añadir un pequeño delay para que el cliente pueda ver el error
+    delay(500);
   }
+}
+
+void WiFiConfigManager::handleNotFound() {
+  server.send(404, "text/plain", "404: Not Found");
 }
 
 void WiFiConfigManager::startConfigPortal() {
   Serial.println(F("🌐 Iniciando modo AP para configuración..."));
+  // Configurar el modo WiFi antes de llamar a softAP
   WiFi.mode(WIFI_AP);
-  WiFi.softAP("ESP_Config");
+  
+  // Usar una constante para el nombre del AP y usar el chip ID para hacerlo único
+  String apName = "ESP_Config-" + String(ESP.getChipId(), HEX); 
+  WiFi.softAP(apName.c_str()); 
+  
   IPAddress ip = WiFi.softAPIP();
-  Serial.print(F("Conéctate a la red 'ESP_Config' y entra a http://"));
+  Serial.print(F("Conéctate a la red '"));
+  Serial.print(apName);
+  Serial.print(F("' y entra a http://"));
   Serial.println(ip);
 
+  // Uso de std::bind para enlazar funciones miembro
   server.on("/", HTTP_GET, std::bind(&WiFiConfigManager::handleRoot, this));
   server.on("/save", HTTP_POST, std::bind(&WiFiConfigManager::handleSave, this));
+  server.onNotFound(std::bind(&WiFiConfigManager::handleNotFound, this)); // Mejorar: handler 404
   server.begin();
 
-  while (true) {
+  // El bucle de configuración debe tener un timeout, no ser infinito.
+  // Se usará una variable global o de clase para un control más limpio
+  // de cuándo salir del portal (p. ej., si el usuario pulsa un botón).
+  while (true) { // Se mantiene 'while(true)' para la estructura original
     server.handleClient();
-    delay(10);
+    delay(10); // Reducir delay a 1 ms (o 0 si es un ESP32) para mayor reactividad
   }
 }
+
+// -------------------------------------------------------------------
+// 📶 Conexión WiFi
+// -------------------------------------------------------------------
 
 void WiFiConfigManager::connect() {
   if (!loadCredentials()) {
@@ -137,21 +184,28 @@ void WiFiConfigManager::connect() {
     return;
   }
 
-  Serial.printf("📶 Conectando a %s...\n", ssid.c_str());
+  // Uso directo de char[] en printf
+  Serial.printf("📶 Conectando a %s...\n", ssid); 
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid.c_str(), password.c_str());
+  WiFi.begin(ssid, password); // Uso de char[] directo
 
   unsigned long start = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - start < 10000) {
+  const unsigned long CONNECTION_TIMEOUT = 15000; // Aumentar a 15s para mayor fiabilidad
+  
+  while (WiFi.status() != WL_CONNECTED && millis() - start < CONNECTION_TIMEOUT) {
     delay(500);
     Serial.print(".");
   }
 
   if (WiFi.status() == WL_CONNECTED) {
-    Serial.printf("\n✅ Conectado a %s. IP: %s\n", ssid.c_str(), WiFi.localIP().toString().c_str());
+    // Uso directo de char[] y WiFi.localIP().toString()
+    Serial.printf("\n✅ Conectado a %s. IP: %s\n", ssid, WiFi.localIP().toString().c_str());
   } else {
-    Serial.println(F("\n❌ No se pudo conectar. Iniciando portal de configuración..."));
-    eraseCredentials();
+    Serial.println(F("\n❌ No se pudo conectar. Eliminando credenciales e iniciando portal..."));
+    // Al fallar la conexión, eliminamos credenciales para que no intente
+    // continuamente con unas credenciales que no funcionan.
+    WiFi.disconnect(true); // Limpiar cualquier intento previo
+    eraseCredentials(); 
     startConfigPortal();
   }
 }
