@@ -2,8 +2,47 @@
 #include <ArduinoJson.h>
 #include <functional> // Necesario para std::bind
 
-// --- Las páginas HTML se mantienen en PROGMEM para ahorrar RAM ---
-// ... (PAGE_INDEX, PAGE_SAVED, PAGE_ERROR se mantienen igual) ...
+// --- Página HTML guardada en memoria flash ---
+const char PAGE_INDEX[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Configuración WiFi</title>
+  </head>
+  <body>
+    <div class="card">
+      <h2>Configurar WiFi</h2>
+      <form action="/save" method="POST">
+        <input type="text" name="ssid" placeholder="SSID"><br>
+        <input type="password" name="password" placeholder="Contraseña"><br>
+        <button type="submit">Guardar</button>
+      </form>
+    </div>
+  </body>
+</html>
+)rawliteral";
+
+// --- Mensajes HTML también en flash ---
+const char PAGE_SAVED[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html>
+  <body>
+    <h3>✅ Credenciales guardadas correctamente.</h3>
+    <p>El dispositivo se reiniciará...</p>
+  </body>
+</html>
+)rawliteral";
+
+const char PAGE_ERROR[] PROGMEM = R"rawliteral(
+<!DOCTYPE html>
+<html>
+  <body>
+    <h3>❌ Datos inválidos.</h3>
+    <p>Por favor, vuelva atrás e inténtelo de nuevo.</p>
+  </body>
+</html>
+)rawliteral";
 
 // Se incluye la definición de los macros para evitar un error de compilación
 #ifndef MAX_SSID_LEN
