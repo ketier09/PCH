@@ -17,8 +17,8 @@ private:
   static constexpr float PULSES_PER_M3 = 450000.0f;
   static constexpr float FLOW_CALIBRATION_FACTOR =
       PULSES_PER_M3 * (periodo_de_las_mediciones / 1000.0f);
-  // 💡 OPTIMIZACIÓN: Si flowRate ya es m³/s, ESCALA debe ser 1.0f para mantener la unidad.
-  static constexpr float ESCALA = 1.0f; 
+  // 💡 OPTIMIZACIÓN: Si flowRate ya es m³/s, kappa debe ser 1.0f para mantener la unidad.
+  static constexpr float kappa = 1.0f; 
 
   const byte pin;
 
