@@ -136,12 +136,37 @@ void WiFiConfigManager::startConfigPortal() {
   Serial.println(F("🌐 Iniciando modo AP para configuración..."));
   WiFi.mode(WIFI_AP);
 
-  // 💡 OPTIMIZACIÓN: AP Único con Chip ID para evitar conflictos
-  String apName = "ESP_Config-" + String(ESP.getChipId(), HEX);
+  // -------- Build a unique AP name without ESP.getChipId() on ESP32 --------
+  String apName;
+
+#if defined(ESP8266)
+  // ESP8266 still has ESP.getChipId()
+  apName = "ESP_Config-" + String(ESP.getChipId(), HEX);
+#elif defined(ESP32)
+  // Use efuse MAC (unique per chip)
+  uint64_t mac = ESP.getEfuseMac();          // 48-bit unique value
+  uint32_t chip = (uint32_t)(mac & 0xFFFFFF); // keep last 24 bits
+
+  char suffix[7]; // 6 hex chars + NUL
+  snprintf(suffix, sizeof(suffix), "%06X", chip); // zero-padded upper hex
+  apName = String("ESP_Config-") + suffix;
+#else
+  // Generic fallback: use the AP MAC address’s last 3 bytes (if available)
+  String macStr = WiFi.softAPmacAddress();   // "AA:BB:CC:DD:EE:FF"
+  macStr.replace(":", "");
+  String tail = macStr.length() >= 6 ? macStr.substring(macStr.length() - 6) : macStr;
+  tail.toUpperCase();
+  apName = "ESP_Config-" + tail;
+#endif
+
+  // Normalize to upper-case for readability
+  apName.toUpperCase();
+
   WiFi.softAP(apName.c_str());
 
   IPAddress ip = WiFi.softAPIP();
-  Serial.printf("Conéctate a la red '%s' y entra a http://%s\n", apName.c_str(), ip.toString().c_str());
+  Serial.printf("Conéctate a la red '%s' y entra a http://%s\n",
+                apName.c_str(), ip.toString().c_str());
 
   server.on("/", HTTP_GET, std::bind(&WiFiConfigManager::handleRoot, this));
   server.on("/save", HTTP_POST, std::bind(&WiFiConfigManager::handleSave, this));
@@ -150,9 +175,10 @@ void WiFiConfigManager::startConfigPortal() {
 
   while (true) {
     server.handleClient();
-    delay(1); // 💡 OPTIMIZACIÓN: Reducción de delay(10) a delay(1)
+    delay(1);
   }
 }
+
 
 void WiFiConfigManager::connect() {
   if (!loadCredentials()) {
