@@ -76,10 +76,10 @@ int generadoresActivos() {
   // El reading() se hace fuera del Mutex lock para no bloquear la tarea de lectura
   const float flow = caudalimetros[1].reading(); 
   
-  if (flow <= 3.0f)   return 0;
-  if (flow <= 6.0f)   return 1;
-  if (flow <  12.87f) return 2;
-  if (flow <= 13.0f)  return 3;
+  if (flow <= 3.0f)  return 0;
+  if (flow <= 6.0f)  return 1;
+  if (flow < 12.87f) return 2;
+  if (flow <= 13.0f) return 3;
   return 4;
 }
 const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 encendidos", "2 a máxima capacidad", "Error (Caudal > 13.0 m³/s)"};
@@ -146,13 +146,13 @@ void setup() {
 
   // 💡 NOTA: La tarea TaskLenta se define al final del archivo.
   xTaskCreatePinnedToCore(
-    TaskLenta,         // Función que implementa la tarea
-    "TaskLenta",       // Nombre de la tarea
-    10000,             // Tamaño de la pila (Stack size) en bytes
-    NULL,              // Parámetros de la tarea
-    1,                 // Prioridad
-    NULL,              // Task Handle
-    0                  // Core 0 (tareas lentas/de red)
+    TaskLenta,     // Función que implementa la tarea
+    "TaskLenta",    // Nombre de la tarea
+    10000,       // Tamaño de la pila (Stack size) en bytes
+    NULL,       // Parámetros de la tarea
+    1,         // Prioridad
+    NULL,       // Task Handle
+    0         // Core 0 (tareas lentas/de red)
   );
 
   delay(100);
