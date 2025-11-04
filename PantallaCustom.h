@@ -8,9 +8,7 @@
 class PantallaCustom {
 public:
   // 💡 OPTIMIZACIÓN: Simplificación del constructor a solo los 4 índices usados
-  PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
-                 int idxCotaCaptacion, int idxCaudalTurbinable, int idxCotaRio,
-                 int idxGeneradoresActivos);
+  PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst);
 
   void set_up();
   void actualizar(dato data[]);
@@ -30,4 +28,5 @@ private:
   
   void dibujarBase();
   void dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad);
+
 };
