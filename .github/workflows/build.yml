@@ -21,16 +21,17 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
+      - name: Update library index
+        run: arduino-cli lib update-index
+
       - name: Install required libraries
         run: |
-          # Library names as they appear in Arduino Library Manager
-          arduino-cli lib install \
-            "Firebase ESP Client" \
-            "ESP32Servo" \
-            "Adafruit GFX Library" \
-            "Adafruit ILI9341" \
-            "LittleFS_esp32" \
-            "ArduinoJson"
+          arduino-cli lib install "Firebase ESP Client"
+          arduino-cli lib install "ESP32Servo"
+          arduino-cli lib install "Adafruit GFX Library"
+          arduino-cli lib install "Adafruit ILI9341"
+          arduino-cli lib install "LittleFS_esp32"
+          arduino-cli lib install "ArduinoJson"
 
       - name: Compile (verbose + warnings) and save log
         run: |
