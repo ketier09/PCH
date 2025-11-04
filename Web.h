@@ -15,8 +15,7 @@ public:
   void enviar(dato data[], int n);
 
 private:
-  // Mover los objetos de Firebase a la sección privada:
-  // Solo la clase 'web' debe interactuar directamente con ellos.
+  // 💡 OPTIMIZACIÓN: Mover a privado para encapsulamiento
   FirebaseData fbdo;
   FirebaseData stream;
   FirebaseAuth auth;
@@ -27,9 +26,5 @@ private:
   static constexpr int NTP_MAX_ATTEMPTS = 30; // 15 segundos (30 * 500ms)
   
   void syncTime();
-  bool firebaseInit(); // Se cambia a bool para indicar éxito/fracaso
-  void handleFirebaseConnection(); // Nueva función para manejar reconexión
+  bool firebaseInit(); // 💡 OPTIMIZACIÓN: Cambiar a bool para control de flujo
 };
-
-// Se mantiene WiFiConfig como global/extern, asumiendo que debe ser accesible.
-extern WiFiConfigManager WiFiConfig;

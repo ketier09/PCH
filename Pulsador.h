@@ -3,27 +3,20 @@
 
 class pulsador {
 public:
-  // (Pin, Función Callback, LOW/HIGH activo)
-  pulsador(byte p, void (*i)(), bool pr);
+  // (Pin, Función Callback, Estado Lógico Activo (HIGH/LOW))
+  pulsador(byte p, void (*i)(), bool active_state); // 💡 OPTIMIZACIÓN: Renombrado de pr
 
   void set_up();
   void update();
 
 private:
-  // Se mantiene el valor de 50ms (estándar de la industria)
-  static constexpr unsigned long DEBOUNCE_MS = 50; 
-
-  // Constantes de modo de entrada para set_up()
-  static constexpr int INPUT_ACTIVE_HIGH = INPUT;
-  static constexpr int INPUT_ACTIVE_LOW = INPUT_PULLUP;
+  static constexpr unsigned long DEBOUNCE_MS = 50; // 💡 OPTIMIZACIÓN: Renombrado
 
   const byte pin;
-  // 'true' si el botón es HIGH-active (INPUT), 'false' si es LOW-active (INPUT_PULLUP)
+  // 💡 OPTIMIZACIÓN: Variable que indica si el botón es HIGH-Active (e.g. no usa pullup)
   const bool isHighActive; 
-  void (*orden)(); // Puntero a la función a ejecutar
+  void (*orden)();
 
-  // Estado del pin leído en el ciclo anterior
-  bool lastRaw; 
-  // Momento en que se ejecutó la última acción para evitar rebotes
-  unsigned long lastTrigger; 
+  bool lastRaw;
+  unsigned long lastTrigger;
 };

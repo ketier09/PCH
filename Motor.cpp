@@ -8,10 +8,21 @@ void motor::set_up() {
 }
 
 void motor::siguiente_estado(){
-  int m = 2*n;
-  estado = (estado + 1) % m;
-  if(estado >= n){
-    estado = m - 1 - estado; // (8 - 1 - 7 = 0)
+  // 1. Avanza el contador cíclico (0, 1, 2, 3, 4, 5, 0, ...)
+  estado_ciclico = (estado_ciclico + 1) % MAX_SEQUENCE_LEN; // % 6
+  
+  int posicionIndex;
+  
+  // 2. Mapea el contador cíclico (0-5) a la posición real (0-3)
+  if (estado_ciclico < n) {
+    posicionIndex = estado_ciclico; // Indices: 0, 1, 2, 3
+  } else {
+    // Indices: 4 -> 2, 5 -> 1
+    // La fórmula 6 - estado_ciclico es más simple:
+    // 6 - 4 = 2 (estado[2])
+    // 6 - 5 = 1 (estado[1])
+    posicionIndex = MAX_SEQUENCE_LEN - estado_ciclico;
   }
-  servo.write(estados[estado]);
+  
+  servo.write(estados[posicionIndex]);
 }

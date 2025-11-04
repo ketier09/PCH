@@ -1,10 +1,16 @@
 #include "PantallaCustom.h"
 #include <Fonts/FreeSansBold12pt7b.h>
 
+// 💡 OPTIMIZACIÓN: Inicialización completa de todos los miembros
 PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
-                               int cotaCaptacion, int caudalTurbinable, int cotaRio,
-                               int caudalCaptacion, int caudalRetorno, int generadoresActivos)
-: tft(cs, dc, rst) {}
+                               int idxCotaCaptacion, int idxCaudalTurbinable, int idxCotaRio,
+                               int idxGeneradoresActivos)
+: tft(cs, dc, rst),
+  cotaCaptacion(idxCotaCaptacion),
+  caudalTurbinable(idxCaudalTurbinable),
+  cotaRio(idxCotaRio),
+  generadoresActivos(idxGeneradoresActivos) {}
+
 
 void PantallaCustom::set_up() {
   tft.begin();
@@ -22,12 +28,25 @@ void PantallaCustom::dibujarBase() {
 }
 
 void PantallaCustom::actualizar(dato data[]) {
-  tft.fillRect(0, 60, 320, 180, ILI9341_BLACK);
+  // Limpiar el área de datos
+  tft.fillRect(0, 60, 320, 180, ILI9341_BLACK); 
 
-  dibujarDato(10, 80,  data[cotaCaptacion].etiqueta, data[cotaCaptacion].valor, data[cotaCaptacion].unidad);
-  dibujarDato(10, 120, data[caudalTurbinable].etiqueta, data[caudalTurbinable].valor, data[caudalTurbinable].unidad);
-  dibujarDato(10, 160, data[cotaRio].etiqueta, data[cotaRio].valor, data[cotaRio].unidad);
-  dibujarDato(10, 200, data[cantidadGeneradoresActivos].etiqueta, data[cantidadGeneradoresActivos].valor, "");
+  int y = START_Y; // Inicializar la posición Y
+
+  // LÍNEA 1: Cota Captación
+  dibujarDato(10, y,  data[cotaCaptacion].etiqueta, data[cotaCaptacion].valor, data[cotaCaptacion].unidad);
+  y += LINE_SPACING_Y;
+
+  // LÍNEA 2: Caudal Turbinable
+  dibujarDato(10, y, data[caudalTurbinable].etiqueta, data[caudalTurbinable].valor, data[caudalTurbinable].unidad);
+  y += LINE_SPACING_Y;
+
+  // LÍNEA 3: Cota Río
+  dibujarDato(10, y, data[cotaRio].etiqueta, data[cotaRio].valor, data[cotaRio].unidad);
+  y += LINE_SPACING_Y;
+
+  // LÍNEA 4: Generadores Activos
+  dibujarDato(10, y, data[generadoresActivos].etiqueta, data[generadoresActivos].valor, "");
 }
 
 void PantallaCustom::dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad) {

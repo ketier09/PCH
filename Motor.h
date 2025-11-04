@@ -10,12 +10,14 @@ public:
   void siguiente_estado();
 
 private:
-  static constexpr int n = 4;
+  static constexpr int n = 4; // Número de estados únicos (0 a 3)
+  // 💡 OPTIMIZACIÓN: Longitud del ciclo limpio (0, 1, 2, 3, 2, 1) = 6
+  static constexpr int MAX_SEQUENCE_LEN = 2 * n - 2; 
 
   const byte pin;
   const int estados[n];
 
   Servo servo;
 
-  int estado = 0;
+  int estado_ciclico = 0; // 💡 OPTIMIZACIÓN: Renombrado para claridad
 };

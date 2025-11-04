@@ -27,5 +27,3 @@ float caudalimetro::reading() {
   }
   return flowRate * ESCALA;
 }
-
-
