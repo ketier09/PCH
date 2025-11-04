@@ -40,7 +40,7 @@ void PantallaCustom::actualizar(dato data[]) {
   y += LINE_SPACING_Y;
 
   // LÍNEA 4: Generadores Activos
-  dibujarDato(10, y, data[generadoresActivos].etiqueta, data[generadoresActivos].valor, "");
+  dibujarDato(10, y, data[cantidadGeneradoresActivos].etiqueta, data[cantidadGeneradoresActivos].valor, "");
 }
 
 void PantallaCustom::dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad) {
@@ -54,4 +54,5 @@ void PantallaCustom::dibujarDato(int x, int y, const char* etiqueta, float valor
   tft.print(unidad);
 
 }
+
 
