@@ -1,4 +1,4 @@
-name: Arduino Build (ESP32, verbose)
+name: Arduino Build (ESP32 via GitHub libs)
 
 on:
   push:
@@ -14,24 +14,28 @@ jobs:
       - name: Install Arduino CLI
         uses: arduino/setup-arduino-cli@v1
 
-      - name: Configure Board Manager (ESP32)
+      - name: Configure ESP32 core
         run: |
           arduino-cli config init
           arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
-      - name: Update library index
-        run: arduino-cli lib update-index
-
-      - name: Install required libraries
+      - name: Install libraries from GitHub
         run: |
-          arduino-cli lib install "Firebase ESP Client"
-          arduino-cli lib install "ESP32Servo"
-          arduino-cli lib install "Adafruit GFX Library"
-          arduino-cli lib install "Adafruit ILI9341"
-          arduino-cli lib install "LittleFS_esp32"
-          arduino-cli lib install "ArduinoJson"
+          set -e
+          # Firebase
+          arduino-cli lib install --git-url https://github.com/mobizt/Firebase-ESP-Client.git
+          # ESP32 Servo
+          arduino-cli lib install --git-url https://github.com/madhephaestus/ESP32Servo.git
+          # Adafruit deps + displays
+          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit_BusIO.git
+          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit-GFX-Library.git
+          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit_ILI9341.git
+          # LittleFS for ESP32 (lorol)
+          arduino-cli lib install --git-url https://github.com/lorol/LITTLEFS.git
+          # ArduinoJson
+          arduino-cli lib install --git-url https://github.com/bblanchon/ArduinoJson.git
 
       - name: Compile (verbose + warnings) and save log
         run: |
