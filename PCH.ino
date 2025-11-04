@@ -25,19 +25,17 @@ caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
   {CAUD_2}
 };
 
-const size_t NUM_ULTRASONICOS = 3;
+const size_t NUM_ULTRASONICOS = 2;
 ultrasonico ultrasonicos[NUM_ULTRASONICOS] = {
   // Parámetros: Trig, Echo, Cota, Techo, Piso, Ancho, RaizPendiente
   { ULTRA_TRIG_0, ULTRA_ECHO_0, 0, 100.0f, 0.0f, 1.0f, 0.01f },
-  { ULTRA_TRIG_1, ULTRA_ECHO_1, 0, 100.0f, 0.0f, 1.0f, 0.01f },
-  { ULTRA_TRIG_2, ULTRA_ECHO_2, 0, 100.0f, 0.0f, 1.0f, 0.01f }
+  { ULTRA_TRIG_1, ULTRA_ECHO_1, 0, 100.0f, 0.0f, 1.0f, 0.01f }
 };
 
-const size_t NUM_ACTUADORES = 3;
+const size_t NUM_ACTUADORES = 2;
 actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
   {ACTUADOR_DIGITAL_0},
-  {ACTUADOR_DIGITAL_1},
-  {ACTUADOR_DIGITAL_2}
+  {ACTUADOR_DIGITAL_1}
 };
 
 motor mo_compuerta(COMPUERTA, 0, 45, 135, 180);
@@ -45,25 +43,17 @@ motor mo_compuerta(COMPUERTA, 0, 45, 135, 180);
 //----------------- Pulsadores (Callbacks) -----------------
 
 // 💡 OPTIMIZACIÓN: Las funciones on_X deben ser lo más rápidas posible.
-void IRAM_ATTR on_0() { actuadores_digitales[0].cambiar(); }
-void IRAM_ATTR on_1() { actuadores_digitales[1].cambiar(); }
-void IRAM_ATTR on_2() { actuadores_digitales[2].cambiar(); }
-void IRAM_ATTR on_3() { mo_compuerta.siguiente_estado(); }
+void IRAM_ATTR on_0() { mo_compuerta.siguiente_estado(); }
 
-const size_t NUM_PULSADORES = 4;
+const size_t NUM_PULSADORES = 1;
 pulsador pulsadores[NUM_PULSADORES] = {
   {PULSADOR_0, on_0, LOW},
-  {PULSADOR_1, on_1, LOW},
-  {PULSADOR_2, on_2, LOW},
-  {PULSADOR_3, on_3, LOW},
 };
 
 //----------------- Pantallas -----------------
 
 // 💡 CORRECCIÓN: Se utiliza el constructor optimizado de 4 índices para evitar redundancia.
-PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST,
-                        cotaCaptacion, caudalTurbinable, cotaRio,
-                        cantidadGeneradoresActivos);
+PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST);
 
 //----------------- Conexión web/Firebase -----------------
 
@@ -95,20 +85,15 @@ void serial_enviar(const dato data[]) {
     Serial.print(F(" - "));
     Serial.print(data[i].etiqueta);
     Serial.print(F(": "));
-    Serial.print(data[i].valor, 2);
+    if (i == cantidadGeneradoresActivos) {
+      Serial.print(generadoresActivosExplicacion[(int)data[cantidadGeneradoresActivos].valor]);
+    }else{
+      Serial.print(data[i].valor, 2);
+    }
     Serial.print(F(" "));
     Serial.println(data[i].unidad);
   }
-
-  Serial.println(F("-------------------------------------------------------------"));
-
-  // 💡 OPTIMIZACIÓN: Se asegura que el índice esté dentro del rango del array de explicación.
-  const int g = (int)data[cantidadGeneradoresActivos].valor;
-  const int index = (g >= 0 && g < 5) ? g : 4; 
   
-  Serial.print(F(" Generadores Activos: "));
-  Serial.println(generadoresActivosExplicacion[index]);
-
   Serial.println(F("=============================================================\n"));
 }
 
@@ -146,13 +131,13 @@ void setup() {
 
   // 💡 NOTA: La tarea TaskLenta se define al final del archivo.
   xTaskCreatePinnedToCore(
-    TaskLenta,     // Función que implementa la tarea
+    TaskLenta,      // Función que implementa la tarea
     "TaskLenta",    // Nombre de la tarea
-    10000,       // Tamaño de la pila (Stack size) en bytes
-    NULL,       // Parámetros de la tarea
-    1,         // Prioridad
-    NULL,       // Task Handle
-    0         // Core 0 (tareas lentas/de red)
+    10000,          // Tamaño de la pila (Stack size) en bytes
+    NULL,           // Parámetros de la tarea
+    1,              // Prioridad
+    NULL,           // Task Handle
+    0               // Core 0 (tareas lentas/de red)
   );
 
   delay(100);
@@ -201,20 +186,6 @@ void loop() {
     // 💡 CRÍTICO: Proteger la actualización y lectura de datos.
     if (xSemaphoreTake(dataMutex, 10 / portTICK_PERIOD_MS) == pdTRUE) {
       // --- BLOQUE CRÍTICO (Actualización de data[]) ---
-      
-      // Lectura de Caudalímetros (asumiendo que reading() no es bloqueante)
-      data[caudalRio].valor                = caudalimetros[0].reading();
-      data[caudalCaptacion].valor          = caudalimetros[1].reading();
-      data[caudalNoCaptado].valor          = caudalimetros[2].reading();
-      
-      // Lectura de Ultrasónicos (asumiendo que reading() y flujo() son rápidos o usan el mismo lock)
-      data[caudalGarantíaAmbiental].valor  = ultrasonicos[0].flujo();
-      data[caudalAduccion].valor           = ultrasonicos[1].flujo();
-      data[caudalTurbinable].valor         = ultrasonicos[2].flujo();
-      
-      data[cotaCaptacion].valor            = ultrasonicos[0].reading();
-      data[cotaRio].valor                  = ultrasonicos[1].reading();
-      data[cotaAduccion].valor             = ultrasonicos[2].reading();
       
       data[cantidadGeneradoresActivos].valor = (float)generadoresActivos();
 
