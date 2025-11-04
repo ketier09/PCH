@@ -62,8 +62,7 @@ bool WiFiConfigManager::loadCredentials() {
   File file = LittleFS.open(filePath, "r");
   if (!file) return false;
 
-  // 💡 OPTIMIZACIÓN: Aumento a 256 bytes para robustez.
-  StaticJsonDocument<256> doc;
+  JsonDocument doc;  // v7 style (dynamic)
   DeserializationError error = deserializeJson(doc, file);
   file.close();
 
@@ -72,16 +71,15 @@ bool WiFiConfigManager::loadCredentials() {
     return false;
   }
 
-  // 💡 OPTIMIZACIÓN: Uso de strlcpy para copia segura
-  strlcpy(ssid, doc["ssid"], sizeof(ssid));
-  strlcpy(password, doc["password"], sizeof(password));
+  // Copia segura
+  strlcpy(ssid, doc["ssid"] | "", sizeof(ssid));
+  strlcpy(password, doc["password"] | "", sizeof(password));
 
   return (ssid[0] != '\0' && password[0] != '\0');
 }
 
-// 💡 OPTIMIZACIÓN: La función ahora acepta const char*
 void WiFiConfigManager::saveCredentials(const char* newSsid, const char* newPassword) {
-  StaticJsonDocument<256> doc;
+  JsonDocument doc;  // v7 style (dynamic)
   doc["ssid"] = newSsid;
   doc["password"] = newPassword;
 
