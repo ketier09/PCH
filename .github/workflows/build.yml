@@ -1,4 +1,4 @@
-name: Arduino Build (ESP32 via GitHub libs)
+name: Arduino Build (ESP32 with Library Manager)
 
 on:
   push:
@@ -7,8 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Install Arduino CLI
@@ -21,21 +22,19 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
-      - name: Install libraries from GitHub
+      - name: Update library index
+        run: arduino-cli lib update-index
+
+      - name: Install libraries (Library Manager preferred, fallback to GitHub if needed)
         run: |
           set -e
-          # Firebase
-          arduino-cli lib install --git-url https://github.com/mobizt/Firebase-ESP-Client.git
-          # ESP32 Servo
-          arduino-cli lib install --git-url https://github.com/madhephaestus/ESP32Servo.git
-          # Adafruit deps + displays
-          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit_BusIO.git
-          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit-GFX-Library.git
-          arduino-cli lib install --git-url https://github.com/adafruit/Adafruit_ILI9341.git
-          # LittleFS for ESP32 (lorol)
-          arduino-cli lib install --git-url https://github.com/lorol/LITTLEFS.git
-          # ArduinoJson
-          arduino-cli lib install --git-url https://github.com/bblanchon/ArduinoJson.git
+
+          # Normal Library Manager installs
+          arduino-cli lib install "ESP32Servo"
+          arduino-cli lib install "Adafruit GFX Library"
+          arduino-cli lib install "Adafruit ILI9341"
+          arduino-cli lib install "ArduinoJson"
+          arduino-cli lib install "Firebase Arduino Client Library for ESP8266 and ESP32"
 
       - name: Compile (verbose + warnings) and save log
         run: |
@@ -47,7 +46,7 @@ jobs:
             --export-binaries \
             . |& tee build.log
 
-      - name: Upload build log
+      - name: Upload build log (always show even if compile fails)
         if: always()
         uses: actions/upload-artifact@v4
         with:
