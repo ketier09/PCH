@@ -35,6 +35,16 @@ jobs:
           arduino-cli lib install "Adafruit ILI9341"
           arduino-cli lib install "ArduinoJson"
           arduino-cli lib install "Firebase Arduino Client Library for ESP8266 and ESP32"
+          
+      - name: Generate Secrets.cpp from CI secrets
+        run: |
+          cat > src/Secrets.cpp << 'EOF'
+          #include "Secrets.h"
+          const char key[]      = "${{ secrets.KEY }}";
+          const char url[]      = "${{ secrets.URL }}";
+          const char email[]    = "${{ secrets.EMAIL }}";
+          const char password[] = "${{ secrets.PASSWORD }}";
+          EOF
 
       - name: Compile (verbose + warnings) and save log
         run: |
