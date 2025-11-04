@@ -65,7 +65,7 @@ bool web::firebaseInit() {
     return true; // Éxito
   } else {
     // 💡 OPTIMIZACIÓN: Imprimir el error de la conexión, no del stream
-    Serial.printf("\n❌ Conexión a Firebase falló: %s\n", Firebase.errorReason().c_str());
+    Serial.printf("\n❌ Conexión a Firebase falló: %s\n", fbdo.errorReason().c_str());
     return false; // Fallo
   }
 }
@@ -109,4 +109,5 @@ void web::enviar(dato data[], int n) {
     }
     Serial.println(F("-> ✅ Datos de sensores enviados a Firebase."));
   }
+
 }
