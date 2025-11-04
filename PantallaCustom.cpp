@@ -2,9 +2,7 @@
 #include <Fonts/FreeSansBold12pt7b.h>
 
 // 💡 OPTIMIZACIÓN: Inicialización completa de todos los miembros
-PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
-                               int idxCotaCaptacion, int idxCaudalTurbinable, int idxCotaRio,
-                               int idxGeneradoresActivos)
+PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst)
 : tft(cs, dc, rst),
   cotaCaptacion(idxCotaCaptacion),
   caudalTurbinable(idxCaudalTurbinable),
@@ -58,4 +56,5 @@ void PantallaCustom::dibujarDato(int x, int y, const char* etiqueta, float valor
   tft.print(valor, 2);
   tft.print(" ");
   tft.print(unidad);
+
 }
