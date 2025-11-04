@@ -1,4 +1,4 @@
-name: Compile Test
+name: Arduino Build (ESP32, verbose)
 
 on:
   push:
@@ -8,11 +8,43 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y build-essential
+      - name: Install Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
 
-      - name: Compile
-        run: make
+      - name: Configure Board Manager (ESP32)
+        run: |
+          arduino-cli config init
+          arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
+
+      - name: Install required libraries
+        run: |
+          # Library names as they appear in Arduino Library Manager
+          arduino-cli lib install \
+            "Firebase ESP Client" \
+            "ESP32Servo" \
+            "Adafruit GFX Library" \
+            "Adafruit ILI9341" \
+            "LittleFS_esp32" \
+            "ArduinoJson"
+
+      - name: Compile (verbose + warnings) and save log
+        run: |
+          set -o pipefail
+          arduino-cli compile \
+            --fqbn esp32:esp32:esp32 \
+            --warnings all \
+            --verbose \
+            --export-binaries \
+            . |& tee build.log
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
