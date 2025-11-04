@@ -16,12 +16,6 @@ public:
 private:
   Adafruit_ILI9341 tft;
   
-  // 💡 OPTIMIZACIÓN: Almacenar los índices como miembros para su uso en actualizar()
-  const int cotaCaptacion;
-  const int caudalTurbinable;
-  const int cotaRio;
-  const int generadoresActivos; 
-  
   // Constantes de diseño para la interfaz
   static constexpr int LINE_SPACING_Y = 40; // Espaciado vertical
   static constexpr int START_Y = 80;        // Posición Y inicial
@@ -30,3 +24,4 @@ private:
   void dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad);
 
 };
+
