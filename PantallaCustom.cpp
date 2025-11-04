@@ -3,11 +3,7 @@
 
 // 💡 OPTIMIZACIÓN: Inicialización completa de todos los miembros
 PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst)
-: tft(cs, dc, rst),
-  cotaCaptacion(idxCotaCaptacion),
-  caudalTurbinable(idxCaudalTurbinable),
-  cotaRio(idxCotaRio),
-  generadoresActivos(idxGeneradoresActivos) {}
+: tft(cs, dc, rst) {}
 
 
 void PantallaCustom::set_up() {
@@ -58,3 +54,4 @@ void PantallaCustom::dibujarDato(int x, int y, const char* etiqueta, float valor
   tft.print(unidad);
 
 }
+
