@@ -56,5 +56,5 @@ enum PCH_Devices_Pines: uint8_t {
   TFT_SCK             = PCH_D18,
   TFT_CS              = PCH_D5,
   TFT_RST             = PCH_D4,
-  TFT_PCH_DC          = PCH_D2
+  TFT_DC          = PCH_D2
 };
