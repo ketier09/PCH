@@ -96,9 +96,9 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 | Sensor | Pin                        |
 |:-------|:----------------------------|
-| CAUD-0 | **GPIO32** (`PCH_TOUCH9`)   |
-| CAUD-1 | **GPIO33** (`PCH_TOUCH8`)   |
-| CAUD-2 | **GPIO34** (`PCH_INPUT_ONLY_0`) |
+| CAUD-0 | **GPIO32** (`PCH_TOUCH9`)   Entrada|
+| CAUD-1 | **GPIO33** (`PCH_TOUCH8`)   Salida|
+| CAUD-2 | **GPIO34** (`PCH_INPUT_ONLY_0`) Sara|
 
 ---
 
@@ -106,9 +106,8 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 | Sensor | TRIG                         | ECHO                         |
 |:-------|:-----------------------------|:------------------------------|
-| US-0   | **GPIO25** (`PCH_DAC0`)      | **GPIO35** (`PCH_INPUT_ONLY_1`) |
-| US-1   | **GPIO26** (`PCH_DAC1`)      | **GPIO36** (`PCH_INPUT_ONLY_2`) |
-| US-2   | **GPIO16** (`PCH_UART2_RX`)  | **GPIO39** (`PCH_INPUT_ONLY_3`) |
+| US-0   | **GPIO25** (`PCH_DAC0`)      | **GPIO35** (`PCH_INPUT_ONLY_1`) Captación|
+| US-1   | **GPIO26** (`PCH_DAC1`)      | **GPIO36** (`PCH_VP`) Garantía|
 
 ---
 
@@ -116,10 +115,9 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 | Dispositivo         | Pin                        |
 |:--------------------|:---------------------------|
-| Compuerta (servo)   | **GPIO13** (`PCH_TOUCH4`)  |
-| Actuador digital 0  | **GPIO12** (`PCH_TOUCH5`)  |
-| Actuador digital 1  | **GPIO14** (`PCH_TOUCH6`)  |
-| Actuador digital 2  | **GPIO17** (`PCH_UART2_TX`) |
+| Compuerta (servo)   | **GPIO13** (`PCH_TOUCH4`)  Compuerta|
+| Actuador digital 0  | **GPIO12** (`PCH_TOUCH5`)  Motobomba sara|
+| Actuador digital 1  | **GPIO14** (`PCH_TOUCH6`)  el led|
 
 ---
 
@@ -127,10 +125,7 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 | Pulsador | Pin                      |
 |:----------|:-------------------------|
-| P0        | **GPIO4**  (`PCH_TOUCH0`) |
-| P1        | **GPIO2**  (`PCH_TOUCH2`) |
-| P2        | **GPIO15** (`PCH_TOUCH3`) |
-| P3        | **GPIO27** (`PCH_TOUCH7`) |
+| P0        | **GPIO27**  (`PCH_TOUCH0`) |
 
 ---
 
@@ -138,9 +133,11 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 | Pin de la pantalla | Pin                     |
 |:--------------------|:------------------------|
-| CS   | **GPIO23** (`PCH_VSPI_SS`) |
-| DC   | **GPIO18** (`PCH_I2C_SDA`) |
-| RST  | **GPIO5**  (`PCH_I2C_SCL`) |
+| SDI/MOSI   | **GPIO23** (`PCH_SDI`) |
+| SCK   | **GPIO18** (`PCH_SCK`) |
+| CS       | **GPIO5** |
+ |     RST      | GPIO4|
+| DC  | **GPIO2**  (``) |
 
 
 > ℹ️ Evita usar los pines de **Flash** (GPIO6–10).
