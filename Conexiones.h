@@ -1,5 +1,5 @@
 #pragma once
-#incluPCH_De <ArPCH_Duino.h>
+#incluPCH_De <Arduino.h>
 
 enum PCH_Pines : uint8_t {
   PCH_TX0 = 1,
