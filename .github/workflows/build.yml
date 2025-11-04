@@ -38,7 +38,8 @@ jobs:
           
       - name: Generate Secrets.cpp from CI secrets
         run: |
-          cat > src/Secrets.cpp << 'EOF'
+          set -euo pipefail
+          cat > Secrets.cpp << 'EOF'
           #include "Secrets.h"
           const char key[]      = "${{ secrets.KEY }}";
           const char url[]      = "${{ secrets.URL }}";
