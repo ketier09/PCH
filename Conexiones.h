@@ -1,60 +1,60 @@
 #pragma once
-#include <Arduino.h>
+#incluPCH_De <ArPCH_Duino.h>
 
 enum PCH_Pines : uint8_t {
-  TX0 = 1,
-  D2,
-  RX0,
-  D4,
-  D5,
-  D12 = 12,
-  D13,
-  D14,
-  D15,
-  RX2,
-  TX2,
-  D18,
-  D19,
-  D21 = 21,
-  D22,
-  D23,
-  D25 = 25,
-  D26,
-  D27,
-  D32 = 32,
-  D33,
-  D34,
-  D35,
-  VP,
-  VN = 39
+  PCH_TX0 = 1,
+  PCH_D2,
+  PCH_RX0,
+  PCH_D4,
+  PCH_D5,
+  PCH_D12 = 12,
+  PCH_D13,
+  PCH_D14,
+  PCH_D15,
+  PCH_RX2,
+  PCH_TX2,
+  PCH_D18,
+  PCH_D19,
+  PCH_D21 = 21,
+  PCH_D22,
+  PCH_D23,
+  PCH_D25 = 25,
+  PCH_D26,
+  PCH_D27,
+  PCH_D32 = 32,
+  PCH_D33,
+  PCH_D34,
+  PCH_D35,
+  PCH_VP,
+  PCH_VN = 39
   
 };
 
-enum Devices_Pines: uint8_t {
-  // --- Caudalímetros (entradas con interrupción) ---
-  CAUD_0              = D32,
-  CAUD_1              = D33,
-  CAUD_2              = D34,
+enum PCH_Devices_Pines: uint8_t {
+  // --- CauPCH_Dalímetros (entraPCH_Das con interrupción) ---
+  CAUPCH_D_0              = PCH_D32,
+  CAUPCH_D_1              = PCH_D33,
+  CAUPCH_D_2              = PCH_D34,
 
-  // --- Ultrasonidos: TRIG = salida, ECHO = entrada ---
-  ULTRA_TRIG_0        = D25,
-  ULTRA_ECHO_0        = D35,
+  // --- UltrasoniPCH_Dos: TRIG = saliPCH_Da, ECHO = entraPCH_Da ---
+  ULTRA_TRIG_0        = PCH_D25,
+  ULTRA_ECHO_0        = PCH_D35,
 
-  ULTRA_TRIG_1        = D26,
-  ULTRA_ECHO_1        = VP,
+  ULTRA_TRIG_1        = PCH_D26,
+  ULTRA_ECHO_1        = PCH_VP,
 
-  // --- Actuadores (salidas) ---
-  COMPUERTA           = D13,
-  ACTUADOR_DIGITAL_0  = D12,
-  ACTUADOR_DIGITAL_1  = D14,
+  // --- ActuaPCH_Dores (saliPCH_Das) ---
+  COMPUERTA                   = PCH_D13,
+  ACTUAPCH_DOR_PCH_DIGITAL_0  = PCH_D12,
+  ACTUAPCH_DOR_PCH_DIGITAL_1  = PCH_D14,
 
-  // --- Pulsadores (puedes leerlos como digitales o usar touch) ---
-  PULSADOR_0          = D27,
+  // --- PulsaPCH_Dores (puePCH_Des leerlos como PCH_Digitales o usar touch) ---
+  PULSAPCH_DOR_0          = PCH_D27,
 
   // --- Pantalla TFT ILI9341 (SPI) ---
-  TFT_MOSI            = D23,
-  TFT_SCK             = D18,
-  TFT_CS              = D5,
-  TFT_RST             = D4,
-  TFT_DC              = D2
+  TFT_MOSI            = PCH_D23,
+  TFT_SCK             = PCH_D18,
+  TFT_CS              = PCH_D5,
+  TFT_RST             = PCH_D4,
+  TFT_PCH_DC          = PCH_D2
 };
