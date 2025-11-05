@@ -9,7 +9,8 @@
 #include "Web.h"
 #include "Actuador_digital.h"
 #include "Pulsador.h"
-#include "Conexiones.h" // Se asume que este archivo define los pines (CAUD_0, etc.)
+#include "Conexiones.h"
+#include "RGB.h"
 
 // --- Sincronización de Tareas ---
 // Mutex para proteger el acceso a la matriz de datos global 'data[]'
@@ -35,9 +36,14 @@ ultrasonico ultrasonicos[NUM_ULTRASONICOS] = {
 const size_t NUM_ACTUADORES = 2;
 actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
   {ACTUADOR_DIGITAL_0},
-  {ACTUADOR_DIGITAL_1}
 };
 
+RGB generadores(LED_R, LED_G, LED_B,
+                0,0,0
+                0,0,0
+                0,0,0
+                0,0,0
+                );
 motor mo_compuerta(COMPUERTA, 0, 45, 135, 180);
 
 //----------------- Pulsadores (Callbacks) -----------------
@@ -66,10 +72,22 @@ int generadoresActivos() {
   // El reading() se hace fuera del Mutex lock para no bloquear la tarea de lectura
   const float flow = caudalimetros[1].reading(); 
   
-  if (flow <= 3.0f)  return 0;
-  if (flow <= 6.0f)  return 1;
-  if (flow < 12.87f) return 2;
-  if (flow <= 13.0f) return 3;
+  if (flow <= 3.0f)  {
+    generadores.establecer_estado(0);
+    return 0;
+  }
+  if (flow <= 6.0f) {
+    generadores.establecer_estado(1);
+    return 1;
+  }
+  if (flow < 12.87f) {
+    generadores.establecer_estado(2);
+    return 2;
+  }
+  if (flow <= 13.0f) {
+    generadores.establecer_estado(3);
+    return 3;
+  }
   return 4;
 }
 const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 encendidos", "2 a máxima capacidad", "Error (Caudal > 13.0 m³/s)"};

@@ -9,6 +9,16 @@ void actuador_digital::set_up(){
   digitalWrite(pin, estado);
 }
 
+void actuador_digital::encender(){
+  estado = HIGH;
+  digitalWrite(pin, estado);
+}
+
+void actuador_digital::apagar(){
+  estado = LOW;
+  digitalWrite(pin, estado);
+}
+
 void actuador_digital::cambiar(){
   estado = !estado;
   digitalWrite(pin, estado);
