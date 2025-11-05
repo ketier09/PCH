@@ -33,7 +33,7 @@ ultrasonico ultrasonicos[NUM_ULTRASONICOS] = {
   { ULTRA_TRIG_1, ULTRA_ECHO_1, 0, 100.0f, 0.0f, 1.0f, 0.01f }
 };
 
-const size_t NUM_ACTUADORES = 2;
+const size_t NUM_ACTUADORES = 1;
 actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
   {ACTUADOR_DIGITAL_0}
 };
@@ -42,7 +42,7 @@ Led generadores(LED_R, LED_G, LED_B,
                 0,0,0,
                 0,0,0,
                 0,0,0,
-                0,0,0,
+                0,0,0
                 );
 motor mo_compuerta(COMPUERTA, 0, 45, 135, 180);
 
