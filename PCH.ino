@@ -35,7 +35,7 @@ ultrasonico ultrasonicos[NUM_ULTRASONICOS] = {
 
 const size_t NUM_ACTUADORES = 2;
 actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
-  {ACTUADOR_DIGITAL_0},
+  {ACTUADOR_DIGITAL_0}
 };
 
 RGB generadores(LED_R, LED_G, LED_B,
