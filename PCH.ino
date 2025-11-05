@@ -10,7 +10,7 @@
 #include "Actuador_digital.h"
 #include "Pulsador.h"
 #include "Conexiones.h"
-#include "RGB.h"
+#include "Led.h"
 
 // --- Sincronización de Tareas ---
 // Mutex para proteger el acceso a la matriz de datos global 'data[]'
@@ -38,7 +38,7 @@ actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
   {ACTUADOR_DIGITAL_0}
 };
 
-RGB generadores(LED_R, LED_G, LED_B,
+Led generadores(LED_R, LED_G, LED_B,
                 0,0,0
                 0,0,0
                 0,0,0

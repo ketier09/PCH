@@ -60,6 +60,11 @@ enum PCH_Devices_Pines : uint8_t {
   // --- Pulsadores ---
   PULSADOR_0     = PCH_D27,
 
+  // --- Led ---
+  LED_R = 1,
+  LED_G = 2,
+  LED_B = 3,
+
   // --- Pantalla TFT ILI9341 (SPI) ---
   TFT_MOSI       = PCH_D23,
   TFT_SCK        = PCH_D18,
