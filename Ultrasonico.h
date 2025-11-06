@@ -21,7 +21,7 @@ private:
   static constexpr float ESCALA = 1.0f; // m/cm
   static constexpr float NIVEL_0 = 1268.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
-  static constexpr float suavizador = 0.30f; 
+  static constexpr float suavizador = 0.70f; 
   static constexpr float kappa = 1.0f;
 
   const byte trig;
