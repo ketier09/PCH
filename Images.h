@@ -12,6 +12,10 @@ public:
   const int y_index;
   const int width;
   const int height;
+
+private:
+
+  static constexpr uint8_t NUM_IMAGENES = 5;
 };
 
-extern const image imagenes[7];
+extern const image imagenes[NUM_IMAGENES];
