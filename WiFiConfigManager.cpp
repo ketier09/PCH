@@ -202,8 +202,7 @@ void WiFiConfigManager::connect() {
     Serial.printf("\n✅ Conectado a %s. IP: %s\n", ssid, WiFi.localIP().toString().c_str());
   } else {
     Serial.println(F("\n❌ No se pudo conectar. Eliminando credenciales e iniciando portal..."));
-    WiFi.disconnect(true);
-    eraseCredentials(); // Eliminar credenciales si la conexión falla
+    eraseCredentials();
     startConfigPortal();
   }
 }

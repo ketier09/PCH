@@ -29,8 +29,8 @@ caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
 const size_t NUM_ULTRASONICOS = 2;
 ultrasonico ultrasonicos[NUM_ULTRASONICOS] = {
   // Parámetros: Trig, Echo, Cota, Techo, Piso, Ancho, RaizPendiente
-  { ULTRA_TRIG_0, ULTRA_ECHO_0, 0, 100.0f, 0.0f, 1.0f, 0.01f },
-  { ULTRA_TRIG_1, ULTRA_ECHO_1, 0, 100.0f, 0.0f, 1.0f, 0.01f }
+  { ULTRA_TRIG_0, ULTRA_ECHO_0, 0, 59.80f, 4.30f, 38.55f, 0.01f },
+  { ULTRA_TRIG_1, ULTRA_ECHO_1, 0, 27.40f, 2.90f, 21.75f, 0.01f }
 };
 
 const size_t NUM_ACTUADORES = 1;

@@ -18,7 +18,7 @@ private:
 
   // --- Constantes de Calibración y Físicas ---
   static constexpr float CM_POR_US = 1.0f / 58.0f; // Constante de conversión cm/us
-  static constexpr float ESCALA = 1.0f; // m/cm
+  static constexpr float ESCALA = 0.1f; // m/mm
   static constexpr float NIVEL_0 = 1268.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
   static constexpr float suavizador = 0.70f; 
