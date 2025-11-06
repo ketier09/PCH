@@ -16,12 +16,7 @@ public:
 private:
   Adafruit_ILI9341 tft;
   
-  // Constantes de diseño para la interfaz
-  static constexpr int LINE_SPACING_Y = 40; // Espaciado vertical
-  static constexpr int START_Y = 80;        // Posición Y inicial
-  
-  void dibujarBase();
-  void dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad);
-
+  void dibujar_imagen(uint8_t indice);
 };
+
 
