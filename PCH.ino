@@ -70,27 +70,15 @@ web pagina;
 int generadoresActivos() {
   // 💡 NOTA: Se asume que caudalimetros[1] es el caudal de captación.
   // El reading() se hace fuera del Mutex lock para no bloquear la tarea de lectura
-  const float flow = caudalimetros[1].reading(); 
+  const float flow = ultrasonicos[1].flujo(); 
   
-  if (flow <= 3.0f)  {
-    generadores.establecer_estado(0);
-    return 0;
-  }
-  if (flow <= 6.0f) {
-    generadores.establecer_estado(1);
-    return 1;
-  }
-  if (flow < 12.87f) {
-    generadores.establecer_estado(2);
-    return 2;
-  }
-  if (flow <= 13.0f) {
-    generadores.establecer_estado(3);
-    return 3;
-  }
+  if (flow <= 3.0f)  return 0;
+  if (flow <= 6.0f)  return 1;
+  if (flow < 12.87f) return 2;
+  if (flow <= 13.0f) return 3;
   return 4;
 }
-const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido","2 encendidos", "2 a máxima capacidad", "Error (Caudal > 13.0 m³/s)"};
+const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido", "2 encendidos", "2 a máxima capacidad", "Error"};
 
 //----------------- Envío por puerto serial (al computador) -----------------
 
@@ -190,7 +178,7 @@ void TaskLenta(void *pvParameters) {
 void loop() {
   
   // Los pulsadores deben ser verificados constantemente para baja latencia
-  for (size_t i = 0; i < NUM_PULSADORES; ++i) {
+  for (size_t i = 0; i < NUM_PULSADORES; i++) {
     pulsadores[i].update();
   }
   
@@ -204,9 +192,20 @@ void loop() {
     // 💡 CRÍTICO: Proteger la actualización y lectura de datos.
     if (xSemaphoreTake(dataMutex, 10 / portTICK_PERIOD_MS) == pdTRUE) {
       // --- BLOQUE CRÍTICO (Actualización de data[]) ---
-      
-      data[cantidadGeneradoresActivos].valor = (float)generadoresActivos();
+        
+      data[caudalGeneracion].valor  = ultrasonicos[0].flujo()-ultrasonicos[1].flujo();
+      data[caudalIngreso].valor     = caudalimetros[0].reading();
+      data[caudalCaptacion].valor   = ultrasonicos[0].flujo();
+      data[caudalGarantia].valor    = ultrasonicos[1].flujo();
+      data[cotaGeneracion].valor    = 0.0;
+      data[cotaIngreso].valor       = 0.0;
+      data[cotaCaptacion].valor     = ultrasonicos[0].reading();
+      data[cotaGarantia].valor      = ultrasonicos[1].reading();
+      data[cantidadGeneradoresActivos].valor =  (float)generadoresActivos();
 
+      
+      generadores.establecer_estado(generadoresActivos());
+      
       // Envío por Serial (lectura de datos)
       serial_enviar(data);
 
@@ -217,4 +216,65 @@ void loop() {
       Serial.println(F("⚠️ ADVERTENCIA: Mutex no disponible. Saltando lectura de datos."));
     }
   }
+}
+
+// Devuelve la cota (nivel) para alcanzar 'flujo'.
+// Parámetros deben ser los mismos que usas hacia adelante.
+float cota_desde_flujo(float flujo, float ancho, float piso, float manningInverso, float raizCuadrada_pendiente, float kappa){
+    if (!(flujo > 0.0f)) return piso; // sin flujo, espejo: h=0 → cota=piso
+
+    // Constantes y helpers
+    const float b = ancho;
+    const float k = manningInverso * raizCuadrada_pendiente * kappa;
+
+    // Q(h) con la MISMA fórmula que usas en el directo
+    auto q_de_h = [&](float h)->float {
+        if (!(h > 0.0f)) return 0.0f;
+        float A  = b * h;
+        float P  = b + 2.0f * h;
+        float R  = A / P;
+        float R23 = powf(R, 2.0f/3.0f);
+        float v  = manningInverso * R23 * raizCuadrada_pendiente;
+        return v * A * kappa;         // = k * A * R^(2/3)
+    };
+
+    // 1) Acotar: buscamos [h_lo, h_hi] tal que Q(h_lo) <= flujo <= Q(h_hi)
+    float h_lo = 0.0f;
+    float q_lo = 0.0f;                // Q(0) = 0
+    float h_hi = 0.1f;                // semilla pequeña
+    float q_hi = q_de_h(h_hi);
+
+    // Expandimos exponencialmente hasta cubrir el flujo objetivo
+    // (la función es monótona, por eso esto siempre termina)
+    int guard = 0;
+    while (q_hi < flujo && guard < 60) { // 60 → cubre rangos muy amplios
+        h_hi *= 2.0f;
+        q_hi  = q_de_h(h_hi);
+        guard++;
+    }
+
+    // 2) Bisección
+    // Tolerancias (puedes ajustarlas)
+    const float tol_h = 1e-6f;                      // tolerancia en altura (m)
+    const float tol_q = fmaxf(1e-6f, 1e-6f * flujo); // tolerancia relativa/absoluta en Q
+
+    for (int i = 0; i < 80; ++i) { // 80 iteraciones = margen amplio
+        float h_mid = 0.5f * (h_lo + h_hi);
+        float q_mid = q_de_h(h_mid);
+
+        if (fabsf(q_mid - flujo) <= tol_q || (h_hi - h_lo) <= tol_h) {
+            return piso + h_mid; // cota = piso + h
+        }
+
+        if (q_mid < flujo) {
+            h_lo = h_mid;
+            q_lo = q_mid;
+        } else {
+            h_hi = h_mid;
+            // q_hi = q_mid; // opcional
+        }
+    }
+
+    // Si no convergió por alguna razón, devuelve el mejor estimado
+    return piso + 0.5f * (h_lo + h_hi);
 }

@@ -11,14 +11,24 @@ void PantallaCustom::set_up() {
   tft.setRotation(3);
   tft.setFont(&FreeSansBold12pt7b);
   tft.fillScreen(ILI9341_BLACK);
-
-  for(int i = 0; i < NUM_IMAGENES; i++){
-    dibujar_imagen(i);
-  }
 }
 
 void PantallaCustom::actualizar(dato data[]) {
-  
+  float flujos[NUM_ETIQUETAS] = { 
+    data[caudalIngreso].valor, 
+    data[caudalCaptacion].valor, 
+    data[caudalGarantia].valor, 
+    data[caudalGeneracion].valor
+  };
+
+  float cotas[NUM_ETIQUETAS] = { 
+    data[cotaIngreso].valor, 
+    data[cotaCaptacion].valor, 
+    data[cotaGarantia].valor, 
+    data[cotaGeneracion].valor
+  };
+
+
   unsigned long tiempoActual = millis();
   if (tiempoActual - tiempoAnterior >= intervalo) {
   tiempoAnterior = tiempoActual;

@@ -21,8 +21,6 @@ private:
   unsigned long tiempoAnterior = 0;
   int indiceActual = 0;
 
-  float cotas[NUM_ETIQUETAS];
-  float flujos[NUM_ETIQUETAS];
   const char* etiquetas[NUM_ETIQUETAS];
 
   void dibujar_imagen(uint8_t indice);

@@ -95,3 +95,4 @@ float ultrasonico::flujo() {
   float velocidad = manningInverso * R23 * raizCuadrada_pendiente;
   return velocidad * areaMojada * kappa;
 }
+
