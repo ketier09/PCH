@@ -12,7 +12,7 @@ void PantallaCustom::set_up() {
   tft.setFont(&FreeSansBold12pt7b);
   tft.fillScreen(ILI9341_BLACK);
 
-  for(int i = 0; i < NUM_ETIQUETAS+1; i++){
+  for(int i = 0; i < NUM_IMAGENES; i++){
     dibujar_imagen(i);
   }
 }
@@ -30,10 +30,10 @@ void PantallaCustom::actualizar(dato data[]) {
     dibujar_imagen(0);
     
     tft.setCursor(130, 40);
-    tft.print(etiquetas[indiceActual]);
+    tft.print(imagenes[indiceActual].string_lugar);
     dibujar_imagen(indiceActual+1);
     
-    mostrarDato(170, 100, "Cota:", cotas[indiceActual, "msnm");
+    mostrarDato(170, 100, "Cota:", cotas[indiceActual], "msnm");
     mostrarDato(170, 180, "Flujo:", flujos[indiceActual], "m3/s");
     
     indiceActual = (indiceActual + 1) % NUM_ETIQUETAS;
@@ -50,7 +50,7 @@ void PantallaCustom::mostrarDato(int x, int y, const char* etiqueta, float valor
 }
 
 void PantallaCustom::dibujar_imagen(uint8_t indice) {
-  tft.drawRGBBitmap(images[indice].x_index, images[indice].y_index, images[indice].pixels, images[indice].width, images[indice].height);
+  tft.drawRGBBitmap(imagenes[indice].x_index, imagenes[indice].y_index, imagenes[indice].pixels, imagenes[indice].width, imagenes[indice].height);
 }
 
 
