@@ -1,4 +1,5 @@
 #include "Web.h"
+#include <addons/TokenHelper.h>
 
 WiFiConfigManager WiFiConfig;
 
@@ -127,29 +128,42 @@ void web::enviar(dato data[], int n) {
 
 bool web::ensureLogin() {
 
-  if (Firebase.ready()) return true;   // reemplaza isTokenReady()
+  // Si ya está listo, nada que hacer
+  if (Firebase.ready()) return true;
 
-  if (WiFi.status() != WL_CONNECTED) return false;
+  // Mantén el mismo chequeo de WiFi que usas en el resto de la clase
+  if (!WiFiConfig.isConnected()) return false;
 
-  config.api_key = FIREBASE_API_KEY;
-  config.database_url = FIREBASE_DATABASE_URL;
+  // Cargar credenciales desde Secrets.h (ya incluidas por Web.h)
+  // y asegurar que config/auth tengan valores
+  if (config.api_key.length() == 0) {
+    config.api_key      = key;     // <-- antes: FIREBASE_API_KEY
+    config.database_url = url;     // <-- antes: FIREBASE_DATABASE_URL
+    auth.user.email     = email;   // <-- antes: USER_EMAIL
+    auth.user.password  = password;// <-- antes: USER_PASSWORD
 
-  auth.user.email = USER_EMAIL;
-  auth.user.password = USER_PASSWORD;
+    Firebase.reconnectWiFi(true);
+    fbdo.setResponseSize(4096);
+    config.timeout.serverResponse = FIREBASE_TIMEOUT_MS;
+    config.token_status_callback = tokenStatusCallback;
+  }
 
+  // Intentar (re)inicializar
   Firebase.begin(&config, &auth);
 
   unsigned long t0 = millis();
-  while (!Firebase.ready() && millis() - t0 < 15000) {
+  while (!Firebase.ready() && millis() - t0 < FIREBASE_TIMEOUT_MS) {
     delay(100);
   }
 
   if (!Firebase.ready()) {
-    Serial.printf("Auth falló: %s\n", config.signer.tokens.error.message.c_str());
+    Serial.printf("Auth falló: %s\n",
+                  config.signer.tokens.error.message.c_str());
     return false;
   }
 
   return true;
 }
+
 
 
