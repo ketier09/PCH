@@ -65,7 +65,7 @@ float ultrasonico::reading(uint32_t timeout_us) {
   }
 
   // Conversión fuera de los bloques críticos
-  float distancia_cm = actual_duracion * CM_POR_US; // Uso de CM_POR_US
+  float distancia_cm = actual_duracion * MM_POR_US; // Uso de MM_POR_US
   float distancia_m = distancia_cm * ESCALA;
 
   nivel = techo - distancia_m;
@@ -82,7 +82,7 @@ float ultrasonico::reading(uint32_t timeout_us) {
 }
 
 float ultrasonico::flujo() {
-  float h = (isnan(nivel_f) ? nivel : nivel_f) - piso; 
+  float h = nivel_f - piso; 
   if (!(h > 0.0f)) return 0.0f; 
 
   float areaMojada = ancho * h;        

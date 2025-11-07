@@ -11,6 +11,11 @@ void PantallaCustom::set_up() {
   tft.setRotation(3);
   tft.setFont(&FreeSansBold12pt7b);
   tft.fillScreen(ILI9341_BLACK);
+
+  tft.fillScreen(ILI9341_RED);   delay(500);
+  tft.fillScreen(ILI9341_GREEN); delay(500);
+  tft.fillScreen(ILI9341_BLUE);  delay(500);
+  tft.fillScreen(ILI9341_BLACK);
 }
 
 void PantallaCustom::actualizar(dato data[]) {
