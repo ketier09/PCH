@@ -4,6 +4,8 @@
 #include <Firebase_ESP_Client.h>
 #include <time.h>
 
+#include "addons/TokenHelper.h"
+
 #include "Secrets.h"
 #include "Datos.h"
 #include "WiFiConfigManager.h"
@@ -22,9 +24,10 @@ private:
   FirebaseConfig config;
   
   // Constantes para tiempos de espera
-  static constexpr int FIREBASE_TIMEOUT_MS = 15000;
+  static constexpr int FIREBASE_TIMEOUT_MS = 30000;
   static constexpr int NTP_MAX_ATTEMPTS = 30; // 15 segundos (30 * 500ms)
   
   void syncTime();
   bool firebaseInit(); // 💡 OPTIMIZACIÓN: Cambiar a bool para control de flujo
+  bool ensureLogin();
 };

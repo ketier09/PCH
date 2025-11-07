@@ -45,7 +45,9 @@ bool web::firebaseInit() {
   config.timeout.serverResponse = FIREBASE_TIMEOUT_MS; // Uso de constante
 
   Serial.println(F("Conectando a Firebase..."));
+  config.token_status_callback = tokenStatusCallback; // logs de estado del token
   Firebase.begin(&config, &auth);
+  ensureLogin();
 
   unsigned long startTime = millis();
   while (!Firebase.ready() && millis() - startTime < FIREBASE_TIMEOUT_MS) {
@@ -104,10 +106,50 @@ void web::enviar(dato data[], int n) {
       
       // 💡 OPTIMIZACIÓN: Verificar el resultado de la operación de envío
       if (!Firebase.RTDB.setFloat(&fbdo, path, data[i].valor)) {
-        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiquetaFirebase, fbdo.errorReason().c_str());
+        String er = fbdo.errorReason();
+        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiquetaFirebase, er.c_str());
+
+        // Si es problema de token, reautentica una vez y reintenta
+        if (er.indexOf("token is not ready") >= 0 || fbdo.httpCode() == 401 || fbdo.httpCode() == 403) {
+          if (ensureLogin()) {
+            if (!Firebase.RTDB.setFloat(&fbdo, path, data[i].valor)) {
+              Serial.printf("❌ Reintento falló %s: %s\n", data[i].etiquetaFirebase, fbdo.errorReason().c_str());
+            }
+          }
+        }
       }
+
     }
     Serial.println(F("-> ✅ Datos de sensores enviados a Firebase."));
   }
 
 }
+
+bool web::ensureLogin() {
+
+  if (Firebase.ready()) return true;   // reemplaza isTokenReady()
+
+  if (WiFi.status() != WL_CONNECTED) return false;
+
+  config.api_key = FIREBASE_API_KEY;
+  config.database_url = FIREBASE_DATABASE_URL;
+
+  auth.user.email = USER_EMAIL;
+  auth.user.password = USER_PASSWORD;
+
+  Firebase.begin(&config, &auth);
+
+  unsigned long t0 = millis();
+  while (!Firebase.ready() && millis() - t0 < 15000) {
+    delay(100);
+  }
+
+  if (!Firebase.ready()) {
+    Serial.printf("Auth falló: %s\n", config.signer.tokens.error.message.c_str());
+    return false;
+  }
+
+  return true;
+}
+
+

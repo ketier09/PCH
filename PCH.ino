@@ -151,26 +151,21 @@ void setup() {
 
 // --- Función que ejecutará la "Tarea Lenta" en el Core 0 ---
 void TaskLenta(void *pvParameters) {
-  // Inicialización de la Web y Firebase
   pagina.set_up();
 
-  // Bucle infinito que se ejecuta en el Core 0
   for (;;) {
+    // 1) Toma snapshot rápido bajo mutex
+    dato snapshot[DatoCount];
     if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
-      // --- BLOQUE CRÍTICO (Acceso a data[]) ---
-
-      // 1. Enviar datos a Firebase (Lento)
-      pagina.enviar(data, DatoCount);
-
-      // 2. Actualizar la Pantalla (Lento)
-      pantalla.actualizar(data);
-
+      for (int i = 0; i < DatoCount; ++i) snapshot[i] = data[i];
       xSemaphoreGive(dataMutex);
-      // --- FIN BLOQUE CRÍTICO ---
     }
-    
-    // Pausa para no saturar el CPU
-    vTaskDelay(pdMS_TO_TICKS(5000)); // Espera 5 segundos
+
+    // 2) I/O LENTO FUERA del mutex
+    pagina.enviar(snapshot, DatoCount);
+    pantalla.actualizar(snapshot);
+
+    vTaskDelay(pdMS_TO_TICKS(5000));
   }
 }
 
