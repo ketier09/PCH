@@ -7,15 +7,25 @@
 
 class PantallaCustom {
 public:
-  PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
-                 int cotaCaptacion, int caudalTurbinable, int cotaRio,
-                 int caudalCaptacion, int caudalRetorno, int generadoresActivos);
+  // 💡 OPTIMIZACIÓN: Simplificación del constructor a solo los 4 índices usados
+  PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst);
 
   void set_up();
   void actualizar(dato data[]);
 
 private:
   Adafruit_ILI9341 tft;
-  void dibujarBase();
-  void dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad);
+
+  static constexpr uint8_t NUM_ETIQUETAS = 4;
+  static constexpr unsigned long intervalo = 5000;
+  unsigned long tiempoAnterior = 0;
+  int indiceActual = 0;
+
+  const char* etiquetas[NUM_ETIQUETAS];
+
+  void dibujar_imagen(uint8_t indice);
+  void mostrarDato(int x, int y, const char* etiqueta, float valor, const char* unidad);
 };
+
+
+

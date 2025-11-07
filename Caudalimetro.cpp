@@ -25,7 +25,6 @@ float caudalimetro::reading() {
 
     flowRate = pulses / FLOW_CALIBRATION_FACTOR;
   }
-  return flowRate * ESCALA;
+  return flowRate * kappa;
+
 }
-
-

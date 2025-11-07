@@ -1,42 +1,68 @@
 #include "PantallaCustom.h"
 #include <Fonts/FreeSansBold12pt7b.h>
 
-PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst,
-                               int cotaCaptacion, int caudalTurbinable, int cotaRio,
-                               int caudalCaptacion, int caudalRetorno, int generadoresActivos)
+// 💡 OPTIMIZACIÓN: Inicialización completa de todos los miembros
+PantallaCustom::PantallaCustom(uint8_t cs, uint8_t dc, uint8_t rst)
 : tft(cs, dc, rst) {}
+
 
 void PantallaCustom::set_up() {
   tft.begin();
   tft.setRotation(3);
-  tft.fillScreen(ILI9341_BLACK);
   tft.setFont(&FreeSansBold12pt7b);
-  dibujarBase();
-}
-
-void PantallaCustom::dibujarBase() {
-  tft.drawRGBBitmap(10, 10, imagenes[sanBartLogo].pixels, imagenes[sanBartLogo].width, imagenes[sanBartLogo].height);
-  tft.setTextColor(ILI9341_WHITE);
-  tft.setCursor(100, 30);
-  tft.print("MONITOREO PCH");
+  tft.fillScreen(ILI9341_BLACK);
 }
 
 void PantallaCustom::actualizar(dato data[]) {
-  tft.fillRect(0, 60, 320, 180, ILI9341_BLACK);
+  float flujos[NUM_ETIQUETAS] = { 
+    data[caudalIngreso].valor, 
+    data[caudalCaptacion].valor, 
+    data[caudalGarantia].valor, 
+    data[caudalGeneracion].valor
+  };
 
-  dibujarDato(10, 80, data[cotaCaptacion].etiqueta, data[cotaCaptacion].valor, data[cotaCaptacion].unidad);
-  dibujarDato(10, 120, data[caudalTurbinable].etiqueta, data[caudalTurbinable].valor, data[caudalTurbinable].unidad);
-  dibujarDato(10, 160, data[cotaRio].etiqueta, data[cotaRio].valor, data[cotaRio].unidad);
-  dibujarDato(10, 200, data[cantidadGeneradoresActivos].etiqueta, data[cantidadGeneradoresActivos].valor, "");
+  float cotas[NUM_ETIQUETAS] = { 
+    data[cotaIngreso].valor, 
+    data[cotaCaptacion].valor, 
+    data[cotaGarantia].valor, 
+    data[cotaGeneracion].valor
+  };
+
+
+  unsigned long tiempoActual = millis();
+  if (tiempoActual - tiempoAnterior >= intervalo) {
+  tiempoAnterior = tiempoActual;
+    
+    tft.setTextColor(ILI9341_WHITE);
+  
+    tft.fillRect(90, 0, 240, 240, ILI9341_BLACK);
+    tft.fillRect(0, 90, 240, 320, ILI9341_BLACK);
+    dibujar_imagen(0);
+    
+    tft.setCursor(130, 40);
+    tft.print(imagenes[indiceActual].string_lugar);
+    dibujar_imagen(indiceActual+1);
+    
+    mostrarDato(170, 100, "Cota:", cotas[indiceActual], "msnm");
+    mostrarDato(170, 180, "Flujo:", flujos[indiceActual], "m3/s");
+    
+    indiceActual = (indiceActual + 1) % NUM_ETIQUETAS;
+  }
 }
 
-void PantallaCustom::dibujarDato(int x, int y, const char* etiqueta, float valor, const char* unidad) {
+void PantallaCustom::mostrarDato(int x, int y, const char* etiqueta, float valor, const char* unidad) {
   tft.setCursor(x, y);
-  tft.setTextColor(ILI9341_YELLOW);
   tft.print(etiqueta);
-  tft.print(": ");
-  tft.setTextColor(ILI9341_GREEN);
-  tft.print(valor, 2);
+  tft.setCursor(x, y + 30);
+  tft.print(valor);
   tft.print(" ");
   tft.print(unidad);
 }
+
+void PantallaCustom::dibujar_imagen(uint8_t indice) {
+  tft.drawRGBBitmap(imagenes[indice].x_index, imagenes[indice].y_index, imagenes[indice].pixels, imagenes[indice].width, imagenes[indice].height);
+}
+
+
+
+

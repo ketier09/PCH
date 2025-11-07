@@ -6,16 +6,25 @@
 
 #include "Secrets.h"
 #include "Datos.h"
+#include "WiFiConfigManager.h"
 
-struct web {
+class web {
+public:
+  
+  void set_up();
+  void enviar(dato data[], int n);
+
+private:
+  // 💡 OPTIMIZACIÓN: Mover a privado para encapsulamiento
   FirebaseData fbdo;
   FirebaseData stream;
   FirebaseAuth auth;
   FirebaseConfig config;
-
-  void wifiInit();
+  
+  // Constantes para tiempos de espera
+  static constexpr int FIREBASE_TIMEOUT_MS = 15000;
+  static constexpr int NTP_MAX_ATTEMPTS = 30; // 15 segundos (30 * 500ms)
+  
   void syncTime();
-  void firebaseInit();
-  void set_up();
-  void enviar(dato data[], int n);
+  bool firebaseInit(); // 💡 OPTIMIZACIÓN: Cambiar a bool para control de flujo
 };

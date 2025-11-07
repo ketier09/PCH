@@ -2,6 +2,8 @@
 
 > Monitorea **niveles** y **caudales** en una **pequeña central hidroeléctrica (PCH)**, decide cuántos **generadores** activar y publica los datos **localmente** y en la **nube (Firebase)**.
 
+![Build](https://github.com/ketier09/PCH/actions/workflows/build.yml/badge.svg)
+
 ---
 
 ## 🚀 Resumen rápido
@@ -27,11 +29,64 @@
 ├─ Motor.h/.cpp              ← Servo que mueve la compuerta (posiciones)
 ├─ PantallaCustom.h/.cpp     ← Interfaz TFT para mostrar 3 datos por lado
 ├─ Images.h/.cpp             ← Imágenes que serán usadas en la pantalla
-├─ Web.h/.cpp                ← WiFi + NTP + Firebase
+├─ Web.h/.cpp                ← NTP + Firebase
+├─ WiFiConfigManager.h/.cpp  ← WiFi
 ├─ Conexiones.h              ← Mapa de pines ESP32
 ├─ Secrets.h                 ← Declaraciones de credenciales
 └─ Secrets.cpp               ← **Definiciones** de credenciales (lo creas tú)
 ```
+
+---
+# 🌐 `WiFiConfigManager`: Gestión de Conexión WiFi en ESP32
+
+El módulo `WiFiConfigManager` es la herramienta central que permite a nuestro sistema **ESP32** conectarse de manera persistente a una red WiFi, sin necesidad de reprogramar las credenciales. Si no encuentra una red guardada o falla la conexión, automáticamente inicia un **Portal de Configuración** para que puedas introducir las credenciales de forma inalámbrica.
+
+---
+
+## 🚀 Flujo de Conexión
+
+Al iniciar el dispositivo, el módulo sigue esta secuencia lógica:
+
+1.  **Carga de Credenciales (Modo STA):**
+    * Intenta leer las credenciales (`SSID` y `Password`) guardadas en el sistema de archivos **LittleFS** (o SPIFFS) en el archivo `/wifi.json`.
+    * Si las encuentra, intenta conectarse al WiFi con esas credenciales.
+2.  **Conexión Exitosa:**
+    * El dispositivo se conecta (`WL_CONNECTED`) y continúa con la lógica principal (sincronización NTP, Firebase, etc.).
+3.  **Conexión Fallida / Sin Credenciales:**
+    * Si falla la conexión después de 10 segundos, o si no hay credenciales, el dispositivo entra en **Modo Punto de Acceso (AP)**.
+    * Se inicia el **Portal de Configuración** (`startConfigPortal()`).
+
+---
+
+## 🛠️ Modo de Configuración (Portal Web)
+
+Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que puedas configurarlo desde tu teléfono o computador:
+
+| Parámetro | Valor |
+| :--- | :--- |
+| **Nombre de la Red (SSID)** | `ESP_Config` |
+| **Contraseña de la Red** | *Sin contraseña* |
+| **Dirección IP del Portal** | `http://192.168.4.1` (IP por defecto del ESP32 en modo AP) |
+
+### Pasos para configurar el WiFi:
+
+1.  **Desconecta** tu dispositivo (PC, móvil) de tu WiFi normal.
+2.  Busca y conéctate a la red WiFi llamada **`ESP_Config`**.
+3.  Abre un navegador y navega a la dirección **`http://192.168.4.1`**.
+4.  Aparecerá la página de configuración para ingresar el **SSID** y la **Contraseña** de tu red.
+5.  Pulsa **"Guardar"**.
+6.  El ESP32 guardará las credenciales y se **reiniciará** (`ESP.restart()`) para intentar conectarse con la nueva configuración.
+
+---
+
+## 💾 Detalle Técnico (Para Desarrolladores)
+
+* **Persistencia:** Utiliza la librería **`LittleFS`** (o SPIFFS) para guardar las credenciales, asegurando que persistan incluso después de reinicios.
+* **Servidor Web:** Utiliza la librería **`WebServer`** para levantar el portal de configuración en el puerto 80.
+* **Rutas de manejo:**
+    * `/`: Muestra el formulario HTML (`handleRoot()`).
+    * `/save`: Recibe las credenciales por método POST, las guarda en `wifi.json` y reinicia el dispositivo (`handleSave()`).
+* **Desconexión:** Si el usuario presiona el botón de reinicio (físico o programado), se puede optar por borrar las credenciales para forzar el portal en el próximo inicio (`eraseCredentials()` no se usa en el flujo principal, pero está disponible).
 
 ---
 
@@ -39,56 +94,50 @@
 
 ### Sensores de caudal (entradas con interrupción)
 
-| Sensor | Pin                        |
-|:-------|:----------------------------|
-| CAUD-0 | **GPIO32** (`PCH_TOUCH9`)   |
-| CAUD-1 | **GPIO33** (`PCH_TOUCH8`)   |
-| CAUD-2 | **GPIO34** (`PCH_INPUT_ONLY_0`) |
+| Sensor |	Pin	| Descripción |
+|:-------|:-------|:------------|
+| CAUD-0 |	D32	| Entrada     |
+| CAUD-1 |	D33	| Salida      |
+| CAUD-2 |	D34	| Sara        |
 
 ---
 
 ### Sensores ultrasónicos (TRIG salida, ECHO entrada)
 
-| Sensor | TRIG                         | ECHO                         |
-|:-------|:-----------------------------|:------------------------------|
-| US-0   | **GPIO25** (`PCH_DAC0`)      | **GPIO35** (`PCH_INPUT_ONLY_1`) |
-| US-1   | **GPIO26** (`PCH_DAC1`)      | **GPIO36** (`PCH_INPUT_ONLY_2`) |
-| US-2   | **GPIO16** (`PCH_UART2_RX`)  | **GPIO39** (`PCH_INPUT_ONLY_3`) |
+| Sensor |	TRIG	                | ECHO	            | Descripción |
+|:-------|:-----------------------|:------------------|:------------|
+| US-0   |	D25	                | D35	            | Captación   |
+| US-1   |	D26                   | VP            	   | Garantía    |
 
 ---
 
 ### Actuadores
 
-| Dispositivo         | Pin                        |
-|:--------------------|:---------------------------|
-| Compuerta (servo)   | **GPIO13** (`PCH_TOUCH4`)  |
-| Actuador digital 0  | **GPIO12** (`PCH_TOUCH5`)  |
-| Actuador digital 1  | **GPIO14** (`PCH_TOUCH6`)  |
-| Actuador digital 2  | **GPIO17** (`PCH_UART2_TX`) |
+| Dispositivo         | Pin                        | Descripción    |
+|:--------------------|:---------------------------|:---------------|
+| Compuerta (servo)   | D13                        | Compuerta      |
+| Actuador digital 0  | D12                        | Motobomba sara |
+| Actuador digital 1  | D14                        | El led         |
 
 ---
 
 ### Pulsadores
 
-| Pulsador | Pin                      |
-|:----------|:-------------------------|
-| P0        | **GPIO4**  (`PCH_TOUCH0`) |
-| P1        | **GPIO2**  (`PCH_TOUCH2`) |
-| P2        | **GPIO15** (`PCH_TOUCH3`) |
-| P3        | **GPIO27** (`PCH_TOUCH7`) |
+| Pulsador |	Pin	| Descripción    |
+|:-------- |:--------|:---------------|
+| P0       |	D27   | Compuerta      |
 
 ---
 
 ### SPI (pantalla local)
 
-| Pin de la pantalla | Pin                     |
-|:--------------------|:------------------------|
-| CS   | **GPIO23** (`PCH_VSPI_SS`) |
-| DC   | **GPIO18** (`PCH_I2C_SDA`) |
-| RST  | **GPIO5**  (`PCH_I2C_SCL`) |
-
-
-> ℹ️ Evita usar los pines de **Flash** (GPIO6–10).
+| Pin de la pantalla | Pin  |
+|:------------------ |:-----|
+| SDI/MOSI           |  D23 |
+| SCK                |	D18 |
+| CS                 |	D5  |
+| RST                |	D4  |
+| DC                 |	D2  |
 
 ---
 
@@ -137,13 +186,16 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 1. **Placa**: instala *ESP32 by Espressif Systems* (Gestor de tarjetas).
 2. **Librerías**:
 
-   * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)](https://github.com/mobizt/Firebase-ESP-Client)
-   * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington, John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
-   * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
-   * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit_ILI9341)
-3. **Abrir** el sketch principal (`PCH.ino`).
-4. **Velocidad Serial**: 115200.
-5. **Compila y sube**.
+  * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)](https://github.com/mobizt/Firebase-ESP-Client)
+  * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington, John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
+  * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
+  * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit_ILI9341)
+  * `LittleFS` [LittleFS for ESP32 (autor: lorol)](https://github.com/lorol/LITTLEFS)
+  * `ArduinoJson` [ArduinoJson (autor: Benoît Blanchon)](https://github.com/bblanchon/ArduinoJson)
+   
+4. **Abrir** el sketch principal (`PCH.ino`).
+5. **Velocidad Serial**: 115200.
+6. **Compila y sube**.
 
 ### PlatformIO (VS Code)
 
@@ -170,8 +222,6 @@ En el repo ya está `Secrets.h` con **declaraciones**. Debes crear **`Secrets.cp
 // Secrets.cpp
 #include "Secrets.h"
 
-const char WIFI_SSID[]     = "TU_SSID";
-const char WIFI_PASSWORD[] = "TU_PASSWORD";
 const char key[]           = "TU_API_KEY_FIREBASE";
 const char url[]           = "https://TU_PROYECTO.firebaseio.com";
 const char email[]         = "usuario@ejemplo.com";

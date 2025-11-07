@@ -1,110 +1,113 @@
 #include "Web.h"
 
-void web::wifiInit() {
-  Serial.print("Conectando a WiFi");
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);  // Intento de conexión con tu red
-  unsigned long startTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 15000) {
-    Serial.print(".");                   // Muestra progreso
-    delay(500);
-  }
-
-  Serial.println();
-  Serial.print("Conectado! IP: ");
-  Serial.println(WiFi.localIP());        // Muestra la dirección IP asignada
-
-}
+WiFiConfigManager WiFiConfig;
 
 void web::syncTime() {
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov"); // Servidores de hora
+  if (!WiFiConfig.isConnected()) {
+    Serial.println(F("Aviso: WiFi no conectado, omitiendo sincronización de hora."));
+    return;
+  }
+  
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov"); 
   Serial.println("\nSincronizando hora...");
   struct tm timeinfo;
   
   int intentos = 0; 
-  // Establece un máximo de 10 segundos de espera (20 intentos * 500ms)
-  const int max_intentos = 20; 
+  const int max_intentos = NTP_MAX_ATTEMPTS; // Uso de constante de 15s
   
-  // Espera hasta que llegue la hora correcta o se agoten los intentos.
   while (!getLocalTime(&timeinfo) && intentos < max_intentos) {
-    Serial.print(F("."));      // Muestra puntos para indicar que sigue intentando
-    delay(500);             // Pausa medio segundo entre intentos
-    intentos++;             // Incrementa el contador
+    Serial.print(F("."));
+    delay(500);
+    intentos++;
   }
 
   if (intentos < max_intentos) {
-    Serial.println(F("\nHora sincronizada."));
+    Serial.println(F("\n✅ Hora sincronizada."));
   } else {
-    // El programa continuará sin la hora NTP.
-    Serial.println(F("\nAviso: La sincronización de la hora falló o tardó demasiado. El programa continúa sin hora NTP."));
+    Serial.println(F("\n❌ La sincronización de la hora falló o tardó demasiado."));
   }
 }
 
-void web::firebaseInit() {
-  // Credenciales y configuración del proyecto
+// 💡 OPTIMIZACIÓN: Cambiar a bool para indicar éxito/fracaso
+bool web::firebaseInit() {
+  if (!WiFiConfig.isConnected()) {
+      Serial.println(F("❌ WiFi no conectado. Fallo al iniciar Firebase."));
+      return false;
+  }
+  
   config.api_key      = key;
   config.database_url = url;
   auth.user.email     = email;
   auth.user.password  = password;
 
-  Firebase.reconnectWiFi(true);  // Si se corta el WiFi, intenta reconectar
-  fbdo.setResponseSize(4096);    // Tamaño máximo de respuesta
-
-  Firebase.begin(&config, &auth); // Empieza la conexión con Firebase
+  Firebase.reconnectWiFi(true);
+  fbdo.setResponseSize(4096);
+  config.timeout.serverResponse = FIREBASE_TIMEOUT_MS; // Uso de constante
 
   Serial.println(F("Conectando a Firebase..."));
+  Firebase.begin(&config, &auth);
+
   unsigned long startTime = millis();
-  // Espera hasta 15 segundos a que Firebase quede listo
-  while (!Firebase.ready() && millis() - startTime < 15000) {
+  while (!Firebase.ready() && millis() - startTime < FIREBASE_TIMEOUT_MS) {
     Serial.print(F("."));
     delay(500);
   }
 
   if (Firebase.ready()) {
-    Serial.println(F("\nConexión con Firebase establecida."));
-    // Abre un "stream": una especie de escucha en vivo de un valor en la nube
+    Serial.println(F("\n✅ Conexión con Firebase establecida."));
+    // Reintentar stream
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-    Serial.println(String("Error al iniciar el stream: ") + stream.errorReason().c_str());
+      Serial.print(F("⚠️ Stream falló al inicio: "));
+      Serial.println(stream.errorReason().c_str());
+    } else {
+       Serial.println(F("✅ Stream de comandos iniciado."));
     }
+    return true; // Éxito
   } else {
-    Serial.println(F("\nNo se pudo conectar con Firebase. Verifica API Key, URL y credenciales."));
+    // 💡 OPTIMIZACIÓN: Imprimir el error de la conexión, no del stream
+    Serial.printf("\n❌ Conexión a Firebase falló: %s\n", fbdo.errorReason().c_str());
+    return false; // Fallo
   }
 }
 
 void web::set_up() {
-  wifiInit();        //Prepara la conexión al WiFi
-  syncTime();        // Pide la hora correcta a Internet
-  firebaseInit();    // Prepara la conexión con Firebase
+  WiFiConfig.begin();
+  // 💡 OPTIMIZACIÓN: Ejecutar servicios solo si hay conexión WiFi
+  if (WiFiConfig.isConnected()) { 
+    syncTime();
+    firebaseInit();
+  } else {
+    Serial.println(F("⚠️ WiFi no conectado, servicios NTP/Firebase omitidos en set_up."));
+  }
 }
 
 void web::enviar(dato data[], int n) {
-  // Si hay WiFi pero Firebase no está listo, intenta prepararlo de nuevo
-  if (WiFi.status() == WL_CONNECTED) {
-    if (!Firebase.ready()) {
-      Serial.println(F("Reconectando a Firebase..."));
-      firebaseInit();
+  // 💡 OPTIMIZACIÓN: Lógica de reconexión centralizada y limpia
+  if (!WiFiConfig.isConnected()) {
+    Serial.println(F("❌ Sin conexión WiFi. Omitiendo envío a Firebase."));
+    return;
+  }
+
+  // Intenta re-inicializar si Firebase no está listo
+  if (!Firebase.ready()) {
+    Serial.println(F("Reconectando a Firebase..."));
+    if (!firebaseInit()) { // Intenta re-inicializar. Si falla, sale.
+      Serial.println(F("⚠️ Re-inicialización de Firebase fallida. Omitiendo envío."));
+      return;
     }
   }
-
-  // Si aún no está listo, vuelve a intentar inicializar
-  if (!Firebase.ready()) {
-    firebaseInit();
-  }
-
+  
   if (Firebase.ready()) {
-    // Recorre todas las mediciones y las envía una por una
     for (int i = 0; i < n; i++) {
       char path[64];
-      // Construye la ruta donde se guardará este dato
-      // Ejemplo: /sensorData/caudalCaptacion
       snprintf(path, sizeof(path), "/sensorData/%s", data[i].etiquetaFirebase);
-      Firebase.RTDB.setFloat(&fbdo, path, data[i].valor);  // Envía el número
+      
+      // 💡 OPTIMIZACIÓN: Verificar el resultado de la operación de envío
+      if (!Firebase.RTDB.setFloat(&fbdo, path, data[i].valor)) {
+        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiquetaFirebase, fbdo.errorReason().c_str());
+      }
     }
-    Serial.println(F("-> Datos de sensores enviados a Firebase."));
-  } else {
-    Serial.println(F("-> No se pudieron enviar datos a Firebase. Conexión no lista."));
+    Serial.println(F("-> ✅ Datos de sensores enviados a Firebase."));
   }
+
 }
-
-
-
-

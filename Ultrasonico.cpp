@@ -2,19 +2,28 @@
 
 void IRAM_ATTR ultrasonico::isrThunk(void* arg) {
   auto* self = static_cast<ultrasonico*>(arg);
+  const uint32_t tiempo_actual = micros();
+  
   if (digitalRead(self->echo)) {
-    self->disparo = micros(); // RISING
+    self->disparo = tiempo_actual; // RISING
   } else {
-    const uint32_t regreso = micros(); // FALLING
+    // 💡 OPTIMIZACIÓN: Cálculo fuera del bloque crítico ISR para mayor eficiencia
+    const uint32_t duracion_calculada = tiempo_actual - self->disparo; 
+    
     portENTER_CRITICAL_ISR(&self->mux);
-    self->duracion = regreso - self->disparo;
+    self->duracion = duracion_calculada;
     portEXIT_CRITICAL_ISR(&self->mux);
   }
 }
 
+// 💡 OPTIMIZACIÓN: Aplicación consistente de ESCALA a las constantes
 ultrasonico::ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe)
-  : trig(t), echo(e), techo(te*ESCALA + NIVEL_0 + (float)c), piso(pi*ESCALA + NIVEL_0 + (float)c), ancho(a*ESCALA), raizCuadrada_pendiente(pe) {}
-
+  : trig(t), echo(e), 
+    techo(te * ESCALA + NIVEL_0 + (float)c * ESCALA), 
+    piso(pi * ESCALA + NIVEL_0 + (float)c * ESCALA), 
+    ancho(a * ESCALA), 
+    raizCuadrada_pendiente(pe) {}
+    
 void ultrasonico::set_up() {
   pinMode(trig, OUTPUT);
   pinMode(echo, INPUT);
@@ -23,7 +32,7 @@ void ultrasonico::set_up() {
 }
 
 void ultrasonico::disparar() {
-  if (!digitalRead(echo)) {          // Evita disparar si hay eco en curso
+  if (!digitalRead(echo)) {
     digitalWrite(trig, LOW);
     delayMicroseconds(2);
     digitalWrite(trig, HIGH);
@@ -33,6 +42,9 @@ void ultrasonico::disparar() {
 }
 
 float ultrasonico::reading(uint32_t timeout_us) {
+  uint32_t actual_duracion = 0;
+
+  // Reset y disparo
   portENTER_CRITICAL(&mux);
   duracion = 0;
   portEXIT_CRITICAL(&mux);
@@ -42,21 +54,18 @@ float ultrasonico::reading(uint32_t timeout_us) {
   const uint32_t t0 = micros();
   while (true) {
     portENTER_CRITICAL(&mux);
-    uint32_t d = duracion;
+    actual_duracion = duracion; // Leer la nueva duración
     portEXIT_CRITICAL(&mux);
-    if (d != 0) break;
+    
+    if (actual_duracion != 0) break;
+    
     if ((uint32_t)(micros() - t0) > timeout_us) {
-      // Timeout: sin eco → reporta NAN o último nivel conocido
       return NAN;
     }
   }
 
-  // Convertir a centímetros
-  portENTER_CRITICAL(&mux);
-  float distancia_cm = duracion / 58.0f;
-  portEXIT_CRITICAL(&mux);
-
-  // A metros y factor de escala (m/cm)
+  // Conversión fuera de los bloques críticos
+  float distancia_cm = actual_duracion * CM_POR_US; // Uso de CM_POR_US
   float distancia_m = distancia_cm * ESCALA;
 
   nivel = techo - distancia_m;
@@ -66,23 +75,24 @@ float ultrasonico::reading(uint32_t timeout_us) {
     if (nivel > techo) nivel = techo;
     
     if (isnan(nivel_f)) nivel_f = nivel;
-    nivel_f = suavizador * nivel + (1.0f - suavizador) * nivel_f; //suavizado
+    nivel_f = suavizador * nivel + (1.0f - suavizador) * nivel_f;
   }
   
   return nivel;
 }
 
 float ultrasonico::flujo() {
-  float h = (isnan(nivel_f) ? nivel : nivel_f) - piso;   // m
-  if (!(h > 0)) return 0.0f;
+  float h = (isnan(nivel_f) ? nivel : nivel_f) - piso; 
+  if (!(h > 0.0f)) return 0.0f; 
 
-  float areaMojada = ancho * h;        // m²
-  float perimetroMojado = ancho + 2*h; // m
-  float radioHidraulico = areaMojada / perimetroMojado; // m
-  float R23 = cbrtf(radioHidraulico * radioHidraulico); //³√(m)²
-  float velocidad = manningInverso * R23 * raizCuadrada_pendiente; // m/s
-  return velocidad * areaMojada * kappa; // m³/s
+  float areaMojada = ancho * h;        
+  float perimetroMojado = ancho + 2.0f * h; 
+  float radioHidraulico = areaMojada / perimetroMojado;
+  
+  // 💡 OPTIMIZACIÓN: Uso de powf para mayor claridad de R^(2/3)
+  float R23 = powf(radioHidraulico, 2.0f / 3.0f); 
+  
+  float velocidad = manningInverso * R23 * raizCuadrada_pendiente;
+  return velocidad * areaMojada * kappa;
 }
-
-
 
