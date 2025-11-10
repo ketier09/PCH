@@ -48,8 +48,7 @@ bool web::firebaseInit() {
   Serial.println(F("Conectando a Firebase..."));
   config.token_status_callback = tokenStatusCallback; // logs de estado del token
   Firebase.begin(&config, &auth);
-  ensureLogin();
-
+  
   unsigned long startTime = millis();
   while (!Firebase.ready() && millis() - startTime < FIREBASE_TIMEOUT_MS) {
     Serial.print(F("."));
@@ -58,117 +57,78 @@ bool web::firebaseInit() {
 
   if (Firebase.ready()) {
     Serial.println(F("\n✅ Conexión con Firebase establecida."));
-    
-    Serial.println("Estabilizando token de autenticación...");
-    delay(2000);
+    delay(1000); // Dar un segundo extra para estabilización interna del token
     // Reintentar stream
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-      Serial.print(F("⚠️ Stream falló al inicio: "));
+      Serial.print(F("⚠ Stream falló al inicio: "));
       Serial.println(stream.errorReason().c_str());
     } else {
        Serial.println(F("✅ Stream de comandos iniciado."));
     }
     return true; // Éxito
   } else {
-    // 💡 OPTIMIZACIÓN: Imprimir el error de la conexión, no del stream
-    Serial.printf("\n❌ Conexión a Firebase falló: %s\n", fbdo.errorReason().c_str());
-    return false; // Fallo
+    Serial.println(F("\n❌ Fallo al conectar con Firebase."));
+    return false; // Fracaso
   }
 }
 
 void web::set_up() {
   WiFiConfig.begin();
-  // 💡 OPTIMIZACIÓN: Ejecutar servicios solo si hay conexión WiFi
-  if (WiFiConfig.isConnected()) { 
-    syncTime();
-    firebaseInit();
-    delay(1000);
-  } else {
-    Serial.println(F("⚠️ WiFi no conectado, servicios NTP/Firebase omitidos en set_up."));
+  syncTime();
+  if (!firebaseInit()) {
+    // Si la inicialización falla, podemos intentar reiniciar o entrar en un modo de error.
+    Serial.println(F("Reiniciando en 10 segundos por fallo de Firebase..."));
+    delay(10000);
+    ESP.restart();
   }
-}
-
-void web::enviar(dato data[], int n) {
-  ensureLogin();
-  // 💡 OPTIMIZACIÓN: Lógica de reconexión centralizada y limpia
-  if (!WiFiConfig.isConnected()) {
-    Serial.println(F("❌ Sin conexión WiFi. Omitiendo envío a Firebase."));
-    return;
-  }
-
-  // Intenta re-inicializar si Firebase no está listo
-  if (!Firebase.ready()) {
-    Serial.println(F("Reconectando a Firebase..."));
-    if (!firebaseInit()) { // Intenta re-inicializar. Si falla, sale.
-      Serial.println(F("⚠️ Re-inicialización de Firebase fallida. Omitiendo envío."));
-      return;
-    }
-  }
-  
-  if (Firebase.ready()) {
-    for (int i = 0; i < n; i++) {
-      char path[64];
-      snprintf(path, sizeof(path), "/sensorData/%s", data[i].etiquetaFirebase);
-      
-      // 💡 OPTIMIZACIÓN: Verificar el resultado de la operación de envío
-      if (!Firebase.RTDB.setFloat(&fbdo, path, data[i].valor)) {
-        String er = fbdo.errorReason();
-        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiquetaFirebase, er.c_str());
-
-        // Si es problema de token, reautentica una vez y reintenta
-        if (er.indexOf("token is not ready") >= 0 || fbdo.httpCode() == 401 || fbdo.httpCode() == 403) {
-          if (ensureLogin()) {
-            if (!Firebase.RTDB.setFloat(&fbdo, path, data[i].valor)) {
-              Serial.printf("❌ Reintento falló %s: %s\n", data[i].etiquetaFirebase, fbdo.errorReason().c_str());
-            }
-          }
-        }
-      }
-
-    }
-    Serial.println(F("-> ✅ Datos de sensores enviados a Firebase."));
-  }
-
 }
 
 bool web::ensureLogin() {
-
-  // Si ya está listo, nada que hacer
-  if (Firebase.ready()) return true;
-
-  // Mantén el mismo chequeo de WiFi que usas en el resto de la clase
-  if (!WiFiConfig.isConnected()) return false;
-
-  // Cargar credenciales desde Secrets.h (ya incluidas por Web.h)
-  // y asegurar que config/auth tengan valores
-  if (config.api_key.length() == 0) {
-    config.api_key      = key;     // <-- antes: FIREBASE_API_KEY
-    config.database_url = url;     // <-- antes: FIREBASE_DATABASE_URL
-    auth.user.email     = email;   // <-- antes: USER_EMAIL
-    auth.user.password  = password;// <-- antes: USER_PASSWORD
-
-    Firebase.reconnectWiFi(true);
-    fbdo.setResponseSize(4096);
-    config.timeout.serverResponse = FIREBASE_TIMEOUT_MS;
-    config.token_status_callback = tokenStatusCallback;
-  }
-
-  // Intentar (re)inicializar
-  Firebase.begin(&config, &auth);
-
-  unsigned long t0 = millis();
-  while (!Firebase.ready() && millis() - t0 < FIREBASE_TIMEOUT_MS) {
-    delay(100);
-  }
-
   if (!Firebase.ready()) {
-    Serial.printf("Auth falló: %s\n",
-                  config.signer.tokens.error.message.c_str());
-    return false;
+    Serial.println(F("Firebase no está listo. Forzando reconexión..."));
+    if (!firebaseInit()) {
+        return false;
+    }
   }
-
   return true;
 }
 
+void web::enviar(dato data[], int n) {
+  if (!WiFiConfig.isConnected()) {
+    Serial.println(F("Aviso: WiFi no conectado. Omitiendo envío de datos."));
+    return;
+  }
 
-
+  bool error_en_envio = false;
+  for (int i = 0; i < n; ++i) {
+    if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
+      // El envío fue exitoso
+    } else {
+      String errorReason = fbdo.errorReason();
+      Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
+      error_en_envio = true;
+      // Si el error es por token, forzar reconexión y reintentar UNA VEZ.
+      if (errorReason.indexOf("token") != -1) {
+        Serial.println(F("🔥 Token inválido. Forzando reconexión completa..."));
+        if (firebaseInit()) {
+          Serial.println(F("✅ Reconexión exitosa. Reintentando envío..."));
+          if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
+            Serial.printf("✅ Reintento exitoso para %s\n", data[i].etiqueta);
+            error_en_envio = false; // Se corrigió el error para este dato.
+          } else {
+            Serial.printf("❌ Reintento falló para %s: %s\n", data[i].etiqueta, fbdo.errorReason().c_str());
+          }
+        } else {
+          Serial.println(F("❌ Fallo en la reconexión. Se reintentará en el próximo ciclo."));
+          break; // Salir del bucle si la reconexión falla
+        }
+      }
+    }
+  }
+  
+  if (!error_en_envio) {
+    Serial.println(F("-> ✅ Datos de sensores enviados a Firebase."));
+  } else {
+    Serial.println(F("-> ❌ Ocurrieron errores al enviar algunos datos."));
+  }
+}
