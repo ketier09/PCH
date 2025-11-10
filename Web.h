@@ -14,6 +14,7 @@ public:
   
   void set_up();
   void enviar(dato data[], int n);
+  bool ensureLogin();
 
 private:
   // 💡 OPTIMIZACIÓN: Mover a privado para encapsulamiento
@@ -28,5 +29,4 @@ private:
   
   void syncTime();
   bool firebaseInit(); // 💡 OPTIMIZACIÓN: Cambiar a bool para control de flujo
-  bool ensureLogin();
 };

@@ -82,12 +82,14 @@ void web::set_up() {
   if (WiFiConfig.isConnected()) { 
     syncTime();
     firebaseInit();
+    delay(1000);
   } else {
     Serial.println(F("⚠️ WiFi no conectado, servicios NTP/Firebase omitidos en set_up."));
   }
 }
 
 void web::enviar(dato data[], int n) {
+  ensureLogin();
   // 💡 OPTIMIZACIÓN: Lógica de reconexión centralizada y limpia
   if (!WiFiConfig.isConnected()) {
     Serial.println(F("❌ Sin conexión WiFi. Omitiendo envío a Firebase."));
