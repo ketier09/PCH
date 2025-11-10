@@ -17,7 +17,7 @@ void web::syncTime() {
   const int max_intentos = NTP_MAX_ATTEMPTS; // Uso de constante de 15s
   
   while (!getLocalTime(&timeinfo) && intentos < max_intentos) {
-    Serial.print(F("......."));
+    Serial.print(F("."));
     delay(500);
     intentos++;
   }
@@ -51,7 +51,7 @@ bool web::firebaseInit() {
   
   unsigned long startTime = millis();
   while (!Firebase.ready() && millis() - startTime < FIREBASE_TIMEOUT_MS) {
-    Serial.print(F("......."));
+    Serial.print(F("."));
     delay(500);
   }
 
@@ -99,6 +99,12 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
+  // Verificar conexión antes de intentar enviar
+  if (!ensureLogin()) {
+    Serial.println(F("-> ❌ No se pudo asegurar la conexión a Firebase. Saltando ciclo de envío."));
+    return;
+  }
+
   bool error_en_envio = false;
   for (int i = 0; i < n; ++i) {
     if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
@@ -107,21 +113,12 @@ void web::enviar(dato data[], int n) {
       String errorReason = fbdo.errorReason();
       Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
       error_en_envio = true;
-      // Si el error es por token, forzar reconexión y reintentar UNA VEZ.
+      // Si el error es por token, forzar reconexión para el próximo ciclo.
       if (errorReason.indexOf("token") != -1) {
-        Serial.println(F("🔥 Token inválido. Forzando reconexión completa..."));
-        if (firebaseInit()) {
-          Serial.println(F("✅ Reconexión exitosa. Reintentando envío..."));
-          if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
-            Serial.printf("✅ Reintento exitoso para %s\n", data[i].etiqueta);
-            error_en_envio = false; // Se corrigió el error para este dato.
-          } else {
-            Serial.printf("❌ Reintento falló para %s: %s\n", data[i].etiqueta, fbdo.errorReason().c_str());
-          }
-        } else {
-          Serial.println(F("❌ Fallo en la reconexión. Se reintentará en el próximo ciclo."));
-          break; // Salir del bucle si la reconexión falla
-        }
+        Serial.println(F("🔥 Token inválido detectado. Se forzará la reconexión en el próximo ciclo."));
+        // Forzamos la reconexión, pero no reintentamos inmediatamente para evitar bucles.
+        firebaseInit(); 
+        break; // Salir del bucle for y esperar al siguiente llamado de enviar()
       }
     }
   }

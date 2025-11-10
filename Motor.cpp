@@ -5,6 +5,7 @@ motor::motor(byte p, int e1, int e2, int e3, int e4)
 
 void motor::set_up() {
   servo.attach(pin, 500, 2500);
+  servo.write(estados[0]);
 }
 
 void motor::siguiente_estado(){

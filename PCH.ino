@@ -44,7 +44,7 @@ Led generadores(LED_R, LED_G, LED_B,
                 72,  219, 35,
                 252, 0,   0
                 );
-motor mo_compuerta(COMPUERTA, 0, 45, 135, 180);
+motor mo_compuerta(COMPUERTA, 0, 60, 120, 180);
 
 //----------------- Pulsadores (Callbacks) -----------------
 
