@@ -39,10 +39,10 @@ actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
 };
 
 Led generadores(LED_R, LED_G, LED_B,
-                0,0,0,
-                0,0,0,
-                0,0,0,
-                0,0,0
+                0,   0,   0,
+                245, 106, 0,
+                72,  219, 35,
+                252, 0,   0
                 );
 motor mo_compuerta(COMPUERTA, 0, 45, 135, 180);
 
