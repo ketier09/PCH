@@ -58,6 +58,9 @@ bool web::firebaseInit() {
 
   if (Firebase.ready()) {
     Serial.println(F("\n✅ Conexión con Firebase establecida."));
+    
+    Serial.println("Estabilizando token de autenticación...");
+    delay(2000);
     // Reintentar stream
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
       Serial.print(F("⚠️ Stream falló al inicio: "));
