@@ -102,6 +102,7 @@ void web::enviar(dato data[], int n) {
 
         if (errorReason.indexOf("token") != -1) {
             Serial.println(F("🔥 Token inválido detectado. Se forzará la reconexión en el próximo ciclo."));
+            Firebase.signOut(fbdo);
             lastTokenRefreshTime = 0; // Forzar el refresco en la siguiente llamada a `enviar`
             break; // Salir del bucle for, no intentar enviar más datos en este ciclo
         }
