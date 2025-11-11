@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 #include "Web.h"
 #include <addons/TokenHelper.h>
 
@@ -61,15 +60,12 @@ bool web::firebaseInit() {
     delay(1000); // Dar un segundo extra para estabilización interna del token
     // Reintentar stream
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-      Serial.print(F("⚠ Stream falló al inicio: "));
+      Serial.print(F("⚠️ Stream falló al inicio: "));
       Serial.println(stream.errorReason().c_str());
     } else {
        Serial.println(F("✅ Stream de comandos iniciado."));
     }
     return true; // Éxito
-=======
-h
->>>>>>> Stashed changes
   } else {
     Serial.println(F("\n❌ Fallo al conectar con Firebase."));
     return false; // Fracaso
@@ -87,25 +83,9 @@ void web::set_up() {
   }
 }
 
-bool web::ensureLogin() {
-  if (!Firebase.ready()) {
-    Serial.println(F("Firebase no está listo. Forzando reconexión..."));
-    if (!firebaseInit()) {
-        return false;
-    }
-  }
-  return true;
-}
-
 void web::enviar(dato data[], int n) {
   if (!WiFiConfig.isConnected()) {
     Serial.println(F("Aviso: WiFi no conectado. Omitiendo envío de datos."));
-    return;
-  }
-
-  // Verificar conexión antes de intentar enviar
-  if (!ensureLogin()) {
-    Serial.println(F("-> ❌ No se pudo asegurar la conexión a Firebase. Saltando ciclo de envío."));
     return;
   }
 
@@ -117,12 +97,21 @@ void web::enviar(dato data[], int n) {
       String errorReason = fbdo.errorReason();
       Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
       error_en_envio = true;
-      // Si el error es por token, forzar reconexión para el próximo ciclo.
+      // Si el error es por token, forzar reconexión y reintentar UNA VEZ.
       if (errorReason.indexOf("token") != -1) {
-        Serial.println(F("🔥 Token inválido detectado. Se forzará la reconexión en el próximo ciclo."));
-        // Forzamos la reconexión, pero no reintentamos inmediatamente para evitar bucles.
-        firebaseInit(); 
-        break; // Salir del bucle for y esperar al siguiente llamado de enviar()
+        Serial.println(F("🔥 Token inválido. Forzando reconexión completa..."));
+        if (firebaseInit()) {
+          Serial.println(F("✅ Reconexión exitosa. Reintentando envío..."));
+          if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
+            Serial.printf("✅ Reintento exitoso para %s\n", data[i].etiqueta);
+            error_en_envio = false; // Se corrigió el error para este dato.
+          } else {
+            Serial.printf("❌ Reintento falló para %s: %s\n", data[i].etiqueta, fbdo.errorReason().c_str());
+          }
+        } else {
+          Serial.println(F("❌ Fallo en la reconexión. Se reintentará en el próximo ciclo."));
+          break; // Salir del bucle si la reconexión falla
+        }
       }
     }
   }
@@ -132,4 +121,5 @@ void web::enviar(dato data[], int n) {
   } else {
     Serial.println(F("-> ❌ Ocurrieron errores al enviar algunos datos."));
   }
+}
 }
