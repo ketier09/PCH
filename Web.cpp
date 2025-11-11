@@ -56,7 +56,6 @@ bool web::firebaseInit() {
 
   if (Firebase.ready()) {
     Serial.println(F("\n✅ Conexión con Firebase establecida."));
-    lastTokenRefreshTime = millis(); // Actualiza el tiempo del último refresco
     delay(1000); 
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
       Serial.print(F("⚠️ Stream falló al inicio: "));
@@ -87,34 +86,41 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
-  // Refresco proactivo del token cada 45 minutos
-  if (millis() - lastTokenRefreshTime > (45 * 60 * 1000)) {
-    Serial.println(F("Refrescando token de Firebase de forma proactiva..."));
-    firebaseInit();
-  }
-
-  bool error_en_envio = false;
+  bool error_general = false;
   for (int i = 0; i < n; ++i) {
-    if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
+    bool enviado = Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor);
+    
+    if (!enviado) {
         String errorReason = fbdo.errorReason();
-        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
-        error_en_envio = true;
-
         if (errorReason.indexOf("token") != -1) {
-            Serial.println(F("🔥 Token inválido detectado. Se forzará la reconexión en el próximo ciclo."));
-            Firebase.RTDB.endStream(stream); // Detener stream antes de limpiar auth
+            Serial.printf("🔥 Token inválido para %s. Forzando reconexión completa...\n", data[i].etiqueta);
+            
+            Firebase.RTDB.endStream(&stream); // Detener stream antes de limpiar auth
             memset(&auth, 0, sizeof(FirebaseAuth)); // Limpiar credenciales
-            lastTokenRefreshTime = 0; // Forzar el refresco en la siguiente llamada a `enviar`
-            break; // Salir del bucle for, no intentar enviar más datos en este ciclo
+            
+            if (firebaseInit()) {
+                Serial.println(F("✅ Reconexión exitosa. Reintentando envío..."));
+                if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
+                    Serial.printf("✅ Reintento exitoso para %s.\n", data[i].etiqueta);
+                } else {
+                    Serial.printf("❌ Reintento falló para %s: %s\n", data[i].etiqueta, fbdo.errorReason().c_str());
+                    error_general = true;
+                }
+            } else {
+                Serial.println(F("❌ Fallo en la reconexión. Omitiendo el resto de envíos en este ciclo."));
+                error_general = true;
+                break; // Salir del bucle si la reconexión falla
+            }
+        } else {
+            Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
+            error_general = true;
         }
     }
   }
   
-  if (!error_en_envio) {
+  if (!error_general) {
     Serial.println(F("-> ✅ Datos de sensores enviados a Firebase."));
   } else {
     Serial.println(F("-> ❌ Ocurrieron errores al enviar algunos datos."));
   }
 }
-
-
