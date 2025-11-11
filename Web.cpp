@@ -29,7 +29,6 @@ void web::syncTime() {
   }
 }
 
-// 💡 OPTIMIZACIÓN: Cambiar a bool para indicar éxito/fracaso
 bool web::firebaseInit() {
   if (!WiFiConfig.isConnected()) {
       Serial.println(F("❌ WiFi no conectado. Fallo al iniciar Firebase."));
@@ -43,10 +42,10 @@ bool web::firebaseInit() {
 
   Firebase.reconnectWiFi(true);
   fbdo.setResponseSize(4096);
-  config.timeout.serverResponse = FIREBASE_TIMEOUT_MS; // Uso de constante
+  config.timeout.serverResponse = FIREBASE_TIMEOUT_MS;
 
   Serial.println(F("Conectando a Firebase..."));
-  config.token_status_callback = tokenStatusCallback; // logs de estado del token
+  config.token_status_callback = tokenStatusCallback;
   Firebase.begin(&config, &auth);
   
   unsigned long startTime = millis();
@@ -57,18 +56,18 @@ bool web::firebaseInit() {
 
   if (Firebase.ready()) {
     Serial.println(F("\n✅ Conexión con Firebase establecida."));
-    delay(1000); // Dar un segundo extra para estabilización interna del token
-    // Reintentar stream
+    lastTokenRefreshTime = millis(); // Actualiza el tiempo del último refresco
+    delay(1000); 
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
       Serial.print(F("⚠️ Stream falló al inicio: "));
       Serial.println(stream.errorReason().c_str());
     } else {
        Serial.println(F("✅ Stream de comandos iniciado."));
     }
-    return true; // Éxito
+    return true;
   } else {
     Serial.println(F("\n❌ Fallo al conectar con Firebase."));
-    return false; // Fracaso
+    return false;
   }
 }
 
@@ -76,7 +75,6 @@ void web::set_up() {
   WiFiConfig.begin();
   syncTime();
   if (!firebaseInit()) {
-    // Si la inicialización falla, podemos intentar reiniciar o entrar en un modo de error.
     Serial.println(F("Reiniciando en 10 segundos por fallo de Firebase..."));
     delay(10000);
     ESP.restart();
@@ -89,30 +87,24 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
+  // Refresco proactivo del token cada 45 minutos
+  if (millis() - lastTokenRefreshTime > (45 * 60 * 1000)) {
+    Serial.println(F("Refrescando token de Firebase de forma proactiva..."));
+    firebaseInit();
+  }
+
   bool error_en_envio = false;
   for (int i = 0; i < n; ++i) {
-    if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
-      // El envío fue exitoso
-    } else {
-      String errorReason = fbdo.errorReason();
-      Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
-      error_en_envio = true;
-      // Si el error es por token, forzar reconexión y reintentar UNA VEZ.
-      if (errorReason.indexOf("token") != -1) {
-        Serial.println(F("🔥 Token inválido. Forzando reconexión completa..."));
-        if (firebaseInit()) {
-          Serial.println(F("✅ Reconexión exitosa. Reintentando envío..."));
-          if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
-            Serial.printf("✅ Reintento exitoso para %s\n", data[i].etiqueta);
-            error_en_envio = false; // Se corrigió el error para este dato.
-          } else {
-            Serial.printf("❌ Reintento falló para %s: %s\n", data[i].etiqueta, fbdo.errorReason().c_str());
-          }
-        } else {
-          Serial.println(F("❌ Fallo en la reconexión. Se reintentará en el próximo ciclo."));
-          break; // Salir del bucle si la reconexión falla
+    if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
+        String errorReason = fbdo.errorReason();
+        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
+        error_en_envio = true;
+
+        if (errorReason.indexOf("token") != -1) {
+            Serial.println(F("🔥 Token inválido detectado. Se forzará la reconexión en el próximo ciclo."));
+            lastTokenRefreshTime = 0; // Forzar el refresco en la siguiente llamada a `enviar`
+            break; // Salir del bucle for, no intentar enviar más datos en este ciclo
         }
-      }
     }
   }
   
