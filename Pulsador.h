@@ -10,7 +10,7 @@ public:
   void update();
 
 private:
-  static constexpr unsigned long DEBOUNCE_MS = 50; // 💡 OPTIMIZACIÓN: Renombrado
+  static constexpr unsigned long DEBOUNCE_MS = 100; // 💡 OPTIMIZACIÓN: Renombrado
 
   const byte pin;
   // 💡 OPTIMIZACIÓN: Variable que indica si el botón es HIGH-Active (e.g. no usa pullup)
