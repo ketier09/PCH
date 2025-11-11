@@ -86,16 +86,18 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
+  // Si Firebase no está listo, intenta reconectar. Si falla, sal del método.
   if (!Firebase.ready()) {
     Serial.println(F("! Firebase no está listo. Intentando reconectar..."));
     if (!firebaseInit()) {
       Serial.println(F("! La reconexión falló. Se reintentará en el próximo ciclo."));
-      return;
+      return; // Salir y esperar al próximo ciclo de envío.
     }
   }
 
   bool error_general = false;
   for (int i = 0; i < n; ++i) {
+    // Re-verificar antes de cada envío por si el token expiró entre envíos.
     if (Firebase.ready()) {
       if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
         String errorReason = fbdo.errorReason();
@@ -105,6 +107,7 @@ void web::enviar(dato data[], int n) {
     } else {
         Serial.printf("❌ Omitiendo envío de %s: Firebase no está listo.\n", data[i].etiqueta);
         error_general = true;
+        // Si no está listo, no tiene sentido seguir en el bucle.
         break;
     }
   }
