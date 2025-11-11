@@ -45,7 +45,7 @@ void PantallaCustom::actualizar(dato data[]) {
     dibujar_imagen(0);
     
     tft.setCursor(130, 40);
-    tft.print(imagenes[indiceActual].string_lugar);
+    tft.print(imagenes[indiceActual+1].string_lugar);
     dibujar_imagen(indiceActual+1);
     
     mostrarDato(170, 100, "Cota:", cotas[indiceActual], "msnm");
