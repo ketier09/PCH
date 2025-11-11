@@ -21,6 +21,8 @@ private:
   FirebaseAuth auth;
   FirebaseConfig config;
   
+  unsigned long lastTokenRefreshTime = 0;
+
   // Constantes para tiempos de espera
   static constexpr int FIREBASE_TIMEOUT_MS = 30000;
   static constexpr int NTP_MAX_ATTEMPTS = 30; // 15 segundos (30 * 500ms)
