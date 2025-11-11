@@ -71,8 +71,8 @@ float ultrasonico::reading(uint32_t timeout_us) {
   nivel = techo - distancia_m;
 
   if (!isnan(nivel)) {
-    if (nivel < piso)  nivel = piso;
-    if (nivel > techo) nivel = techo;
+    if (nivel < piso)  nivel = NAN;
+    if (nivel > techo) nivel = NAN;
     
     if (isnan(nivel_f)) nivel_f = nivel;
     nivel_f = suavizador * nivel + (1.0f - suavizador) * nivel_f;

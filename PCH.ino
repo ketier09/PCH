@@ -84,22 +84,31 @@ const char* generadoresActivosExplicacion[5] = {"Apagados", "1 encendido", "2 en
 
 // 💡 OPTIMIZACIÓN: Se usa const dato data[]& para pasar la referencia constante.
 void serial_enviar(const dato data[]) { 
+
+  static unsigned long ultimoEnvio = 0;     // Guarda el tiempo del último envío
+  const unsigned long intervalo = 2000;     // Intervalo en ms (ajusta a gusto)
+
+  // ⏱ Verifica si ya pasó el tiempo necesario
+  if (millis() - ultimoEnvio < intervalo) {
+    return; // Si no ha pasado, salimos sin imprimir
+  }
+  ultimoEnvio = millis(); // Se actualiza el tiempo del último envío
+
   Serial.println(F("\n===================== DATOS DEL SISTEMA ====================="));
-  
-  // 💡 OPTIMIZACIÓN: Se usa la constante DatoCount del archivo Datos.h
+
   for (int i = 0; i < DatoCount; i++) { 
     Serial.print(F(" - "));
     Serial.print(data[i].etiqueta);
     Serial.print(F(": "));
     if (i == cantidadGeneradoresActivos) {
       Serial.print(generadoresActivosExplicacion[(int)data[cantidadGeneradoresActivos].valor]);
-    }else{
+    } else {
       Serial.print(data[i].valor, 2);
     }
     Serial.print(F(" "));
     Serial.println(data[i].unidad);
   }
-  
+
   Serial.println(F("=============================================================\n"));
 }
 
