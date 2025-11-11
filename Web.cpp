@@ -86,39 +86,29 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
+  // Si Firebase no está listo, intenta reconectar. Si falla, sal del método.
+  if (!Firebase.ready()) {
+    Serial.println(F("! Firebase no está listo. Intentando reconectar..."));
+    if (!firebaseInit()) {
+      Serial.println(F("! La reconexión falló. Se reintentará en el próximo ciclo."));
+      return; // Salir y esperar al próximo ciclo de envío.
+    }
+  }
+
   bool error_general = false;
   for (int i = 0; i < n; ++i) {
-    bool enviado = Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor);
-    
-    if (!enviado) {
+    // Re-verificar antes de cada envío por si el token expiró entre envíos.
+    if (Firebase.ready()) {
+      if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
         String errorReason = fbdo.errorReason();
-        if (errorReason.indexOf("token") != -1) {
-<<<<<<< Updated upstream
-            Serial.printf("🔥 Token inválido para %s. Forzando reconexión completa...\n", data[i].etiqueta);
-            
-=======
-            Serial.println(F("🔥 Token inválido detectado. Se forzará la reconexión en el próximo ciclo."));
->>>>>>> Stashed changes
-            Firebase.RTDB.endStream(&stream); // Detener stream antes de limpiar auth
-            memset(&auth, 0, sizeof(FirebaseAuth)); // Limpiar credenciales
-            
-            if (firebaseInit()) {
-                Serial.println(F("✅ Reconexión exitosa. Reintentando envío..."));
-                if (Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
-                    Serial.printf("✅ Reintento exitoso para %s.\n", data[i].etiqueta);
-                } else {
-                    Serial.printf("❌ Reintento falló para %s: %s\n", data[i].etiqueta, fbdo.errorReason().c_str());
-                    error_general = true;
-                }
-            } else {
-                Serial.println(F("❌ Fallo en la reconexión. Omitiendo el resto de envíos en este ciclo."));
-                error_general = true;
-                break; // Salir del bucle si la reconexión falla
-            }
-        } else {
-            Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
-            error_general = true;
-        }
+        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
+        error_general = true;
+      }
+    } else {
+        Serial.printf("❌ Omitiendo envío de %s: Firebase no está listo.\n", data[i].etiqueta);
+        error_general = true;
+        // Si no está listo, no tiene sentido seguir en el bucle.
+        break;
     }
   }
   
