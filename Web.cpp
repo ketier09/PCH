@@ -56,9 +56,10 @@ bool web::firebaseInit() {
 
   if (Firebase.ready()) {
     Serial.println(F("\n✅ Conexión con Firebase establecida."));
+    lastTokenRefreshTime = millis(); // Actualiza el tiempo del último refresco
     delay(1000); 
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-      Serial.print(F("⚠️ Stream falló al inicio: "));
+      Serial.print(F("⚠ Stream falló al inicio: "));
       Serial.println(stream.errorReason().c_str());
     } else {
        Serial.println(F("✅ Stream de comandos iniciado."));
@@ -86,29 +87,24 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
-  // Si Firebase no está listo, intenta reconectar. Si falla, sal del método.
-  if (!Firebase.ready()) {
-    Serial.println(F("! Firebase no está listo. Intentando reconectar..."));
-    if (!firebaseInit()) {
-      Serial.println(F("! La reconexión falló. Se reintentará en el próximo ciclo."));
-      return; // Salir y esperar al próximo ciclo de envío.
-    }
+  // Refresco proactivo del token cada 50 minutos para evitar expiración.
+  // Un token de Firebase dura 60 minutos.
+  if (millis() - lastTokenRefreshTime > (50 * 60 * 1000)) {
+    Serial.println(F("Refrescando token de Firebase de forma proactiva..."));
+    firebaseInit();
+  }
+  
+  if (!Firebase.ready()){
+      Serial.println(F("! Firebase no está listo. Omitiendo ciclo de envío."));
+      return;
   }
 
   bool error_general = false;
   for (int i = 0; i < n; ++i) {
-    // Re-verificar antes de cada envío por si el token expiró entre envíos.
-    if (Firebase.ready()) {
-      if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
-        String errorReason = fbdo.errorReason();
-        Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
-        error_general = true;
-      }
-    } else {
-        Serial.printf("❌ Omitiendo envío de %s: Firebase no está listo.\n", data[i].etiqueta);
-        error_general = true;
-        // Si no está listo, no tiene sentido seguir en el bucle.
-        break;
+    if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
+      String errorReason = fbdo.errorReason();
+      Serial.printf("❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
+      error_general = true;
     }
   }
   
