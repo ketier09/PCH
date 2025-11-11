@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 #include "Web.h"
 #include <addons/TokenHelper.h>
 
@@ -66,6 +67,9 @@ bool web::firebaseInit() {
        Serial.println(F("✅ Stream de comandos iniciado."));
     }
     return true; // Éxito
+=======
+h
+>>>>>>> Stashed changes
   } else {
     Serial.println(F("\n❌ Fallo al conectar con Firebase."));
     return false; // Fracaso
