@@ -93,8 +93,12 @@ void web::enviar(dato data[], int n) {
     if (!enviado) {
         String errorReason = fbdo.errorReason();
         if (errorReason.indexOf("token") != -1) {
+<<<<<<< Updated upstream
             Serial.printf("🔥 Token inválido para %s. Forzando reconexión completa...\n", data[i].etiqueta);
             
+=======
+            Serial.println(F("🔥 Token inválido detectado. Se forzará la reconexión en el próximo ciclo."));
+>>>>>>> Stashed changes
             Firebase.RTDB.endStream(&stream); // Detener stream antes de limpiar auth
             memset(&auth, 0, sizeof(FirebaseAuth)); // Limpiar credenciales
             
