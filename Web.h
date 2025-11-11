@@ -20,8 +20,6 @@ private:
   FirebaseData stream;
   FirebaseAuth auth;
   FirebaseConfig config;
-  
-  unsigned long lastTokenRefreshTime = 0;
 
   // Constantes para tiempos de espera
   static constexpr int FIREBASE_TIMEOUT_MS = 30000;
