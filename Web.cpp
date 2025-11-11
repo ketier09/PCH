@@ -87,18 +87,29 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
-  // Refresco proactivo del token cada 50 minutos para evitar expiración.
-  // Un token de Firebase dura 60 minutos.
+  // Refresco proactivo del token cada 50 minutos.
   if (millis() - lastTokenRefreshTime > (50 * 60 * 1000)) {
     Serial.println(F("Refrescando token de Firebase de forma proactiva..."));
-    firebaseInit();
-  }
-  
-  if (!Firebase.ready()){
-      Serial.println(F("! Firebase no está listo. Omitiendo ciclo de envío."));
-      return;
+    if (firebaseInit()) { // Se re-inicializa
+        lastTokenRefreshTime = millis();
+    }
   }
 
+  // --- LÓGICA DE RECUPERACIÓN CRÍTICA ---
+  if (!Firebase.ready()){ 
+    Serial.println(F("! Firebase no está listo. Intentando re-autenticación CRÍTICA..."));
+    
+    // Intenta re-inicializar el token. Si firebaseInit() es exitoso, Firebase.ready() será verdadero.
+    if (firebaseInit()) { 
+        Serial.println(F("✅ Re-autenticación exitosa. Reintentando envío en este ciclo."));
+        lastTokenRefreshTime = millis(); // Reinicia el contador de refresco proactivo
+    } else {
+        Serial.println(F("❌ Fallo en re-autenticación. Omitiendo ciclo de envío."));
+        return; // Omitir el envío si la re-autenticación falla
+    }
+  }
+  // ----------------------------------------
+  
   bool error_general = false;
   for (int i = 0; i < n; ++i) {
     if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
