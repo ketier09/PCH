@@ -201,8 +201,8 @@ void loop() {
       data[caudalIngreso].valor     = caudalimetros[0].reading();
       data[caudalCaptacion].valor   = ultrasonicos[0].flujo();
       data[caudalGarantia].valor    = ultrasonicos[1].flujo();
-      data[cotaGeneracion].valor    = 0.0;
-      data[cotaIngreso].valor       = 0.0;
+      data[cotaGeneracion].valor    = cota_desde_flujo(data[caudalGeneracion].valor, 1, 0, 0.01);
+      data[cotaIngreso].valor       = cota_desde_flujo(data[caudalIngreso].valor, 1, 0, 0.01);
       data[cotaCaptacion].valor     = ultrasonicos[0].reading();
       data[cotaGarantia].valor      = ultrasonicos[1].reading();
       data[cantidadGeneradoresActivos].valor =  (float)generadoresActivos();
@@ -224,7 +224,15 @@ void loop() {
 
 // Devuelve la cota (nivel) para alcanzar 'flujo'.
 // Parámetros deben ser los mismos que usas hacia adelante.
-float cota_desde_flujo(float flujo, float ancho, float piso, float manningInverso, float raizCuadrada_pendiente, float kappa){
+float cota_desde_flujo(float flujo, float ancho, float piso, float raizCuadrada_pendiente){
+    const float ESCALA = 0.1f; // m/mm
+    const float kappa = 5.0;
+    const float manningInverso = 1.0f / 0.013f;
+
+    
+    ancho = ancho * ESCALA;
+    piso = piso * ESCALA;
+
     if (!(flujo > 0.0f)) return piso; // sin flujo, espejo: h=0 → cota=piso
 
     // Constantes y helpers

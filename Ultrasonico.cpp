@@ -60,24 +60,47 @@ float ultrasonico::reading(uint32_t timeout_us) {
     if (actual_duracion != 0) break;
     
     if ((uint32_t)(micros() - t0) > timeout_us) {
+      // timeout sigue siendo un error real (no hay dato), se devuelve NaN
+      if (advertencias) {
+        Serial.println(F("[Ultrasonico] Advertencia: timeout esperando eco."));
+      }
       return NAN;
     }
   }
 
   // Conversión fuera de los bloques críticos
-  float distancia_cm = actual_duracion * MM_POR_US; // Uso de MM_POR_US
-  float distancia_m = distancia_cm * ESCALA;
+  float distancia_mm = actual_duracion * MM_POR_US; // Uso de MM_POR_US (mm/us)
+  float distancia_m  = distancia_mm * ESCALA;       // ESCALA: mm->m (o tu factor)
 
+  // nivel = techo - distancia_m (m)
   nivel = techo - distancia_m;
 
   if (!isnan(nivel)) {
-    if (nivel < piso)  nivel = NAN;
-    if (nivel > techo) nivel = NAN;
-    
-    if (isnan(nivel_f)) nivel_f = nivel;
-    nivel_f = suavizador * nivel + (1.0f - suavizador) * nivel_f;
+    const bool fuera_rango = (nivel < piso) || (nivel > techo);
+
+    // ⚠️ Ahora NO anulamos la medición con NaN si está fuera de rango.
+    //    En su lugar, avisamos y retornamos igualmente el valor.
+    if (fuera_rango) {
+      if (advertencias) {
+        Serial.print(F("[Ultrasonico] Advertencia: medición fuera de rango. "));
+        Serial.print(F("Valor="));
+        Serial.print(nivel, 3);
+        Serial.print(F(" (piso="));
+        Serial.print(piso, 3);
+        Serial.print(F(", techo="));
+        Serial.print(techo, 3);
+        Serial.println(F(")"));
+      }
+      // Evitamos alimentar el filtro con un valor fuera de rango:
+      // nivel_f se mantiene (si existe) con su último valor válido.
+    } else {
+      // Dentro de rango: actualizar filtro exponencial normalmente
+      if (isnan(nivel_f)) nivel_f = nivel;
+      nivel_f = suavizador * nivel + (1.0f - suavizador) * nivel_f;
+    }
   }
   
+  // Devolver SIEMPRE el valor calculado (dentro o fuera del rango).
   return nivel;
 }
 

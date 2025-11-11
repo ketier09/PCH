@@ -34,6 +34,8 @@ private:
 
   float nivel = NAN;
   float nivel_f = nivel;
+  bool advertencias = true;
+
   volatile uint32_t disparo = 0;
   volatile uint32_t duracion = 0;
 
