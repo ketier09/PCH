@@ -16,7 +16,6 @@ public:
   void enviar(dato data[], int n);
 
 private:
-  // 💡 OPTIMIZACIÓN: Mover a privado para encapsulamiento
   FirebaseData fbdo;
   FirebaseData stream;
   FirebaseAuth auth;
@@ -27,6 +26,5 @@ private:
   static constexpr int NTP_MAX_ATTEMPTS = 30; // 15 segundos (30 * 500ms)
   
   void syncTime();
-  bool firebaseInit(); // 💡 OPTIMIZACIÓN: Cambiar a bool para control de flujo
-  bool ensureLogin();
+  bool firebaseInit();
 };
