@@ -122,4 +122,3 @@ void web::enviar(dato data[], int n) {
     Serial.println(F("-> ❌ Ocurrieron errores al enviar algunos datos."));
   }
 }
-}
