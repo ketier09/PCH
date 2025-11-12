@@ -190,6 +190,7 @@ void loop() {
       // --- BLOQUE CRÍTICO (Actualización de data[]) ---
         
       data[caudalGeneracion].valor  = ultrasonicos[0].flujo()-ultrasonicos[1].flujo();
+        data[caudalGeneracion].valor  = (data[caudalGeneracion].valor > 13) ? 13 : data[caudalGeneracion].valor;
       data[caudalIngreso].valor     = caudalimetros[0].reading();
       data[caudalCaptacion].valor   = ultrasonicos[0].flujo();
       data[caudalGarantia].valor    = ultrasonicos[1].flujo();

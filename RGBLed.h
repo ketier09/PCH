@@ -25,12 +25,13 @@ private:
     uint8_t _rPin, _gPin, _bPin;
     LedType _tipo;
 
-    static const uint8_t _colorCount = 4;
+    static const uint8_t _colorCount = 5;
     const Color _colors[_colorCount] = {
         {0,   0,   0},     // Negro / apagado
         {245, 106, 0},     // Naranja
         {72,  219, 35},    // Verde brillante
-        {252, 0,   0}      // Rojo brillante
+        {252, 0,   0},     // Rojo brillante
+        {255, 255, 255}
     };
 
     uint8_t mapLevel(uint8_t v) const;
