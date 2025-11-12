@@ -68,11 +68,6 @@ void PantallaCustom::dibujar_imagen(uint8_t indice) {
   tft.drawRGBBitmap(imagenes[indice].x_index, imagenes[indice].y_index, imagenes[indice].pixels, imagenes[indice].width, imagenes[indice].height);
 }
 
-double PantallaCustom::reducirDecimales(double numero, int decimales) {
-    double factor = pow(10, decimales);
-    return round(numero * factor) / factor;
-}
-
 
 
 
