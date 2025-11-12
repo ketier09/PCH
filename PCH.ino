@@ -10,7 +10,7 @@
 #include "Actuador_digital.h"
 #include "Pulsador.h"
 #include "Conexiones.h"
-#include "Led.h"
+#include "RGBLed.h"
 
 // --- Sincronización de Tareas ---
 // Mutex para proteger el acceso a la matriz de datos global 'data[]'
@@ -38,12 +38,7 @@ actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
   {ACTUADOR_DIGITAL_0}
 };
 
-Led generadores(LED_R, LED_G, LED_B,
-                0,   0,   0,
-                245, 106, 0,
-                72,  219, 35,
-                252, 0,   0
-                );
+RGBLed generadores(LED_R, LED_G, LED_B, RGBLed::ANODO_COMUN);
 motor mo_compuerta(COMPUERTA, 0, 60, 120, 180);
 
 //----------------- Pulsadores (Callbacks) -----------------
@@ -205,7 +200,7 @@ void loop() {
       data[cantidadGeneradoresActivos].valor =  (float)generadoresActivos(data[caudalGeneracion].valor);
 
       
-      generadores.establecer_estado((uint8_t)data[cantidadGeneradoresActivos].valor);
+      generadores.showColor((uint8_t)data[cantidadGeneradoresActivos].valor);
       
       // Envío por Serial (lectura de datos)
       serial_enviar(data);
