@@ -38,7 +38,7 @@ actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
   {ACTUADOR_DIGITAL_0}
 };
 
-RGBLed generadores(LED_R, LED_G, LED_B, RGBLed::ANODO_COMUN);
+RGBLed generadores(LED_R, LED_G, LED_B, RGBLed::CATODO_COMUN);
 motor mo_compuerta(COMPUERTA, 0, 60, 120, 180);
 
 //----------------- Pulsadores (Callbacks) -----------------
