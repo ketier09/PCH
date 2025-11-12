@@ -87,18 +87,15 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
-  if (millis() - lastTokenRefreshTime > (50 * 60 * 1000)) {
-    Serial.println(F("Refrescando token de Firebase de forma proactiva..."));
+ // Si Firebase no está listo, intenta reconectar. Si falla, sal del método.
+  if (!Firebase.ready()) {
+    Serial.println(F("! Firebase no está listo. Intentando reconectar..."));
     if (!firebaseInit()) {
-        Serial.println(F("! La reconexión proactiva falló. Se reintentará en el próximo ciclo."));
-        return;
+      Serial.println(F("! La reconexión falló. Se reintentará en el próximo ciclo."));
+      return; // Salir y esperar al próximo ciclo de envío.
     }
   }
   
-  if (!Firebase.ready()){
-      Serial.println(F("! Firebase no está listo. Omitiendo ciclo de envío."));
-      return;
-  }
 
   bool error_general = false;
   for (int i = 0; i < n; ++i) {
@@ -115,3 +112,4 @@ void web::enviar(dato data[], int n) {
     Serial.println(F("-> ❌ Ocurrieron errores al enviar algunos datos."));
   }
 }
+
