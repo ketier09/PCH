@@ -67,10 +67,7 @@ web pagina;
 
 // -------------------- Lógica para decidir generadores --------------------
 
-int generadoresActivos() {
-  // 💡 NOTA: Se asume que caudalimetros[1] es el caudal de captación.
-  // El reading() se hace fuera del Mutex lock para no bloquear la tarea de lectura
-  const float flow = ultrasonicos[1].flujo(); 
+uint8_t generadoresActivos(float flow) {
   
   if (flow <= 3.0f)  return 0;
   if (flow <= 6.0f)  return 1;
@@ -205,10 +202,10 @@ void loop() {
       data[cotaIngreso].valor       = cota_desde_flujo(data[caudalIngreso].valor, 10, 0, 0.01);
       data[cotaCaptacion].valor     = ultrasonicos[0].reading();
       data[cotaGarantia].valor      = ultrasonicos[1].reading();
-      data[cantidadGeneradoresActivos].valor =  (float)generadoresActivos();
+      data[cantidadGeneradoresActivos].valor =  (float)generadoresActivos(data[caudalGeneracion].valor);
 
       
-      generadores.establecer_estado(generadoresActivos());
+      generadores.establecer_estado((uint8_t)data[cantidadGeneradoresActivos].valor);
       
       // Envío por Serial (lectura de datos)
       serial_enviar(data);
