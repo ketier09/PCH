@@ -22,7 +22,7 @@ private:
   static constexpr float NIVEL_0 = 1268.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
   static constexpr float suavizador = 0.70f; 
-  static constexpr float kappa = 5.0f;
+  static constexpr float kappa = 2.0f;
 
   const byte trig;
   const byte echo;
@@ -34,7 +34,7 @@ private:
 
   float nivel = NAN;
   float nivel_f = nivel;
-  bool advertencias = true;
+  bool advertencias = false;
 
   volatile uint32_t disparo = 0;
   volatile uint32_t duracion = 0;

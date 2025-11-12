@@ -17,7 +17,7 @@ void web::syncTime() {
   const int max_intentos = NTP_MAX_ATTEMPTS; // Uso de constante de 15s
   
   while (!getLocalTime(&timeinfo) && intentos < max_intentos) {
-    Serial.print(F("."));
+    Serial.println(F("\n......"));
     delay(500);
     intentos++;
   }
@@ -50,7 +50,7 @@ bool web::firebaseInit() {
   
   unsigned long startTime = millis();
   while (!Firebase.ready() && millis() - startTime < FIREBASE_TIMEOUT_MS) {
-    Serial.print(F("."));
+    Serial.println(F("\n......"));
     delay(500);
   }
 
