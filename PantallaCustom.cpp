@@ -20,17 +20,17 @@ void PantallaCustom::set_up() {
 
 void PantallaCustom::actualizar(dato data[]) {
   float flujos[NUM_ETIQUETAS] = { 
-    reducirDecimales(data[caudalIngreso].valor,     1),
-    reducirDecimales(data[caudalCaptacion].valor,   1),
-    reducirDecimales(data[caudalGarantia].valor,    1),
-    reducirDecimales(data[caudalGeneracion].valor,  1)
+    data[caudalIngreso].valor,
+    data[caudalCaptacion].valor,
+    data[caudalGarantia].valor,
+    data[caudalGeneracion].valor
   };
 
   float cotas[NUM_ETIQUETAS] = { 
-    reducirDecimales(data[cotaIngreso].valor,     1),
-    reducirDecimales(data[cotaCaptacion].valor,   1),
-    reducirDecimales(data[cotaGarantia].valor,    1),
-    reducirDecimales(data[cotaGeneracion].valor,  1)
+    data[cotaIngreso].valor,
+    data[cotaCaptacion].valor,
+    data[cotaGarantia].valor,
+    data[cotaGeneracion].valor
   };
 
 
