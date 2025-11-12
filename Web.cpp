@@ -14,10 +14,10 @@ void web::syncTime() {
   struct tm timeinfo;
   
   int intentos = 0; 
-  const int max_intentos = NTP_MAX_ATTEMPTS; // Uso de constante de 15s
+  const int max_intentos = NTP_MAX_ATTEMPTS;
   
   while (!getLocalTime(&timeinfo) && intentos < max_intentos) {
-    Serial.println(F("\n......"));
+    Serial.print(F("."));
     delay(500);
     intentos++;
   }
@@ -50,16 +50,16 @@ bool web::firebaseInit() {
   
   unsigned long startTime = millis();
   while (!Firebase.ready() && millis() - startTime < FIREBASE_TIMEOUT_MS) {
-    Serial.println(F("\n......"));
+    Serial.print(F("."));
     delay(500);
   }
 
   if (Firebase.ready()) {
     Serial.println(F("\n✅ Conexión con Firebase establecida."));
-    lastTokenRefreshTime = millis(); // Actualiza el tiempo del último refresco
-    delay(1000); 
+    lastTokenRefreshTime = millis();
+    delay(1000); // Pausa crucial para permitir que el token se estabilice.
     if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-      Serial.print(F("⚠ Stream falló al inicio: "));
+      Serial.print(F("⚠️ Stream falló al inicio: "));
       Serial.println(stream.errorReason().c_str());
     } else {
        Serial.println(F("✅ Stream de comandos iniciado."));
@@ -87,29 +87,19 @@ void web::enviar(dato data[], int n) {
     return;
   }
 
-  // Refresco proactivo del token cada 50 minutos.
   if (millis() - lastTokenRefreshTime > (50 * 60 * 1000)) {
     Serial.println(F("Refrescando token de Firebase de forma proactiva..."));
-    if (firebaseInit()) { // Se re-inicializa
-        lastTokenRefreshTime = millis();
+    if (!firebaseInit()) {
+        Serial.println(F("! La reconexión proactiva falló. Se reintentará en el próximo ciclo."));
+        return;
     }
+  }
+  
+  if (!Firebase.ready()){
+      Serial.println(F("! Firebase no está listo. Omitiendo ciclo de envío."));
+      return;
   }
 
-  // --- LÓGICA DE RECUPERACIÓN CRÍTICA ---
-  if (!Firebase.ready()){ 
-    Serial.println(F("! Firebase no está listo. Intentando re-autenticación CRÍTICA..."));
-    
-    // Intenta re-inicializar el token. Si firebaseInit() es exitoso, Firebase.ready() será verdadero.
-    if (firebaseInit()) { 
-        Serial.println(F("✅ Re-autenticación exitosa. Reintentando envío en este ciclo."));
-        lastTokenRefreshTime = millis(); // Reinicia el contador de refresco proactivo
-    } else {
-        Serial.println(F("❌ Fallo en re-autenticación. Omitiendo ciclo de envío."));
-        return; // Omitir el envío si la re-autenticación falla
-    }
-  }
-  // ----------------------------------------
-  
   bool error_general = false;
   for (int i = 0; i < n; ++i) {
     if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
