@@ -25,6 +25,7 @@ private:
 
   void dibujar_imagen(uint8_t indice);
   void mostrarDato(int x, int y, const char* etiqueta, float valor, const char* unidad);
+  double reducirDecimales(double numero, int decimales);
 };
 
 

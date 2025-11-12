@@ -20,17 +20,17 @@ void PantallaCustom::set_up() {
 
 void PantallaCustom::actualizar(dato data[]) {
   float flujos[NUM_ETIQUETAS] = { 
-    data[caudalIngreso].valor, 
-    data[caudalCaptacion].valor, 
-    data[caudalGarantia].valor, 
-    data[caudalGeneracion].valor
+    reducirDecimales(data[caudalIngreso].valor,     1),
+    reducirDecimales(data[caudalCaptacion].valor,   1),
+    reducirDecimales(data[caudalGarantia].valor,    1),
+    reducirDecimales(data[caudalGeneracion].valor,  1)
   };
 
   float cotas[NUM_ETIQUETAS] = { 
-    data[cotaIngreso].valor, 
-    data[cotaCaptacion].valor, 
-    data[cotaGarantia].valor, 
-    data[cotaGeneracion].valor
+    reducirDecimales(data[cotaIngreso].valor,     1),
+    reducirDecimales(data[cotaCaptacion].valor,   1),
+    reducirDecimales(data[cotaGarantia].valor,    1),
+    reducirDecimales(data[cotaGeneracion].valor,  1)
   };
 
 
@@ -66,6 +66,11 @@ void PantallaCustom::mostrarDato(int x, int y, const char* etiqueta, float valor
 
 void PantallaCustom::dibujar_imagen(uint8_t indice) {
   tft.drawRGBBitmap(imagenes[indice].x_index, imagenes[indice].y_index, imagenes[indice].pixels, imagenes[indice].width, imagenes[indice].height);
+}
+
+double PantallaCustom::reducirDecimales(double numero, int decimales) {
+    double factor = pow(10, decimales);
+    return round(numero * factor) / factor;
 }
 
 
