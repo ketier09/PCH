@@ -8,7 +8,7 @@ const char PAGE_INDEX[] PROGMEM = R"rawliteral(
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Configuración WiFi</title>
+    <title>Configuracion WiFi</title>
   </head>
   <body>
     <div class="card">
@@ -29,7 +29,7 @@ const char PAGE_SAVED[] PROGMEM = R"rawliteral(
 <html>
   <body>
     <h3>✅ Credenciales guardadas correctamente.</h3>
-    <p>El dispositivo se reiniciará...</p>
+    <p>El dispositivo se reiniciara...</p>
   </body>
 </html>
 )rawliteral";
@@ -39,7 +39,7 @@ const char PAGE_ERROR[] PROGMEM = R"rawliteral(
 <html>
   <body>
     <h3>❌ Datos inválidos.</h3>
-    <p>Por favor, vuelva atrás e inténtelo de nuevo.</p>
+    <p>Por favor, vuelva atras e intentelo de nuevo.</p>
   </body>
 </html>
 )rawliteral";

@@ -21,9 +21,9 @@ SemaphoreHandle_t dataMutex;
 // Usamos constexpr size_t para el tamaño de las matrices (más claro en los bucles)
 const size_t NUM_CAUDALIMETROS = 3;
 caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
-  {CAUD_0},
-  {CAUD_1},
-  {CAUD_2}
+  { CAUD_0 },
+  { CAUD_1 },
+  { CAUD_2 }
 };
 
 const size_t NUM_ULTRASONICOS = 2;
@@ -35,7 +35,7 @@ ultrasonico ultrasonicos[NUM_ULTRASONICOS] = {
 
 const size_t NUM_ACTUADORES = 1;
 actuador_digital actuadores_digitales[NUM_ACTUADORES] = {
-  {ACTUADOR_DIGITAL_0}
+  { ACTUADOR_DIGITAL_0 }
 };
 
 RGBLed generadores(LED_R, LED_G, LED_B, RGBLed::CATODO_COMUN);
@@ -48,7 +48,7 @@ void IRAM_ATTR on_0() { mo_compuerta.siguiente_estado(); }
 
 const size_t NUM_PULSADORES = 1;
 pulsador pulsadores[NUM_PULSADORES] = {
-  {PULSADOR_0, on_0, LOW},
+  { PULSADOR_0, on_0, LOW }
 };
 
 //----------------- Pantallas -----------------
@@ -190,7 +190,7 @@ void loop() {
       // --- BLOQUE CRÍTICO (Actualización de data[]) ---
         
       data[caudalGeneracion].valor  = ultrasonicos[0].flujo()-ultrasonicos[1].flujo();
-        data[caudalGeneracion].valor  = (data[caudalGeneracion].valor > 13) ? 13 : data[caudalGeneracion].valor;
+        //data[caudalGeneracion].valor  = (data[caudalGeneracion].valor > 13) ? 13 : data[caudalGeneracion].valor;
       data[caudalIngreso].valor     = caudalimetros[0].reading();
       data[caudalCaptacion].valor   = ultrasonicos[0].flujo();
       data[caudalGarantia].valor    = ultrasonicos[1].flujo();
