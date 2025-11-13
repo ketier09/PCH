@@ -19,11 +19,10 @@ SemaphoreHandle_t dataMutex;
 // ----------------- Declaraciones de Componentes -----------------
 
 // Usamos constexpr size_t para el tamaño de las matrices (más claro en los bucles)
-const size_t NUM_CAUDALIMETROS = 3;
+const size_t NUM_CAUDALIMETROS = 2;
 caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
   { CAUD_0 },
-  { CAUD_1 },
-  { CAUD_2 }
+  { CAUD_1 }
 };
 
 const size_t NUM_ULTRASONICOS = 2;
@@ -202,6 +201,11 @@ void loop() {
 
       
       generadores.showColor((uint8_t)data[cantidadGeneradoresActivos].valor);
+      if(data[caudalGeneracion].valor >= 0.0) {
+        actuadores_digitales[0].encender();
+      } else {
+        actuadores_digitales[0].apagar();
+      }
       
       // Envío por Serial (lectura de datos)
       serial_enviar(data);

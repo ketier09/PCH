@@ -117,7 +117,6 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 |:--------------------|:---------------------------|:---------------|
 | Compuerta (servo)   | D13                        | Compuerta      |
 | Actuador digital 0  | D12                        | Motobomba sara |
-| Actuador digital 1  | D14                        | El led         |
 
 ---
 
