@@ -13,7 +13,7 @@ public:
 private:
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
-  static constexpr float periodo_de_las_mediciones = 2000; // ms
+  static constexpr float periodo_de_las_mediciones = 1000; // ms
   // 450 pulsos/L → 450000 pulsos/m^3. Resultado: m^3/s
   static constexpr float PULSES_PER_M3 = 450000.0f;
   static constexpr float FLOW_CALIBRATION_FACTOR =
