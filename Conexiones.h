@@ -42,8 +42,7 @@ enum PCH_Pines : uint8_t {
 
 enum PCH_Devices_Pines : uint8_t {
   // --- Caudalímetros (entradas con interrupción) ---
-  CAUD_0       = PCH_D32,
-  CAUD_1       = PCH_D33,
+  CAUD_0       = PCH_D33,
 
   // --- Ultrasonidos: TRIG = salida, ECHO = entrada ---
   ULTRA_TRIG_0 = PCH_D25,

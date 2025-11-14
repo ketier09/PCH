@@ -19,10 +19,9 @@ SemaphoreHandle_t dataMutex;
 // ----------------- Declaraciones de Componentes -----------------
 
 // Usamos constexpr size_t para el tamaño de las matrices (más claro en los bucles)
-const size_t NUM_CAUDALIMETROS = 2;
+const size_t NUM_CAUDALIMETROS = 1;
 caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
-  { CAUD_0 },
-  { CAUD_1 }
+  { CAUD_0 }
 };
 
 const size_t NUM_ULTRASONICOS = 2;
@@ -188,7 +187,7 @@ void loop() {
     if (xSemaphoreTake(dataMutex, 10 / portTICK_PERIOD_MS) == pdTRUE) {
       // --- BLOQUE CRÍTICO (Actualización de data[]) ---
         
-      data[caudalGeneracion].valor  = caudalimetros[1].reading();
+      data[caudalGeneracion].valor  = ultrasonicos[0].flujo()-ultrasonicos[1].flujo();
       data[caudalIngreso].valor     = caudalimetros[0].reading();
       data[caudalCaptacion].valor   = ultrasonicos[0].flujo();
       data[caudalGarantia].valor    = ultrasonicos[1].flujo();
