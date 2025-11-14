@@ -3,6 +3,7 @@
 caudalimetro::caudalimetro(byte p) : pin(p) {}
 
 void caudalimetro::set_up() {
+  // ... (código de set_up() sin cambios)
   if (!digitalPinIsValid(pin)) {
     lastError = "Pin inválido para caudalímetro";
     Serial.print(F("\n[Caudalímetro] "));
@@ -51,7 +52,7 @@ float caudalimetro::reading() {
   }
 
   const uint32_t now = millis();
-  if (now - lastMillis >= periodo_de_las_mediciones) {
+  if (now - lastMillis >= (uint32_t)periodo_de_las_mediciones) {
     lastMillis = now;
 
     uint32_t pulses;
@@ -59,13 +60,27 @@ float caudalimetro::reading() {
     pulses = pulseCount;
     pulseCount = 0;
     portEXIT_CRITICAL(&mux);
+    
+    // Cálculo de Frecuencia (Pulsos/s)
+    float pulseFrequency = (float)pulses * (1000.0f / periodo_de_las_mediciones);
 
-    flowRate = pulses / FLOW_CALIBRATION_FACTOR;
+    // Cálculo del caudal instantáneo (L/min)
+    flowRate = (pulseFrequency / FLOW_CALIBRATION_FACTOR) * 60.0f;
+    
+    // --- Aplicación del Filtro Exponencial Móvil (EMA) ---
+    if (isnan(flowRate_f)) {
+      // Inicialización: si es el primer valor, se toma directamente
+      flowRate_f = flowRate; 
+    } else {
+      flowRate_f = suavizador * flowRate + (1.0f - suavizador) * flowRate_f;
+    }
+
   }
-  return flowRate * kappa;
+  
+  // Retorna el valor filtrado (L/min) convertido a m³/s
+  return flowRate_f * kappa; 
 }
 
 const char* caudalimetro::getLastError() {
   return lastError;
 }
-

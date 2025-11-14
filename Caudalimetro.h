@@ -13,19 +13,20 @@ public:
 private:
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
-  static constexpr float periodo_de_las_mediciones = 1000; // ms
-  // 450 pulsos/L → 450000 pulsos/m^3. Resultado: m^3/s
-  static constexpr float PULSES_PER_M3 = 450000.0f;
+  static constexpr float periodo_de_las_mediciones = 1000.0f; // ms (Se usa float para cálculos)
+  // 450 pulsos/L
+  static constexpr float PULSES_PER_LITTER = 450.0f;
   static constexpr float FLOW_CALIBRATION_FACTOR =
-      PULSES_PER_M3 * (periodo_de_las_mediciones / 1000.0f);
-  // 💡 OPTIMIZACIÓN: Si flowRate ya es m³/s, kappa debe ser 1.0f para mantener la unidad.
-  static constexpr float kappa = 1.0f; 
+      PULSES_PER_LITTER * (periodo_de_las_mediciones / 1000.0f);
+  static constexpr float suavizador = 0.30f;
+  static constexpr float kappa = 1.0f; //min*m³/s*L
 
   const byte pin;
   const char* lastError = nullptr;
 
   uint32_t lastMillis = 0;
-  float    flowRate   = 0.0f;          // m^3/s   
+  float    flowRate   = NAN;
+  float    flowRate_f = NAN;
   bool initialized = false;
 
   volatile uint32_t pulseCount = 0;
@@ -33,5 +34,4 @@ private:
 
   // ISR genérica: estática y con arg
   static void IRAM_ATTR isrThunk(void* arg);
-
 };
