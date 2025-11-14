@@ -3,15 +3,13 @@
 caudalimetro::caudalimetro(byte p) : pin(p) {}
 
 void caudalimetro::set_up() {
-  pinMode(pin, INPUT_PULLUP);
+  pinMode(pin, INPUT);
 
   attachInterruptArg(pin, &caudalimetro::isrThunk, this, FALLING);
-  initialized = true;
 }
 
 void IRAM_ATTR caudalimetro::isrThunk(void* arg) {
   auto* self = static_cast<caudalimetro*>(arg);
-  
   self->pulseCount++;
 }
 
@@ -31,7 +29,7 @@ float caudalimetro::reading() {
     float pulseFrequency = (float)pulses * (1000.0f / periodo_de_las_mediciones);
 
     // Cálculo del caudal instantáneo (L/min)
-    flowRate = (pulseFrequency / FLOW_CALIBRATION_FACTOR) * 60.0f;
+    flowRate = pulseFrequency / FLOW_CALIBRATION_FACTOR;
     
     // --- Aplicación del Filtro Exponencial Móvil (EMA) ---
     if (isnan(flowRate_f)) {
@@ -44,5 +42,5 @@ float caudalimetro::reading() {
   }
   
   // Retorna el valor filtrado (L/min) convertido a m³/s
-  return flowRate_f * kappa; 
+  return flowRate_f * kappa;
 }
