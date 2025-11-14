@@ -3,53 +3,19 @@
 caudalimetro::caudalimetro(byte p) : pin(p) {}
 
 void caudalimetro::set_up() {
-  // ... (código de set_up() sin cambios)
-  if (!digitalPinIsValid(pin)) {
-    lastError = "Pin inválido para caudalímetro";
-    Serial.print(F("\n[Caudalímetro] "));
-    Serial.println(lastError);
-    return;
-  }
+  pinMode(pin, INPUT_PULLUP);
 
-  pinMode(pin, INPUT);
-
-  int irq = digitalPinToInterrupt(pin);
-  if (irq == NOT_AN_INTERRUPT) {
-    lastError = "El pin no soporta interrupciones";
-    Serial.print(F("\n[Caudalímetro] "));
-    Serial.println(lastError);
-    return;
-  }
-
-  attachInterruptArg(irq, &caudalimetro::isrThunk, this, FALLING);
+  attachInterruptArg(pin, &caudalimetro::isrThunk, this, FALLING);
   initialized = true;
 }
 
 void IRAM_ATTR caudalimetro::isrThunk(void* arg) {
   auto* self = static_cast<caudalimetro*>(arg);
-
-  // Evita desbordes del contador
-  if (self->pulseCount < UINT32_MAX) {
-    self->pulseCount++;
-  } else {
-    self->errorFlag = true;
-  }
+  
+  self->pulseCount++;
 }
 
 float caudalimetro::reading() {
-  if (!initialized) {
-    lastError = "Error: se llamó a reading() antes de set_up()";
-    Serial.print(F("\n[Caudalímetro] "));
-    Serial.println(lastError);
-    return -1;  // Valor inválido
-  }
-
-  if (errorFlag) {
-    lastError = "Overflow: pulseCount llegó a UINT32_MAX";
-    Serial.print(F("\n[Caudalímetro] "));
-    Serial.println(lastError);
-    errorFlag = false;
-  }
 
   const uint32_t now = millis();
   if (now - lastMillis >= (uint32_t)periodo_de_las_mediciones) {
@@ -79,8 +45,4 @@ float caudalimetro::reading() {
   
   // Retorna el valor filtrado (L/min) convertido a m³/s
   return flowRate_f * kappa; 
-}
-
-const char* caudalimetro::getLastError() {
-  return lastError;
 }

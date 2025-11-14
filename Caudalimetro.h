@@ -18,11 +18,10 @@ private:
   static constexpr float PULSES_PER_LITTER = 450.0f;
   static constexpr float FLOW_CALIBRATION_FACTOR =
       PULSES_PER_LITTER * (periodo_de_las_mediciones / 1000.0f);
-  static constexpr float suavizador = 1.0f;
+  static constexpr float suavizador = 0.3f;
   static constexpr float kappa = 1.0f; //min*m³/s*L
 
   const byte pin;
-  const char* lastError = nullptr;
 
   uint32_t lastMillis = 0;
   float    flowRate   = NAN;
@@ -30,7 +29,6 @@ private:
   bool initialized = false;
 
   volatile uint32_t pulseCount = 0;
-  volatile bool errorFlag = false;
 
   // ISR genérica: estática y con arg
   static void IRAM_ATTR isrThunk(void* arg);
