@@ -19,8 +19,8 @@ void IRAM_ATTR ultrasonico::isrThunk(void* arg) {
 // 💡 OPTIMIZACIÓN: Aplicación consistente de ESCALA a las constantes
 ultrasonico::ultrasonico(byte t, byte e, int c, float te, float pi, float a, float pe)
   : trig(t), echo(e), 
-    techo(te * ESCALA + NIVEL_0 + (float)c * ESCALA), 
-    piso(pi * ESCALA + NIVEL_0 + (float)c * ESCALA), 
+    techo(te * ESCALA + NIVEL_0 + (float)c), 
+    piso(pi * ESCALA + NIVEL_0 + (float)c), 
     ancho(a * ESCALA), 
     raizCuadrada_pendiente(pe) {}
     
