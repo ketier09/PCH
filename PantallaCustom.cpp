@@ -15,7 +15,7 @@ void PantallaCustom::set_up() {
   tft.fillScreen(ILI9341_GREEN); delay(500);
   tft.fillScreen(ILI9341_BLUE);  delay(500);
   tft.fillScreen(ILI9341_BLACK);
-  tft.print(F("Esperando internet"));
+  tft.print(F("\nEsperando internet\nConéctate a la red\n'ESP_CONFIG-F9D108'\ny entra a http://192.168.4.1\npara cargar credenciales"));
 }
 
 void PantallaCustom::actualizar(dato data[]) {
