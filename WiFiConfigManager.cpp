@@ -173,9 +173,15 @@ void WiFiConfigManager::startConfigPortal() {
   server.onNotFound(std::bind(&WiFiConfigManager::handleNotFound, this));
   server.begin();
 
+  
+  unsigned long trabajarSinInternet = millis() + 1000 * 60 * 2;
   while (true) {
     server.handleClient();
     delay(1);
+    if(millis() == trabajarSinInternet) {
+      Serial.println("\nIniciando modo sin conexión. Reinicie el ESP32 para reintentar.");
+      break;
+    }
   }
 }
 
