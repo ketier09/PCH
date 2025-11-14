@@ -10,27 +10,27 @@ void PantallaCustom::set_up() {
   tft.begin();
   tft.setRotation(3);
   tft.setFont(&FreeSansBold12pt7b);
-  tft.fillScreen(ILI9341_BLACK);
 
   tft.fillScreen(ILI9341_RED);   delay(500);
   tft.fillScreen(ILI9341_GREEN); delay(500);
   tft.fillScreen(ILI9341_BLUE);  delay(500);
   tft.fillScreen(ILI9341_BLACK);
+  tft.print(F("Esperando internet"));
 }
 
 void PantallaCustom::actualizar(dato data[]) {
   float flujos[NUM_ETIQUETAS] = { 
-    reducirDecimales(data[caudalIngreso].valor,     1),
-    reducirDecimales(data[caudalCaptacion].valor,   1),
-    reducirDecimales(data[caudalGarantia].valor,    1),
-    reducirDecimales(data[caudalGeneracion].valor,  1)
+    reducirDecimales(data[caudalIngreso].valor,     0),
+    reducirDecimales(data[caudalCaptacion].valor,   0),
+    reducirDecimales(data[caudalGarantia].valor,    0),
+    reducirDecimales(data[caudalGeneracion].valor,  0)
   };
 
   float cotas[NUM_ETIQUETAS] = { 
-    reducirDecimales(data[cotaIngreso].valor,     1),
-    reducirDecimales(data[cotaCaptacion].valor,   1),
-    reducirDecimales(data[cotaGarantia].valor,    1),
-    reducirDecimales(data[cotaGeneracion].valor,  1)
+    reducirDecimales(data[cotaIngreso].valor,     0),
+    reducirDecimales(data[cotaCaptacion].valor,   0),
+    reducirDecimales(data[cotaGarantia].valor,    0),
+    reducirDecimales(data[cotaGeneracion].valor,  0)
   };
 
 
