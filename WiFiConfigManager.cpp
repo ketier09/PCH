@@ -133,7 +133,7 @@ void WiFiConfigManager::handleNotFound() {
 }
 
 void WiFiConfigManager::startConfigPortal() {
-  Serial.println(F("🌐 Iniciando modo AP para configuración..."));
+  Serial.println(F("🌐📵 Iniciando modo AP para configuración..."));
   WiFi.mode(WIFI_AP);
 
   // -------- Build a unique AP name without ESP.getChipId() on ESP32 --------
