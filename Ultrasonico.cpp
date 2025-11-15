@@ -26,9 +26,9 @@ ultrasonico::ultrasonico(byte t, byte e, int c, float te, float pi, float a, flo
     
 void ultrasonico::set_up() {
   pinMode(trig, OUTPUT);
-  pinMode(echo, INPUT);
+  pinMode(echo, INPUT_PULLDOWN);
   digitalWrite(trig, LOW);
-  attachInterruptArg(echo, &ultrasonico::isrThunk, this, CHANGE);
+  attachInterruptArg(digitalPinToInterrupt(echo), &ultrasonico::isrThunk, this, CHANGE);
 }
 
 void ultrasonico::disparar() {
