@@ -221,7 +221,7 @@ void loop() {
 // Parámetros deben ser los mismos que usas hacia adelante.
 float cota_desde_flujo(float flujo, float ancho, float piso, float raizCuadrada_pendiente){
     const float ESCALA = 0.1f; // m/mm
-    const float kappa = 2.0;
+    const float kappa = 2.3;
     const float manningInverso = 1.0f / 0.013f;
 
     
