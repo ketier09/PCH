@@ -7,7 +7,6 @@ void IRAM_ATTR ultrasonico::isrThunk(void* arg) {
   if (digitalRead(self->echo)) {
     self->disparo = tiempo_actual; // RISING
   } else {
-    // 💡 OPTIMIZACIÓN: Cálculo fuera del bloque crítico ISR para mayor eficiencia
     const uint32_t duracion_calculada = tiempo_actual - self->disparo; 
     
     portENTER_CRITICAL_ISR(&self->mux);
