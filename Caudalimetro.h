@@ -8,7 +8,9 @@ public:
 
   void set_up();
   float reading();
-  const char* getLastError();
+
+  static void IRAM_ATTR isrThunk(void *p);
+  void IRAM_ATTR instance_isrThunk();
 
 private:
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
@@ -34,7 +36,4 @@ private:
   bool initialized = false;
 
   volatile uint32_t pulseCount = 0;
-
-  // ISR genérica: estática y con arg
-  static void IRAM_ATTR isrThunk(void* arg);
 };

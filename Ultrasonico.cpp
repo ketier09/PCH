@@ -1,18 +1,22 @@
 #include "Ultrasonico.h"
 
-void IRAM_ATTR ultrasonico::isrThunk(void* arg) {
-  auto* self = static_cast<ultrasonico*>(arg);
-  const uint32_t tiempo_actual = micros();
+void IRAM_ATTR ultrasonico::isrThunk(void *p) {
+    ultrasonico *self = static_cast<ultrasonico*>(p);
+    self->instance_isrThunk();
+}
+
+void IRAM_ATTR ultrasonico::instance_isrThunk() {
+    const uint32_t tiempo_actual = micros();
   
-  if (digitalRead(self->echo)) {
-    self->disparo = tiempo_actual; // RISING
-  } else {
-    const uint32_t duracion_calculada = tiempo_actual - self->disparo; 
+    if (digitalRead(echo)) {           // ya estás dentro del objeto
+        disparo = tiempo_actual;       // RISING
+    } else {
+        const uint32_t duracion_calculada = tiempo_actual - disparo; 
     
-    portENTER_CRITICAL_ISR(&self->mux);
-    self->duracion = duracion_calculada;
-    portEXIT_CRITICAL_ISR(&self->mux);
-  }
+        portENTER_CRITICAL_ISR(&mux);
+        duracion = duracion_calculada;
+        portEXIT_CRITICAL_ISR(&mux);
+    }
 }
 
 // 💡 OPTIMIZACIÓN: Aplicación consistente de ESCALA a las constantes
@@ -27,7 +31,7 @@ void ultrasonico::set_up() {
   pinMode(trig, OUTPUT);
   pinMode(echo, INPUT_PULLDOWN);
   digitalWrite(trig, LOW);
-  attachInterruptArg(digitalPinToInterrupt(echo), &ultrasonico::isrThunk, this, CHANGE);
+  attachInterruptArg(digitalPinToInterrupt(echo), ultrasonico::isrThunk, this, CHANGE);
 }
 
 void ultrasonico::disparar() {

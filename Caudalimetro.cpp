@@ -5,13 +5,16 @@ caudalimetro::caudalimetro(byte p) : pin(p) {}
 void caudalimetro::set_up() {
   pinMode(pin, INPUT_PULLDOWN);
 
-  attachInterruptArg(digitalPinToInterrupt(pin), &caudalimetro::isrThunk, this, FALLING);
+  attachInterruptArg(digitalPinToInterrupt(pin), isrThunk, this, FALLING);
   
 }
 
-void IRAM_ATTR caudalimetro::isrThunk(void* arg) {
-  auto* self = static_cast<caudalimetro*>(arg);
-  self->pulseCount++;
+void IRAM_ATTR caudalimetro::isrThunk(void *p) {
+  auto *self = static_cast<caudalimetro*>(p);
+  self->instance_isrThunk();
+}
+void caudalimetro::instance_isrThunk() {
+  pulseCount++;
 }
 
 float caudalimetro::reading() {

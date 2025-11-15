@@ -11,7 +11,8 @@ public:
   float reading(uint32_t timeout_us = 30000); // ~5 m máx
   float flujo();
 
-  static void IRAM_ATTR isrThunk(void* arg);
+  static void IRAM_ATTR isrThunk(void *p);
+  void IRAM_ATTR instance_isrThunk();    
 
 private:
   portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
