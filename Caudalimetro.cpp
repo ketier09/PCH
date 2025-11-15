@@ -5,7 +5,8 @@ caudalimetro::caudalimetro(byte p) : pin(p) {}
 void caudalimetro::set_up() {
   pinMode(pin, INPUT);
 
-  attachInterruptArg(pin, &caudalimetro::isrThunk, this, FALLING);
+  attachInterruptArg(digitalPinToInterrupt(pin), &caudalimetro::isrThunk, this, FALLING);
+  
 }
 
 void IRAM_ATTR caudalimetro::isrThunk(void* arg) {
