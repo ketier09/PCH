@@ -3,7 +3,7 @@
 caudalimetro::caudalimetro(byte p) : pin(p) {}
 
 void caudalimetro::set_up() {
-  pinMode(pin, INPUT);
+  pinMode(pin, INPUT_PULLDOWN);
 
   attachInterruptArg(digitalPinToInterrupt(pin), &caudalimetro::isrThunk, this, FALLING);
   
