@@ -63,9 +63,9 @@ enum PCH_Devices_Pines : uint8_t {
   LED_B = PCH_D22,
 
   // --- Pantalla TFT ILI9341 (SPI) ---
-  TFT_MOSI       = PCH_D23,
-  TFT_SCK        = PCH_D18,
-  TFT_CS         = PCH_D5,
-  TFT_RST        = PCH_D4,
-  TFT_DC         = PCH_D2   // <- renombrado (antes: TFT_PCH_DC)
+  TFT_MOSI       = PCH_D23, //Violeta
+  TFT_SCK        = PCH_D18, //Verde
+  TFT_CS         = PCH_D5,  //Naranja
+  TFT_RST        = PCH_D4,  //Amarillo
+  TFT_DC         = PCH_D2   //Azul
 };
