@@ -52,10 +52,10 @@ enum PCH_Devices_Pines : uint8_t {
 
   // --- Actuadores (salidas) ---
   COMPUERTA            = PCH_D13,
-  ACTUADOR_DIGITAL_0   = PCH_D12,
+  ACTUADOR_DIGITAL_0   = PCH_D27,
 
   // --- Pulsadores ---
-  PULSADOR_0     = PCH_D27,
+  PULSADOR_0     = PCH_D12,
 
   // --- Led ---
   LED_R = PCH_D19,
