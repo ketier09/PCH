@@ -7,7 +7,8 @@ public:
   motor(byte p, int e1, int e2, int e3, int e4);
 
   void set_up();
-  void siguiente_estado();
+  uint8_t siguiente_estado();
+  void showState(uint8_t index);
 
 private:
   static constexpr int n = 4; // Número de estados únicos (0 a 3)

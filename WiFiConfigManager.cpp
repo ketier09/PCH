@@ -52,7 +52,7 @@ WiFiConfigManager::WiFiConfigManager(const char* path) : filePath(path) {
 
 void WiFiConfigManager::begin() {
   if (!LittleFS.begin(true)) {
-    Serial.println(F("[WiFi] ❌ Error montando LittleFS."));
+    Serial.println(F("\n[WiFi] ❌ Error montando LittleFS."));
     return;
   }
   connect();
@@ -67,7 +67,7 @@ bool WiFiConfigManager::loadCredentials() {
   file.close();
 
   if (error || doc["ssid"].isNull() || doc["password"].isNull()) {
-    Serial.printf("[WiFi] ❌ Error deserializando JSON: %s\n", error.c_str());
+    Serial.printf("\n[WiFi] ❌ Error deserializando JSON: %s\n", error.c_str());
     return false;
   }
 
@@ -89,9 +89,9 @@ void WiFiConfigManager::saveCredentials(const char* newSsid, const char* newPass
   if (!file) return;
 
   if (serializeJson(doc, file) == 0) {
-    Serial.println(F("[WiFi] ❌ Error al serializar a LittleFS."));
+    Serial.println(F("\n[WiFi] ❌ Error al serializar a LittleFS."));
   } else {
-    Serial.println(F("✅ Credenciales guardadas en LittleFS."));
+    Serial.println(F("\n✅ Credenciales guardadas en LittleFS."));
   }
   file.close();
 }
@@ -99,7 +99,7 @@ void WiFiConfigManager::saveCredentials(const char* newSsid, const char* newPass
 void WiFiConfigManager::eraseCredentials() {
   if (LittleFS.exists(filePath)) {
     if (LittleFS.remove(filePath)) {
-      Serial.println(F("🗑️ Credenciales eliminadas."));
+      Serial.println(F("\n🗑️ Credenciales eliminadas."));
       memset(ssid, 0, sizeof(ssid));
       memset(password, 0, sizeof(password));
     }
@@ -121,7 +121,7 @@ void WiFiConfigManager::handleSave() {
     ESP.restart();
   } else {
     server.send_P(400, "text/html", PAGE_ERROR);
-    Serial.println(F("[WiFi] ❌ SSID o contraseña vacíos."));
+    Serial.println(F("\n[WiFi] ❌ SSID o contraseña vacíos."));
     delay(500);
   }
 }
@@ -131,7 +131,7 @@ void WiFiConfigManager::handleNotFound() {
 }
 
 void WiFiConfigManager::startConfigPortal() {
-  Serial.println(F("🌐📵 Iniciando modo AP para configuración..."));
+  Serial.println(F("\n🌐📵 Iniciando modo AP para configuración..."));
   WiFi.mode(WIFI_AP);
 
   String apName;
@@ -157,7 +157,7 @@ void WiFiConfigManager::startConfigPortal() {
   WiFi.softAP(apName.c_str());
 
   IPAddress ip = WiFi.softAPIP();
-  Serial.printf("Conéctate a la red '%s' y entra a http://%s\n",
+  Serial.printf("\nConéctate a la red '%s' y entra a http://%s\n",
                 apName.c_str(), ip.toString().c_str());
 
   server.on("/", HTTP_GET, std::bind(&WiFiConfigManager::handleRoot, this));
@@ -173,12 +173,12 @@ void WiFiConfigManager::startConfigPortal() {
 
 void WiFiConfigManager::connect() {
   if (!loadCredentials()) {
-    Serial.println(F("[WiFi] ❌ No hay credenciales guardadas."));
+    Serial.println(F("\n[WiFi] ❌ No hay credenciales guardadas."));
     startConfigPortal();
     return;
   }
 
-  Serial.printf("📶 Conectando a %s...\n", ssid);
+  Serial.printf("\n📶 Conectando a %s...\n", ssid);
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 

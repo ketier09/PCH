@@ -18,6 +18,16 @@ SemaphoreHandle_t dataMutex;
 
 // ----------------- Declaraciones de Componentes -----------------
 
+
+//----------------- Pantallas -----------------
+
+// 💡 CORRECCIÓN: Se utiliza el constructor optimizado de 4 índices para evitar redundancia.
+PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST);
+
+//----------------- Conexión web/Firebase -----------------
+
+web pagina;
+
 // Usamos constexpr size_t para el tamaño de las matrices (más claro en los bucles)
 const size_t NUM_CAUDALIMETROS = 1;
 caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
@@ -42,21 +52,12 @@ motor mo_compuerta(COMPUERTA, 0, 60, 120, 180);
 //----------------- Pulsadores (Callbacks) -----------------
 
 // 💡 OPTIMIZACIÓN: Las funciones on_X deben ser lo más rápidas posible.
-void IRAM_ATTR on_0() { mo_compuerta.siguiente_estado(); }
+void IRAM_ATTR on_0() { pagina.ordenCompuerta = mo_compuerta.siguiente_estado(); }
 
 const size_t NUM_PULSADORES = 1;
 pulsador pulsadores[NUM_PULSADORES] = {
   { PULSADOR_0, on_0, LOW }
 };
-
-//----------------- Pantallas -----------------
-
-// 💡 CORRECCIÓN: Se utiliza el constructor optimizado de 4 índices para evitar redundancia.
-PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST);
-
-//----------------- Conexión web/Firebase -----------------
-
-web pagina;
 
 // -------------------- Lógica para decidir generadores --------------------
 
@@ -154,6 +155,7 @@ void TaskLenta(void *pvParameters) {
   for (;;) {
 
     // 🔹 Procesar comandos remotos de Firebase
+    pagina.set_up();
     pagina.handleStream();  
 
     // 1) Toma snapshot rápido bajo mutex
@@ -174,6 +176,8 @@ void TaskLenta(void *pvParameters) {
 
 // -------------------- Loop (Core 1) --------------------
 void loop() {
+
+  mo_compuerta.showState(pagina.ordenCompuerta);
   
   // Los pulsadores deben ser verificados constantemente para baja latencia
   for (size_t i = 0; i < NUM_PULSADORES; i++) {

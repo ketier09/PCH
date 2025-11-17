@@ -8,7 +8,13 @@ void motor::set_up() {
   servo.write(estados[0]);
 }
 
-void motor::siguiente_estado(){
+
+void motor::showState(uint8_t index){
+  int estado_ciclico = index;
+  servo.write(estados[index]);
+}
+
+uint8_t motor::siguiente_estado(){
   // 1. Avanza el contador cíclico (0, 1, 2, 3, 4, 5, 0, ...)
   estado_ciclico = (estado_ciclico + 1) % MAX_SEQUENCE_LEN; // % 6
   
@@ -25,5 +31,6 @@ void motor::siguiente_estado(){
     posicionIndex = MAX_SEQUENCE_LEN - estado_ciclico;
   }
   
-  servo.write(estados[posicionIndex]);
+  showState(posicionIndex);
+  return posicionIndex;
 }

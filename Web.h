@@ -12,6 +12,7 @@ public:
     void set_up();
     void enviar(dato data[], int n);
     void handleStream(); // control remoto desde Firebase
+    uint8_t ordenCompuerta = 0;
 
 private:
     bool firebaseInit();

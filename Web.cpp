@@ -1,13 +1,12 @@
 #include "Web.h"
-#include "Motor.h"  // Para controlar mo_compuerta
 
-extern WiFiConfigManager WiFiConfig;
-extern motor mo_compuerta; // 👈 motor en minúscula (tu clase real)
+WiFiConfigManager WiFiConfig;
 
 // Prototipo del callback del token
 void tokenStatusCallback(TokenInfo info);
 
 void web::set_up() {
+    WiFiConfig.begin();
     syncTime();
     firebaseInit();
 }
@@ -77,11 +76,9 @@ void web::handleStream() {
         if (path.endsWith("/compuerta")) {
 
             if (value == "toggle")
-                mo_compuerta.siguiente_estado();
-            else if (value == "abrir")
-                mo_compuerta.abrir();
-            else if (value == "cerrar")
-                mo_compuerta.cerrar();
+                ordenCompuerta = (ordenCompuerta + 1) % 4;
+            else if (value == "abrir"){}
+            else if (value == "cerrar"){}
 
             Firebase.RTDB.setString(&fbdo, "/status/compuerta", value);
             Serial.println("[STREAM] ✔ Acción ejecutada");
