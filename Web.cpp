@@ -40,11 +40,7 @@ bool web::firebaseInit() {
   auth.user.email = email;
   auth.user.password = password;
 
-  // REFRESH AUTOMÁTICO DEL TOKEN (Permite escritura)
-  config.auto_refresh_token = true;
-  auth.token.uid = ""; // No forzar UID, Firebase asignará el correcto
-
-  // Reintentos y buffers
+ // Reintentos y buffers
   Firebase.reconnectWiFi(true);
   fbdo.setResponseSize(4096);
 
