@@ -83,32 +83,42 @@ void web::set_up() {
 }
 
 void web::enviar(dato data[], int n) {
+  
   if (!WiFiConfig.isConnected()) {
-    Serial.println(F("[Website] Aviso: WiFi no conectado. Omitiendo envío de datos."));
+    Serial.println(F("[Website] ⚠ WiFi no conectado, no se envían datos."));
     return;
   }
 
-  // Si Firebase no está listo, intenta reconectar. Si falla, sal del método.
   if (!Firebase.ready()) {
-    Serial.println(F("[Website] ! Firebase no está listo. Intentando reconectar..."));
+    Serial.println(F("[Website] ⏳ Token no listo, reintentando inicialización..."));
+
+    // Intentar inicializar Firebase de nuevo SOLO si no está listo
     if (!firebaseInit()) {
-      Serial.println(F("[Website] ! La reconexión falló. Se reintentará en el próximo ciclo."));
+      Serial.println(F("[Website] ❌ Firebase sigue no listo. No se envían datos."));
       return;
     }
+
+    // Tiempo para permitir que el token se estabilice
+    delay(1500);
   }
-  
+
+  Serial.println(F("[Website] 🔄 Enviando datos a Firebase..."));
+
   bool error_general = false;
+
   for (int i = 0; i < n; ++i) {
-    if (!Firebase.RTDB.setFloat(&fbdo, String("sensorData/") + data[i].etiquetaFirebase, data[i].valor)) {
-      String errorReason = fbdo.errorReason();
-      Serial.printf("[Website] ❌ Error enviando %s: %s\n", data[i].etiqueta, errorReason.c_str());
+    if (!Firebase.RTDB.setFloat(&fbdo,
+        String("sensorData/") + data[i].etiquetaFirebase,
+        data[i].valor)) {
+
+      Serial.printf("[Website] ❌ Error enviando %s: %s\n",
+        data[i].etiqueta,
+        fbdo.errorReason().c_str());
       error_general = true;
     }
   }
-  
+
   if (!error_general) {
-    Serial.println(F("-> ✅ Datos de sensores enviados a Firebase."));
-  } else {
-    Serial.println(F("[Website] -> ❌ Ocurrieron errores al enviar algunos datos."));
+    Serial.println(F("-> ✅ Datos enviados a Firebase correctamente."));
   }
 }
