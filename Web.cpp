@@ -1,5 +1,8 @@
 #include "Web.h"
 
+// Prototipo del callback del token
+void TokenStatusCallback(TokenInfo info);
+
 extern WiFiConfigManager WiFiConfig;
 
 void web::set_up() {
@@ -12,7 +15,7 @@ void web::set_up() {
 
 void web::syncTime() {
   Serial.println(F("[NTP] ⏳ Sincronizando hora..."));
-  configTime(-5 * 3600, 0, "pool.ntp.org", "time.nist.gov"); // UTC-5 Colombia
+  configTime(-5 * 3600, 0, "pool.ntp.org", "time.nist.gov"); // UTC-5
 
   for (int i = 0; i < NTP_MAX_ATTEMPTS; i++) {
     struct tm timeinfo;
@@ -36,16 +39,12 @@ bool web::firebaseInit() {
   auth.user.email = email;
   auth.user.password = password;
 
-<<<<<<< HEAD
-=======
- // Reintentos y buffers
->>>>>>> 58b1b1f875966a73ab6bf70d58401b26bfe40938
   Firebase.reconnectWiFi(true);
   fbdo.setResponseSize(4096);
-  config.token_status_callback = tokenStatusCallback;
+
+  config.token_status_callback = TokenStatusCallback;
 
   Firebase.begin(&config, &auth);
-
   Serial.println(F("[Firebase] ✓ Firebase iniciado."));
 
   Serial.println(F("⏳ Esperando autenticación completa..."));
@@ -94,16 +93,12 @@ void web::enviar(dato data[], int n) {
   bool error_general = false;
 
   for (int i = 0; i < n; ++i) {
-<<<<<<< HEAD
     String path = "/sensorData/" + String(data[i].etiquetaFirebase);
-    Serial.printf("[Website] 📌 Enviando a: %s → %.3f\n", path.c_str(), data[i].valor);
-=======
-    if (!Firebase.RTDB.setFloat(&fbdo,
-        String("/sensorData/") + data[i].etiquetaFirebase,
-        data[i].valor)) {
->>>>>>> 58b1b1f875966a73ab6bf70d58401b26bfe40938
 
-    if (!Firebase.RTDB.setFloat(&fbdo, path.c_str(), data[i].valor)) {
+    Serial.printf("[Website] 📌 Enviando a: %s → %.3f\n",
+                  path.c_str(), data[i].valor);
+
+    if (!Firebase.RTDB.setFloat(&fbdo, path, data[i].valor)) {
       Serial.printf("[Website] ❌ Error enviando %s: %s\n",
                     data[i].etiqueta,
                     fbdo.errorReason().c_str());
@@ -113,5 +108,18 @@ void web::enviar(dato data[], int n) {
 
   if (!error_general) {
     Serial.println(F("-> ✅ Datos enviados correctamente a Firebase."));
+  }
+}
+
+
+// IMPLEMENTACIÓN DEL CALLBACK DEL TOKEN
+void TokenStatusCallback(TokenInfo info) {
+  if (info.status == token_status_error) {
+    Serial.printf("[TOKEN] ❌ Error: %s\n",
+                  info.error.message.c_str());
+  } else if (info.status == token_status_ready) {
+    Serial.println("[TOKEN] 🔐 Token listo");
+  } else {
+    Serial.println("[TOKEN] 🔄 Token actualizándose...");
   }
 }
