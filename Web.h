@@ -9,6 +9,8 @@
 #include "Datos.h"
 #include "WiFiConfigManager.h"
 
+void tokenStatusCallback(TokenInfo info);
+
 class web {
 public:
   void set_up();

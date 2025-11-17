@@ -42,7 +42,8 @@ bool web::firebaseInit() {
   Firebase.reconnectWiFi(true);
   fbdo.setResponseSize(4096);
 
-  config.token_status_callback = TokenStatusCallback;
+config.token_status_callback = tokenStatusCallback;
+
 
   Firebase.begin(&config, &auth);
   Serial.println(F("[Firebase] ✓ Firebase iniciado."));
@@ -113,13 +114,27 @@ void web::enviar(dato data[], int n) {
 
 
 // IMPLEMENTACIÓN DEL CALLBACK DEL TOKEN
-void TokenStatusCallback(TokenInfo info) {
-  if (info.status == token_status_error) {
-    Serial.printf("[TOKEN] ❌ Error: %s\n",
-                  info.error.message.c_str());
-  } else if (info.status == token_status_ready) {
-    Serial.println("[TOKEN] 🔐 Token listo");
-  } else {
-    Serial.println("[TOKEN] 🔄 Token actualizándose...");
+void tokenStatusCallback(TokenInfo info) {
+  switch (info.status) {
+    case token_status_uninitialized:
+      Serial.println("[TOKEN] ⏳ Sin inicializar...");
+      break;
+    case token_status_on_request:
+      Serial.println("[TOKEN] 📨 Solicitando token...");
+      break;
+    case token_status_on_refresh:
+      Serial.println("[TOKEN] 🔄 Refrescando token...");
+      break;
+    case token_status_ready:
+      Serial.println("[TOKEN] 🔐 Token listo");
+      break;
+    case token_status_error:
+      Serial.printf("[TOKEN] ❌ Error: %s\n",
+                    info.error.message.c_str());
+      break;
+    default:
+      Serial.println("[TOKEN] ⚠ Estado desconocido...");
+      break;
   }
 }
+
