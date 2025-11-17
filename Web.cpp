@@ -30,46 +30,33 @@ void web::syncTime() {
 }
 
 bool web::firebaseInit() {
-  if (!WiFiConfig.isConnected()) {
-      Serial.println(F("[Website] ❌ WiFi no conectado. Fallo al iniciar Firebase."));
-      return false;
-  }
-  
-  config.api_key      = key;
+  config.api_key = key;
   config.database_url = url;
-  auth.user.email     = email;
-  auth.user.password  = password;
+
+  auth.user.email = email;       // <-- AÑADIR ESTO
+  auth.user.password = password; // <-- AÑADIR ESTO
 
   Firebase.reconnectWiFi(true);
   fbdo.setResponseSize(4096);
-  config.timeout.serverResponse = FIREBASE_TIMEOUT_MS;
 
-  Serial.println(F("Conectando a Firebase..."));
   config.token_status_callback = tokenStatusCallback;
-  Firebase.begin(&config, &auth);
-  
-  unsigned long startTime = millis();
-  while (!Firebase.ready() && millis() - startTime < FIREBASE_TIMEOUT_MS) {
-    Serial.print(F("....."));
-    delay(500);
-  }
 
-  if (Firebase.ready()) {
-    Serial.println(F("\n✅ Conexión con Firebase establecida."));
-    lastTokenRefreshTime = millis();
-    delay(1000); // Pausa crucial para permitir que el token se estabilice.
-    
-    if (!Firebase.RTDB.beginStream(&stream, "/commands/valve1State")) {
-      Serial.print(F("[Website] ⚠️ Stream falló al inicio: "));
-      Serial.println(stream.errorReason().c_str());
-    } else {
-       Serial.println(F("✅ Stream de comandos iniciado."));
-    }
-    return true;
-  } else {
-    Serial.println(F("[Website] ❌ Fallo al conectar con Firebase."));
+  if (!Firebase.begin(&config, &auth)) {
+    Serial.println(F("[Firebase] ❌ Error al iniciar."));
     return false;
   }
+
+  Serial.println(F("[Firebase] ✓ Conexión con Firebase establecida."));
+
+  // Stream comandos
+  String path = "/commands";
+  if (Firebase.RTDB.beginStream(&stream, path)) {
+    Serial.println(F("✓ Stream de comandos iniciado."));
+  } else {
+    Serial.printf("❌ Error iniciando stream: %s\n", stream.errorReason().c_str());
+  }
+
+  return true;
 }
 
 void web::set_up() {
@@ -122,3 +109,4 @@ void web::enviar(dato data[], int n) {
     Serial.println(F("-> ✅ Datos enviados a Firebase correctamente."));
   }
 }
+ 
