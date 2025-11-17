@@ -200,9 +200,9 @@ void loop() {
       
       generadores.showColor((uint8_t)data[cantidadGeneradoresActivos].valor);
       if(data[caudalGeneracion].valor >= 0.0) {
-        actuadores_digitales[0].encender();
-      } else {
         actuadores_digitales[0].apagar();
+      } else {
+        actuadores_digitales[0].encender();
       }
       
       // Envío por Serial (lectura de datos)
