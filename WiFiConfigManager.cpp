@@ -187,7 +187,7 @@ void WiFiConfigManager::connect() {
 
   while (WiFi.status() != WL_CONNECTED && millis() - start < CONNECTION_TIMEOUT) {
     delay(500);
-    Serial.print(".");
+    Serial.print(F("....."));
   }
 
   if (WiFi.status() == WL_CONNECTED) {
