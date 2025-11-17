@@ -36,6 +36,10 @@ bool web::firebaseInit() {
   auth.user.email = email;
   auth.user.password = password;
 
+<<<<<<< HEAD
+=======
+ // Reintentos y buffers
+>>>>>>> 58b1b1f875966a73ab6bf70d58401b26bfe40938
   Firebase.reconnectWiFi(true);
   fbdo.setResponseSize(4096);
   config.token_status_callback = tokenStatusCallback;
@@ -90,8 +94,14 @@ void web::enviar(dato data[], int n) {
   bool error_general = false;
 
   for (int i = 0; i < n; ++i) {
+<<<<<<< HEAD
     String path = "/sensorData/" + String(data[i].etiquetaFirebase);
     Serial.printf("[Website] 📌 Enviando a: %s → %.3f\n", path.c_str(), data[i].valor);
+=======
+    if (!Firebase.RTDB.setFloat(&fbdo,
+        String("/sensorData/") + data[i].etiquetaFirebase,
+        data[i].valor)) {
+>>>>>>> 58b1b1f875966a73ab6bf70d58401b26bfe40938
 
     if (!Firebase.RTDB.setFloat(&fbdo, path.c_str(), data[i].valor)) {
       Serial.printf("[Website] ❌ Error enviando %s: %s\n",

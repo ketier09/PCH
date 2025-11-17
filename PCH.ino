@@ -212,7 +212,7 @@ void loop() {
       // --- FIN BLOQUE CRÍTICO ---
       
     } else {
-      Serial.println(F("⚠️ ADVERTENCIA: Mutex no disponible. Saltando lectura de datos."));
+      Serial.println(F("[Muttex] ⚠️ ADVERTENCIA: Mutex no disponible. Saltando lectura de datos."));
     }
   }
 }
