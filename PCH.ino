@@ -109,7 +109,7 @@ void setup() {
   // 💡 CRÍTICO: Inicialización del Mutex antes de usarlo.
   dataMutex = xSemaphoreCreateMutex(); 
   if (dataMutex == NULL) {
-      Serial.println(F("❌ ERROR: No se pudo crear el Mutex de FreeRTOS."));
+      Serial.println(F("[Muttex] ❌ ERROR: No se pudo crear el Mutex de FreeRTOS."));
       while(1); // Error crítico, detener el sistema.
   }
 
