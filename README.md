@@ -8,8 +8,8 @@
 
 ## 🚀 Resumen rápido
 
-* **Sensores**: 3 ultrasónicos (niveles) + 3 caudalímetros (flujo).
-* **Actuadores**: 1 servomotor para **compuerta** + 3 **salidas digitales**.
+* **Sensores**: **2 ultrasónicos** (niveles) + **1 caudalímetro** (flujo).
+* **Actuadores**: 1 servomotor para **compuerta** + **1 salida digital**.
 * **Cada ~1 s**: lee → calcula → decide generadores → muestra/serial → envía a Firebase.
 * **Conexión**: WiFi (hora NTP) + Firebase Realtime Database.
 * **Serie**: 115200 baudios.
@@ -19,25 +19,11 @@
 ## 🧩 Estructura del proyecto
 
 ```
-/src (o raíz del sketch)
-├─ PCH-_.ino                 ← Sketch principal
-├─ Datos.h                   ← Definición de variables y arreglo `data[]`
-├─ Caudalimetro.h/.cpp       ← Sensor de caudal por pulsos (con ISR)
-├─ Ultrasonico.h/.cpp        ← Sensor de nivel + cálculo de caudal (Manning)
-├─ Pulsador.h/.cpp           ← Entradas con anti-rebote y callbacks
-├─ Actuador_digital.h/.cpp   ← Salidas digitales ON/OFF
-├─ Motor.h/.cpp              ← Servo que mueve la compuerta (posiciones)
-├─ PantallaCustom.h/.cpp     ← Interfaz TFT para mostrar 3 datos por lado
-├─ Images.h/.cpp             ← Imágenes que serán usadas en la pantalla
-├─ Web.h/.cpp                ← NTP + Firebase
-├─ WiFiConfigManager.h/.cpp  ← WiFi
-├─ Conexiones.h              ← Mapa de pines ESP32
-├─ Secrets.h                 ← Declaraciones de credenciales
-└─ Secrets.cpp               ← **Definiciones** de credenciales (lo creas tú)
+/src (o raíz del sketch) ├─ PCH-_.ino ← Sketch principal ├─ Datos.h/.cpp ← Definición de variables y arreglo data[] ├─ Conexiones.h ← Definiciones de pines (enum PCH_Pines) ├─ Secrets.h ← Credenciales de Firebase y WiFi (no se sube a Git) ├─ Caudalimetro.h/.cpp ← Sensor de caudal por pulsos (con ISR) ├─ Ultrasonico.h/.cpp ← Sensor de nivel + cálculo de caudal (Manning) ├─ Pulsador.h/.cpp ← Entradas con anti-rebote y callbacks ├─ Actuador_digital.h/.cpp ← Actuador digital para encender/apagar generadores ├─ Motor.h/.cpp ← Servomotor para la compuerta ├─ RGBLed.h/.cpp ← LED RGB para indicar estados de la WiFi ├─ Images.h/.cpp ← Imágenes para la pantalla TFT ├─ PantallaCustom.h/.cpp ← Manejo de la pantalla ILI9341 ├─ WiFiConfigManager.h/.cpp ← Portal de configuración WiFi (AP) ├─ Web.h/.cpp ← Funciones de conexión a Firebase y hora NTP
 ```
 
 ---
-# 🌐 `WiFiConfigManager`: Gestión de Conexión WiFi en ESP32
+## 🌐 `WiFiConfigManager`: Gestión de Conexión WiFi en ESP32
 
 El módulo `WiFiConfigManager` es la herramienta central que permite a nuestro sistema **ESP32** conectarse de manera persistente a una red WiFi, sin necesidad de reprogramar las credenciales. Si no encuentra una red guardada o falla la conexión, automáticamente inicia un **Portal de Configuración** para que puedas introducir las credenciales de forma inalámbrica.
 
@@ -47,12 +33,12 @@ El módulo `WiFiConfigManager` es la herramienta central que permite a nuestro s
 
 Al iniciar el dispositivo, el módulo sigue esta secuencia lógica:
 
-1.  **Carga de Credenciales (Modo STA):**
+1. **Carga de Credenciales (Modo STA):**
     * Intenta leer las credenciales (`SSID` y `Password`) guardadas en el sistema de archivos **LittleFS** (o SPIFFS) en el archivo `/wifi.json`.
     * Si las encuentra, intenta conectarse al WiFi con esas credenciales.
-2.  **Conexión Exitosa:**
+2. **Conexión Exitosa:**
     * El dispositivo se conecta (`WL_CONNECTED`) y continúa con la lógica principal (sincronización NTP, Firebase, etc.).
-3.  **Conexión Fallida / Sin Credenciales:**
+3. **Conexión Fallida / Sin Credenciales:**
     * Si falla la conexión después de 10 segundos, o si no hay credenciales, el dispositivo entra en **Modo Punto de Acceso (AP)**.
     * Se inicia el **Portal de Configuración** (`startConfigPortal()`).
 
@@ -70,12 +56,12 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 ### Pasos para configurar el WiFi:
 
-1.  **Desconecta** tu dispositivo (PC, móvil) de tu WiFi normal.
-2.  Busca y conéctate a la red WiFi llamada **`ESP_Config`**.
-3.  Abre un navegador y navega a la dirección **`http://192.168.4.1`**.
-4.  Aparecerá la página de configuración para ingresar el **SSID** y la **Contraseña** de tu red.
-5.  Pulsa **"Guardar"**.
-6.  El ESP32 guardará las credenciales y se **reiniciará** (`ESP.restart()`) para intentar conectarse con la nueva configuración.
+1. **Desconecta** tu dispositivo (PC, móvil) de tu WiFi normal.
+2. Busca y conéctate a la red WiFi llamada **`ESP_Config`**.
+3. Abre un navegador y navega a la dirección **`http://192.168.4.1`**.
+4. Aparecerá la página de configuración para ingresar el **SSID** y la **Contraseña** de tu red.
+5. Pulsa **"Guardar"**.
+6. El ESP32 guardará las credenciales y se **reiniciará** (`ESP.restart()`) para intentar conectarse con la nueva configuración.
 
 ---
 
@@ -94,49 +80,48 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 ### Sensores de caudal (entradas con interrupción)
 
-| Sensor |	Pin	| Descripción |
-|:-------|:-------|:------------|
-| CAUD-0 |	D32	| Entrada     |
-| CAUD-1 |	D33	| Salida      |
-| CAUD-2 |	D34	| Sara        |
+| Sensor | Pin | Descripción |
+|:-------|:----|:------------|
+| CAUD-0 | **D34** | Caudal de **Generación** |
 
 ---
 
 ### Sensores ultrasónicos (TRIG salida, ECHO entrada)
 
-| Sensor |	TRIG	                | ECHO	            | Descripción |
-|:-------|:-----------------------|:------------------|:------------|
-| US-0   |	D25	                | D35	            | Captación   |
-| US-1   |	D26                   | VP            	   | Garantía    |
+| Sensor | TRIG | ECHO | Descripción |
+|:-------|:-----|:-----|:------------|
+| US-0 | **D18** | **D19** | Nivel de **Captación** |
+| US-1 | **D25** | **D26** | Nivel de **Ingreso** |
 
 ---
 
 ### Actuadores
 
-| Dispositivo         | Pin                        | Descripción    |
-|:--------------------|:---------------------------|:---------------|
-| Compuerta (servo)   | D13                        | Compuerta      |
-| Actuador digital 0  | D12                        | Motobomba sara |
+| Dispositivo | Pin | Descripción |
+|:--------------------|:-----------|:---------------|
+| Compuerta (servo) | **D13** | Compuerta |
+| Actuador digital 0 | **D12** | Generador 1 / Motobomba sara |
 
 ---
 
 ### Pulsadores
 
-| Pulsador |	Pin	| Descripción    |
-|:-------- |:--------|:---------------|
-| P0       |	D27   | Compuerta      |
+| Pulsador | Pin | Descripción |
+|:-------- |:----|:---------------|
+| P0 | **D39** | Forzar apagado de generadores |
+| P1 | **D36** | Ciclar estados de la compuerta |
 
 ---
 
-### SPI (pantalla local)
+### SPI (pantalla local - ILI9341)
 
-| Pin de la pantalla | Pin  |
+| Función | Pin |
 |:------------------ |:-----|
-| SDI/MOSI           |  D23 |
-| SCK                |	D18 |
-| CS                 |	D5  |
-| RST                |	D4  |
-| DC                 |	D2  |
+| CS | **D5** |
+| RST | **D4** |
+| DC | **D2** |
+| SCK | **D14** |
+| SDI/MOSI | **D27** |
 
 ---
 
@@ -144,13 +129,13 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 1. **Lectura**: ultrasonidos → *nivel* y *caudal estimado* (Manning); caudalímetros → *flujo* por pulsos.
 2. **Procesamiento**: se llenan las entradas del arreglo `data[]` (ver tabla más abajo).
-3. **Decisión**: en función del **Caudal Turbinable**, se recomiendan **0–3 generadores**.
+3. **Decisión**: en función del **Caudal Turbinable**, se recomienda **1 generador activo** (la lógica en el código solo maneja un actuador digital).
 4. **Salida**:
 
-   * **Serial**: imprime etiquetas, valores y unidades.
-   * **Pantalla TFT**: interfaz `PantallaCustom::actualizar(...)`.
-   * **Firebase**: `web::enviar(...)` sube `data[]` a `/sensorData/...`.
-   * **Actuación**: servo **compuerta** y **actuadores digitales**, además de 4 **pulsadores** con callbacks.
+    * **Serial**: imprime etiquetas, valores y unidades.
+    * **Pantalla TFT**: interfaz `PantallaCustom::actualizar(...)`.
+    * **Firebase**: `web::enviar(...)` sube `data[]` a `/sensorData/...`.
+    * **Actuación**: servo **compuerta** y **actuador digital**, además de 2 **pulsadores** con callbacks.
 
 ---
 
@@ -158,21 +143,17 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData/<clave>`.
 
-| ID (enum)            | Etiqueta              | Clave Firebase       | Unidad  |
-| -------------------- | --------------------- | -------------------- | ------- |
-| `caudalRio`                      | Caudal del río                 | `caudalRio`                        | m³/s   |
-| `caudalCaptacion`                | Caudal de captación            | `caudalCaptacion`                  | m³/s   |
-| `caudalNoCaptado`                | Caudal no captado              | `caudalNoCaptado`                  | m³/s   |
-| `caudalGarantíaAmbiental`        | Caudal de garantía ambiental   | `caudalGarantíaAmbiental`          | m³/s   |
-| `caudalAduccion`                 | Caudal de aducción             | `caudalAduccion`                   | m³/s   |
-| `caudalTurbinable`               | Caudal turbinable              | `caudalTurbinable`                 | m³/s   |
-| `caudalDevuelto`                 | Caudal devuelto                | `caudalDevuelto`                   | m³/s   |
-| `caudalRetorno`                  | Caudal de retorno              | `caudalRetorno`                    | m³/s   |
-| `cotaCaptacion`                  | Cota en captación              | `cotaCaptacion`                    | msnm   |
-| `cotaRio`                        | Cota del río                   | `cotaRio`                          | msnm   |
-| `cotaAduccion`                   | Cota en aducción               | `cotaAduccion`                     | msnm   |
-| `cotaGarantíaAmbiental`          | Cota de garantía ambiental     | `cotaGarantíaAmbiental`            | msnm   |
-| `cantidadGeneradoresActivos`     | Generadores activos            | `cantidadGeneradoresActivos`       | texto  |
+| ID (enum) | Etiqueta | Clave Firebase | Unidad |
+| :--- | :--- | :--- | :--- |
+| `caudalGeneracion` | Caudal Generación | `caudalGeneracion` | m³/s |
+| `caudalIngreso` | Caudal Ingreso | `caudalIngreso` | m³/s |
+| `caudalCaptacion` | Caudal Captación | `caudalCaptacion` | m³/s |
+| `caudalGarantia` | Caudal Garantía | `caudalGarantia` | m³/s |
+| `cotaGeneracion` | Cota Generación | `cotaGeneracion` | msnm |
+| `cotaIngreso` | Cota Ingreso | `cotaIngreso` | msnm |
+| `cotaCaptacion` | Cota Captación | `cotaCaptacion` | msnm |
+| `cotaGarantia` | Cota Garantía | `cotaGarantia` | msnm |
+| `cantidadGeneradoresActivos` | Generadores activos | `cantidadGeneradoresActivos` | |
 
 > En serie, `GeneradoresActivos` se muestra como texto: **Apagados | 1 encendido | 2 encendidos | 2 a máxima capacidad | Error**.
 
@@ -184,14 +165,13 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 
 1. **Placa**: instala *ESP32 by Espressif Systems* (Gestor de tarjetas).
 2. **Librerías**:
-
-  * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)](https://github.com/mobizt/Firebase-ESP-Client)
-  * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington, John K. Bennett)](https://github.com/madhephaestus/ESP32Servo)
-  * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)](https://github.com/adafruit/Adafruit-GFX-Library)
-  * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)](https://github.com/adafruit/Adafruit_ILI9341)
-  * `LittleFS` [LittleFS for ESP32 (autor: lorol)](https://github.com/lorol/LITTLEFS)
-  * `ArduinoJson` [ArduinoJson (autor: Benoît Blanchon)](https://github.com/bblanchon/ArduinoJson)
-   
+    * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)]
+    * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington, John K. Bennett)]
+    * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)]
+    * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)]
+    * `LittleFS` [LittleFS for ESP32 (autor: lorol)]
+    * `ArduinoJson` [ArduinoJson (autor: Benoît Blanchon)]
+    
 4. **Abrir** el sketch principal (`PCH.ino`).
 5. **Velocidad Serial**: 115200.
 6. **Compila y sube**.
@@ -209,6 +189,8 @@ lib_deps =
   arduino-libraries/Servo
   adafruit/Adafruit GFX Library
   adafruit/Adafruit ILI9341
+  lorol/LittleFS @ ^1.0.0
+  bblanchon/ArduinoJson @ ^6.19.4
 ```
 
 ---
@@ -221,10 +203,10 @@ En el repo ya está `Secrets.h` con **declaraciones**. Debes crear **`Secrets.cp
 // Secrets.cpp
 #include "Secrets.h"
 
-const char key[]           = "TU_API_KEY_FIREBASE";
-const char url[]           = "https://TU_PROYECTO.firebaseio.com";
-const char email[]         = "usuario@ejemplo.com";
-const char password[]      = "tu_password";
+const char key[]      = "TU_API_KEY_FIREBASE";
+const char url[]      = "https://TU_PROYECTO.firebaseio.com";
+const char email[]    = "usuario@ejemplo.com";
+const char password[] = "tu_password";
 ```
 
 ---
@@ -233,51 +215,48 @@ const char password[]      = "tu_password";
 
 ### Caudalímetros
 
-* ISR que cuenta pulsos, período de cálculo: **2000 ms**.
-* Factor de calibración en `Caudalimetro.h` (**`FLOW_CALIBRATION_FACTOR`**).
+* **ISR que cuenta pulsos**, período de cálculo: **1000 ms** (1 segundo).
+* Factor de calibración en `Caudalimetro.h` (`FLOW_CALIBRATION_FACTOR`).
 
 ### Ultrasónicos
 
-Constructor:
-`ultrasonico(byte trig, byte echo, int c, float techo, float piso, float ancho, float sqrtPendiente)`
-
-* **techo/piso**: límites de nivel (m).
-* **ancho**: del canal (m).
-* **sqrtPendiente**: `sqrt(S)` de Manning.
+* **Constructor**:
+    ```c++
+    ultrasonico(byte trig, byte echo, int c, float techo, float piso, float ancho, float sqrtPendiente)
+    ```
+* `techo/piso`: límites de nivel (m).
+* `ancho`: del canal (m).
+* `sqrtPendiente`: `sqrt(S)` de Manning.
 
 ---
 
 ## ▶️ Uso básico
 
-1. Conecta el ESP32 y abre el **Monitor Serie** (115200).
-2. Verás los mensajes de **WiFi**, **hora** y **Firebase**.
-3. Cada ~1 s se imprimirán cotas, caudales y recomendación de generadores.
-4. La **pantalla TFT** y Firebase reflejarán los mismos datos.
+1.  Conecta el **ESP32** y abre el **Monitor Serie** (`115200`).
+2.  Verás los mensajes de **WiFi**, **hora** y **Firebase**.
+3.  Cada **~1 s** se imprimirán cotas, caudales y recomendación de generadores.
+4.  La **pantalla TFT** y **Firebase** reflejarán los mismos datos.
 
 ---
 
 ## 🧯 Solución de problemas
 
 * **No compila**:
-
-  * Asegúrate de tener `Secrets.cpp` y librerías.
-  * Si ves errores con `datos`, confirma `using datos = dato;` en `Datos.h`.
+    * Asegúrate de tener `Secrets.cpp` y librerías instaladas.
+    * Si ves errores con `datos`, confirma `using datos = dato;` en `Datos.h`.
 * **Firebase no conecta**:
-
-  * Verifica `key`, `url`, `email/password` y la hora NTP.
+    * Verifica `key`, `url`, `email/password` y la hora **NTP** (que la sincronización sea exitosa).
 * **Lecturas ultrasónicas inestables**:
-
-  * Revisa cableado y fuente de poder.
-  * Ajusta `timeout_us` en `reading()`.
+    * Revisa cableado y fuente de poder.
+    * Ajusta `timeout_us` en `reading()`.
 * **Pulsadores no responden**:
-
-  * Confirma lógica **LOW** = presionado y `INPUT_PULLUP`.
+    * Confirma lógica **LOW** = presionado y `INPUT_PULLUP`.
 
 ---
 
 ## 🧭 Roadmap corto
 
-* Implementar control remoto de actuadores vía **Firebase stream**.
+* Implementar control remoto de actuadores vía **Firebase stream** (ya está listo el stream de comandos).
 * Endpoint web/app para visualizar `/sensorData` en tiempo real.
 * Hacer **pantalla TFT** más interactiva con gráficos y estados o animaciones.
 
@@ -285,9 +264,9 @@ Constructor:
 
 ## 📌 Sugerencias de ChatGPT
 
-* **Documentación viva**: mantener README con cambios reales de hardware/software.
+* **Documentación viva**: mantener `README` con cambios reales de hardware/software.
 * **Tests de campo**: comparar lecturas con mediciones manuales.
-* **Escalabilidad**: pensar en MQTT además de Firebase.
+* **Escalabilidad**: pensar en **MQTT** además de Firebase.
 * **UX**: añadir menús básicos en la pantalla TFT.
 * **Mantenimiento**: dividir lógicas largas (ej. `loop`) en funciones pequeñas.
 
