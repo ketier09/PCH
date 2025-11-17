@@ -151,11 +151,12 @@ void setup() {
 
 // --- Función que ejecutará la "Tarea Lenta" en el Core 0 ---
 void TaskLenta(void *pvParameters) {
+  pagina.set_up();
 
   for (;;) {
 
     // 🔹 Procesar comandos remotos de Firebase
-    pagina.set_up();
+
     pagina.handleStream();  
 
     // 1) Toma snapshot rápido bajo mutex
