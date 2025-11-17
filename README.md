@@ -19,7 +19,61 @@
 ## 🧩 Estructura del proyecto
 
 ```
-/src (o raíz del sketch) ├─ PCH-_.ino ← Sketch principal ├─ Datos.h/.cpp ← Definición de variables y arreglo data[] ├─ Conexiones.h ← Definiciones de pines (enum PCH_Pines) ├─ Secrets.h ← Credenciales de Firebase y WiFi (no se sube a Git) ├─ Caudalimetro.h/.cpp ← Sensor de caudal por pulsos (con ISR) ├─ Ultrasonico.h/.cpp ← Sensor de nivel + cálculo de caudal (Manning) ├─ Pulsador.h/.cpp ← Entradas con anti-rebote y callbacks ├─ Actuador_digital.h/.cpp ← Actuador digital para encender/apagar generadores ├─ Motor.h/.cpp ← Servomotor para la compuerta ├─ RGBLed.h/.cpp ← LED RGB para indicar estados de la WiFi ├─ Images.h/.cpp ← Imágenes para la pantalla TFT ├─ PantallaCustom.h/.cpp ← Manejo de la pantalla ILI9341 ├─ WiFiConfigManager.h/.cpp ← Portal de configuración WiFi (AP) ├─ Web.h/.cpp ← Funciones de conexión a Firebase y hora NTP
+/src (o raíz del sketch)
+│
+├─ PCH-_.ino
+│    ← Sketch principal
+│
+├─ Datos.h
+├─ Datos.cpp
+│    ← Definición de variables y arreglo data[]
+│
+├─ Conexiones.h
+│    ← Definiciones de pines (enum PCH_Pines)
+│
+├─ Secrets.h
+│    ← Credenciales de Firebase y WiFi (no se sube a Git)
+│
+├─ Caudalimetro.h
+├─ Caudalimetro.cpp
+│    ← Sensor de caudal por pulsos (con ISR)
+│
+├─ Ultrasonico.h
+├─ Ultrasonico.cpp
+│    ← Sensor de nivel + cálculo de caudal (Manning)
+│
+├─ Pulsador.h
+├─ Pulsador.cpp
+│    ← Entradas con anti-rebote y callbacks
+│
+├─ Actuador_digital.h
+├─ Actuador_digital.cpp
+│    ← Actuador digital para encender/apagar generadores
+│
+├─ Motor.h
+├─ Motor.cpp
+│    ← Servomotor para la compuerta
+│
+├─ RGBLed.h
+├─ RGBLed.cpp
+│    ← LED RGB para indicar estados de la WiFi
+│
+├─ Images.h
+├─ Images.cpp
+│    ← Imágenes para la pantalla TFT
+│
+├─ PantallaCustom.h
+├─ PantallaCustom.cpp
+│    ← Manejo de la pantalla ILI9341
+│
+├─ WiFiConfigManager.h
+├─ WiFiConfigManager.cpp
+│    ← Portal de configuración WiFi (AP)
+│
+├─ Web.h
+├─ Web.cpp
+│    ← Funciones de conexión a Firebase y hora NTP
+
 ```
 
 ---
