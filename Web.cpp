@@ -30,32 +30,49 @@ void web::syncTime() {
 }
 
 bool web::firebaseInit() {
+
+  Serial.println(F("[Firebase] ⏳ Iniciando configuración..."));
+
+  // Asignar credenciales
   config.api_key = key;
   config.database_url = url;
+  
+  auth.user.email = email;
+  auth.user.password = password;
 
-  auth.user.email = email;       // <-- AÑADIR ESTO
-  auth.user.password = password; // <-- AÑADIR ESTO
+  // REFRESH AUTOMÁTICO DEL TOKEN (Permite escritura)
+  config.auto_refresh_token = true;
+  auth.token.uid = ""; // No forzar UID, Firebase asignará el correcto
 
+  // Reintentos y buffers
   Firebase.reconnectWiFi(true);
   fbdo.setResponseSize(4096);
 
+  // Mostrar estado del token en serial
   config.token_status_callback = tokenStatusCallback;
 
-  if (!Firebase.begin(&config, &auth)) {
-    Serial.println(F("[Firebase] ❌ Error al iniciar."));
+  // --- Iniciar Firebase ---
+  Firebase.begin(&config, &auth);
+  Serial.println(F("[Firebase] ✓ Firebase iniciado."));
+
+  // Esperar a que el token esté funcional (lectura y escritura)
+  Serial.println(F("⏳ Esperando autenticación completa..."));
+  while (!Firebase.ready()) {
+    Serial.print(".");
+    delay(300);
+  }
+  Serial.println("\n🔑 Token listo para lectura y escritura.");
+
+  // --- Iniciar Stream de comandos ---
+  if (Firebase.RTDB.beginStream(&stream, "/commands")) {
+    Serial.println(F("✓ Stream de comandos iniciado."));
+  } else {
+    Serial.printf("❌ Error iniciando stream: %s\n",
+                  stream.errorReason().c_str());
     return false;
   }
 
-  Serial.println(F("[Firebase] ✓ Conexión con Firebase establecida."));
-
-  // Stream comandos
-  String path = "/commands";
-  if (Firebase.RTDB.beginStream(&stream, path)) {
-    Serial.println(F("✓ Stream de comandos iniciado."));
-  } else {
-    Serial.printf("❌ Error iniciando stream: %s\n", stream.errorReason().c_str());
-  }
-
+  Serial.println(F("[Firebase] 🚀 Configuración completa."));
   return true;
 }
 
