@@ -55,7 +55,7 @@ enum PCH_Devices_Pines : uint8_t {
   ACTUADOR_DIGITAL_0   = PCH_D27,
 
   // --- Pulsadores ---
-  PULSADOR_0     = PCH_D12,
+  PULSADOR_0     = PCH_D34,
 
   // --- Led ---
   LED_R = PCH_D19,
