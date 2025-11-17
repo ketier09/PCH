@@ -262,16 +262,6 @@ const char password[] = "tu_password";
 
 ---
 
-## 📌 Sugerencias de ChatGPT
-
-* **Documentación viva**: mantener `README` con cambios reales de hardware/software.
-* **Tests de campo**: comparar lecturas con mediciones manuales.
-* **Escalabilidad**: pensar en **MQTT** además de Firebase.
-* **UX**: añadir menús básicos en la pantalla TFT.
-* **Mantenimiento**: dividir lógicas largas (ej. `loop`) en funciones pequeñas.
-
----
-
 ## 📜 Licencia
 
 Uso académico y demostrativo. Úsalo con criterio y **bajo tu responsabilidad**.
