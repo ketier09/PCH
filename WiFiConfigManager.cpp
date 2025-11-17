@@ -52,7 +52,7 @@ WiFiConfigManager::WiFiConfigManager(const char* path) : filePath(path) {
 
 void WiFiConfigManager::begin() {
   if (!LittleFS.begin(true)) {
-    Serial.println(F("❌ Error montando LittleFS."));
+    Serial.println(F("[WiFi] ❌ Error montando LittleFS."));
     return;
   }
   connect();
@@ -62,16 +62,15 @@ bool WiFiConfigManager::loadCredentials() {
   File file = LittleFS.open(filePath, "r");
   if (!file) return false;
 
-  JsonDocument doc;  // v7 style (dynamic)
+  JsonDocument doc;
   DeserializationError error = deserializeJson(doc, file);
   file.close();
 
   if (error || doc["ssid"].isNull() || doc["password"].isNull()) {
-    Serial.printf("❌ Error deserializando JSON: %s\n", error.c_str());
+    Serial.printf("[WiFi] ❌ Error deserializando JSON: %s\n", error.c_str());
     return false;
   }
 
-  // Copia segura
   strlcpy(ssid, doc["ssid"] | "", sizeof(ssid));
   strlcpy(password, doc["password"] | "", sizeof(password));
 
@@ -79,11 +78,10 @@ bool WiFiConfigManager::loadCredentials() {
 }
 
 void WiFiConfigManager::saveCredentials(const char* newSsid, const char* newPassword) {
-  JsonDocument doc;  // v7 style (dynamic)
+  JsonDocument doc;
   doc["ssid"] = newSsid;
   doc["password"] = newPassword;
 
-  // Copia segura a los miembros de la clase
   strlcpy(ssid, newSsid, sizeof(ssid));
   strlcpy(password, newPassword, sizeof(password));
 
@@ -91,7 +89,7 @@ void WiFiConfigManager::saveCredentials(const char* newSsid, const char* newPass
   if (!file) return;
 
   if (serializeJson(doc, file) == 0) {
-    Serial.println(F("❌ Error al serializar a LittleFS."));
+    Serial.println(F("[WiFi] ❌ Error al serializar a LittleFS."));
   } else {
     Serial.println(F("✅ Credenciales guardadas en LittleFS."));
   }
@@ -117,13 +115,13 @@ void WiFiConfigManager::handleSave() {
   String newPass_str = server.arg("password");
 
   if (newSSID_str.length() > 0 && newPass_str.length() > 0) {
-    // Uso de c_str() para pasar a la función optimizada
     saveCredentials(newSSID_str.c_str(), newPass_str.c_str());
     server.send_P(200, "text/html", PAGE_SAVED);
-    delay(1000); // 💡 OPTIMIZACIÓN: Reducción de delay de 2s a 1s
+    delay(1000);
     ESP.restart();
   } else {
     server.send_P(400, "text/html", PAGE_ERROR);
+    Serial.println(F("[WiFi] ❌ SSID o contraseña vacíos."));
     delay(500);
   }
 }
@@ -136,32 +134,26 @@ void WiFiConfigManager::startConfigPortal() {
   Serial.println(F("🌐📵 Iniciando modo AP para configuración..."));
   WiFi.mode(WIFI_AP);
 
-  // -------- Build a unique AP name without ESP.getChipId() on ESP32 --------
   String apName;
 
 #if defined(ESP8266)
-  // ESP8266 still has ESP.getChipId()
   apName = "ESP_Config-" + String(ESP.getChipId(), HEX);
 #elif defined(ESP32)
-  // Use efuse MAC (unique per chip)
-  uint64_t mac = ESP.getEfuseMac();          // 48-bit unique value
-  uint32_t chip = (uint32_t)(mac & 0xFFFFFF); // keep last 24 bits
+  uint64_t mac = ESP.getEfuseMac();
+  uint32_t chip = (uint32_t)(mac & 0xFFFFFF);
 
-  char suffix[7]; // 6 hex chars + NUL
-  snprintf(suffix, sizeof(suffix), "%06X", chip); // zero-padded upper hex
+  char suffix[7];
+  snprintf(suffix, sizeof(suffix), "%06X", chip);
   apName = String("ESP_Config-") + suffix;
 #else
-  // Generic fallback: use the AP MAC address’s last 3 bytes (if available)
-  String macStr = WiFi.softAPmacAddress();   // "AA:BB:CC:DD:EE:FF"
+  String macStr = WiFi.softAPmacAddress();
   macStr.replace(":", "");
   String tail = macStr.length() >= 6 ? macStr.substring(macStr.length() - 6) : macStr;
   tail.toUpperCase();
   apName = "ESP_Config-" + tail;
 #endif
 
-  // Normalize to upper-case for readability
   apName.toUpperCase();
-
   WiFi.softAP(apName.c_str());
 
   IPAddress ip = WiFi.softAPIP();
@@ -179,20 +171,20 @@ void WiFiConfigManager::startConfigPortal() {
   }
 }
 
-
 void WiFiConfigManager::connect() {
   if (!loadCredentials()) {
+    Serial.println(F("[WiFi] ❌ No hay credenciales guardadas."));
     startConfigPortal();
     return;
   }
 
   Serial.printf("📶 Conectando a %s...\n", ssid);
   WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password); // Uso de char[] directo
+  WiFi.begin(ssid, password);
 
   unsigned long start = millis();
-  const unsigned long CONNECTION_TIMEOUT = 15000; // 💡 OPTIMIZACIÓN: Aumento a 15s
-  
+  const unsigned long CONNECTION_TIMEOUT = 15000;
+
   while (WiFi.status() != WL_CONNECTED && millis() - start < CONNECTION_TIMEOUT) {
     delay(500);
     Serial.print(".");
@@ -201,7 +193,7 @@ void WiFiConfigManager::connect() {
   if (WiFi.status() == WL_CONNECTED) {
     Serial.printf("\n✅ Conectado a %s. IP: %s\n", ssid, WiFi.localIP().toString().c_str());
   } else {
-    Serial.println(F("\n❌ No se pudo conectar. Eliminando credenciales e iniciando portal..."));
+    Serial.println(F("\n[WiFi] ❌ No se pudo conectar. Eliminando credenciales e iniciando portal..."));
     eraseCredentials();
     startConfigPortal();
   }
