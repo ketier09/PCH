@@ -1,20 +1,15 @@
 #include "Web.h"
-#include "Motor.h"  // 👈 Asegura acceso al motor
+#include "Motor.h"  // Para controlar mo_compuerta
 
 extern WiFiConfigManager WiFiConfig;
-extern Motor mo_compuerta;  // 👈 Motor global
+extern motor mo_compuerta; // 👈 motor en minúscula (tu clase real)
 
-// --------------------------------------------------------
-// PROTOTIPO DE CALLBACK DEL TOKEN
-// --------------------------------------------------------
+// Prototipo del callback del token
 void tokenStatusCallback(TokenInfo info);
 
 void web::set_up() {
     syncTime();
-
-    if (!firebaseInit()) {
-        Serial.println(F("[Website] ⚠ Firebase no listo aún, continuo ejecución."));
-    }
+    firebaseInit();
 }
 
 void web::syncTime() {
@@ -34,9 +29,6 @@ void web::syncTime() {
     Serial.println(F("\n[NTP] ❌ No se pudo sincronizar la hora."));
 }
 
-// --------------------------------------------------------
-// CONFIGURACIÓN DE FIREBASE
-// --------------------------------------------------------
 bool web::firebaseInit() {
     Serial.println(F("[Firebase] ⏳ Iniciando configuración..."));
 
@@ -48,7 +40,6 @@ bool web::firebaseInit() {
 
     Firebase.reconnectWiFi(true);
     fbdo.setResponseSize(4096);
-
     config.token_status_callback = tokenStatusCallback;
 
     Firebase.begin(&config, &auth);
@@ -61,57 +52,48 @@ bool web::firebaseInit() {
     }
     Serial.println("\n🔑 Token listo.");
 
-    if (Firebase.RTDB.beginStream(&stream, "/commands")) {
-        Serial.println(F("✓ Stream de comandos iniciado."));
-    } else {
-        Serial.printf("❌ Error iniciando stream: %s\n", stream.errorReason().c_str());
+    if (!Firebase.RTDB.beginStream(&stream, "/commands")) {
+        Serial.printf("❌ Error iniciando stream: %s\n",
+                      stream.errorReason().c_str());
         return false;
     }
 
+    Serial.println(F("✓ Stream escuchando comandos..."));
+
     lastTokenRefreshTime = millis();
-    Serial.println(F("[Firebase] 🚀 Configuración completa."));
     return true;
 }
 
-// --------------------------------------------------------
-// ESCUCHAR CAMBIOS DESDE FIREBASE (CONTROL SERVO)
-// --------------------------------------------------------
 void web::handleStream() {
-    if (!stream.available()) return;
+    if (!Firebase.RTDB.readStream(&stream)) return;
 
-    FirebaseStream msg = stream.readStream();
-    String path = msg.dataPath();
-    String value = msg.stringData();
+    if (stream.streamAvailable()) {
+        String path = stream.dataPath();
+        String value = stream.stringData();
 
-    Serial.printf("[STREAM] Cambio → %s = %s\n",
-                  path.c_str(), value.c_str());
+        Serial.printf("[STREAM] Cambio → %s = %s\n",
+                      path.c_str(), value.c_str());
 
-    // === CONTROL DE COMPUERTA ===
-    if (path.endsWith("/compuerta")) {
+        if (path.endsWith("/compuerta")) {
 
-        if (value == "toggle") mo_compuerta.siguiente_estado();
-        else if (value == "abrir") mo_compuerta.abrir();
-        else if (value == "cerrar") mo_compuerta.cerrar();
+            if (value == "toggle")
+                mo_compuerta.siguiente_estado();
+            else if (value == "abrir")
+                mo_compuerta.abrir();
+            else if (value == "cerrar")
+                mo_compuerta.cerrar();
 
-        Firebase.RTDB.setString(&fbdo, "/status/compuerta", value);
-        Serial.println("[STREAM] ✔ Acción ejecutada");
+            Firebase.RTDB.setString(&fbdo, "/status/compuerta", value);
+            Serial.println("[STREAM] ✔ Acción ejecutada");
+        }
     }
 }
 
-// --------------------------------------------------------
-// ENVÍO DE SENSORES A FIREBASE
-// --------------------------------------------------------
 void web::enviar(dato data[], int n) {
 
     if (!WiFiConfig.isConnected()) {
         Serial.println(F("[Website] ⚠ Sin WiFi."));
         return;
-    }
-
-    unsigned long diff = millis() - lastTokenRefreshTime;
-    if (diff < 2500) {
-        Serial.println(F("[Website] ⏳ Esperando estabilizar token..."));
-        delay(2500);
     }
 
     if (!Firebase.ready()) {
@@ -134,20 +116,13 @@ void web::enviar(dato data[], int n) {
     Serial.println(F("-> ✅ Datos enviados correctamente."));
 }
 
-// --------------------------------------------------------
-// CALLBACK: ESTADO DEL TOKEN
-// --------------------------------------------------------
 void tokenStatusCallback(TokenInfo info) {
-    switch (info.status) {
-        case token_status_ready:
-            Serial.println("[TOKEN] 🔐 Token listo");
-            break;
-        case token_status_error:
-            Serial.printf("[TOKEN] ❌ Error: %s\n",
-                          info.error.message.c_str());
-            break;
-        default:
-            Serial.println("[TOKEN] 🔄 Actualizando token...");
-            break;
+    if (info.status == token_status_ready) {
+        Serial.println("[TOKEN] 🔐 Token listo");
+    } else if (info.status == token_status_error) {
+        Serial.printf("[TOKEN] ❌ Error: %s\n",
+                      info.error.message.c_str());
+    } else {
+        Serial.println("[TOKEN] 🔄 Actualizando token...");
     }
 }
