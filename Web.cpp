@@ -108,7 +108,7 @@ void web::enviar(dato data[], int n) {
 
   for (int i = 0; i < n; ++i) {
     if (!Firebase.RTDB.setFloat(&fbdo,
-        String("sensorData/") + data[i].etiquetaFirebase,
+        String("/sensorData/") + data[i].etiquetaFirebase,
         data[i].valor)) {
 
       Serial.printf("[Website] ❌ Error enviando %s: %s\n",
