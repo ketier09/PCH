@@ -98,7 +98,14 @@ void web::enviar(dato data[], int n) {
         if (!firebaseInit()) return;
     }
 
-    Serial.println(F("[Website] 🔄 Enviando datos..."));
+    Serial.println(F("[Website] 🔄 Verificando Token..."));
+
+while (auth.token.status != token_status_ready) {
+    Serial.println(F("[TOKEN] ↻ Renovando..."));
+    delay(200);
+}
+
+Serial.println(F("[Website] 🔄 Token OK → Enviando datos..."));
 
     for (int i = 0; i < n; i++) {
         String path = "/sensorData/" + String(data[i].etiquetaFirebase);
