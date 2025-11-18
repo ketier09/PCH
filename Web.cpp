@@ -1,10 +1,29 @@
 #include "Web.h"
+#include "Secrets.h"
+#include "Datos.h"
+#include "WiFiConfigManager.h"
 
-WiFiConfigManager WiFiConfig;
+#include <Firebase_ESP_Client.h>
+#include <WiFi.h>
+#include <time.h>
 
-void web::set_up() {
-    WiFiConfig.begin();
-    firebaseInit();
+// Firestore IDs
+static String g_projectId = String(projectId);
+static String g_databaseId = "(default)";
+
+void tokenStatusCallback(TokenInfo info) {}
+
+String web::getISO8601Time() {
+    struct tm timeinfo;
+    if (!getLocalTime(&timeinfo)) {
+        time_t now = time(nullptr);
+        char buf[32];
+        strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", gmtime(&now));
+        return String(buf);
+    }
+    char buf[32];
+    strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &timeinfo);
+    return String(buf);
 }
 
 void web::syncTime() {
@@ -25,9 +44,27 @@ void web::syncTime() {
 bool web::firebaseInit() {
     Serial.println(F("[Firebase] Inicializando..."));
 
-    if (!WiFiConfig.isConnected()) {
-        WiFiConfig.begin();
+if (WiFi.status() != WL_CONNECTED) {
+    Serial.println(F("[WiFi] Conectando..."));
+    WiFi.mode(WIFI_STA);
+    WiFi.begin("conectividad", "Escuela2023");
+
+    uint32_t start = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - start < 15000) {
+        Serial.print(".");
+        delay(500);
     }
+    Serial.println();
+
+    if (WiFi.status() != WL_CONNECTED) {
+        Serial.println(F("[WiFi] ❌ No se pudo conectar"));
+        return false;
+    }
+
+    Serial.print(F("[WiFi] ✔ Conectado (IP: "));
+    Serial.print(WiFi.localIP());
+    Serial.println(")");
+}
 
     syncTime();
 
@@ -54,29 +91,6 @@ bool web::firebaseInit() {
     lastTokenRefreshTime = millis();
     Serial.println(F("[Firebase] ✔ Token listo."));
     return true;
-}
-
-void web::handleStream() {
-    if (!Firebase.RTDB.readStream(&stream)) return;
-
-    if (stream.streamAvailable()) {
-        String path = stream.dataPath();
-        String value = stream.stringData();
-
-        Serial.printf("[STREAM] Cambio → %s = %s\n",
-                      path.c_str(), value.c_str());
-
-        if (path.endsWith("/compuerta")) {
-
-            if (value == "toggle")
-                ordenCompuerta = (ordenCompuerta + 1) % 4;
-            else if (value == "abrir"){}
-            else if (value == "cerrar"){}
-
-            Firebase.RTDB.setString(&fbdo, "/status/compuerta", value);
-            Serial.println("[STREAM] ✔ Acción ejecutada");
-        }
-    }
 }
 
 FirebaseJson web::buildFirestorePayload(dato dataArr[], int n) {
@@ -119,3 +133,33 @@ void web::enviar(dato dataArr[], int n) {
                                       "");
 }
 
+// ========= CONTROL DE COMPuERTA (POLLING FIRESTORE) =========
+
+void web::ejecutarComandoCompuerta(const String &accion) {
+    if (accion.equalsIgnoreCase("SIGUIENTE")) {
+        estadoCompuerta = (estadoCompuerta + 1) % 4;
+    }
+    else if (accion.equalsIgnoreCase("ABRIR")) {
+        estadoCompuerta = 3;
+    }
+    else if (accion.equalsIgnoreCase("CERRAR")) {
+        estadoCompuerta = 0;
+    }
+    else return;
+
+    FirebaseJson confirm;
+    confirm.set("fields/estado/integerValue", estadoCompuerta);
+    confirm.set("fields/timestamp/timestampValue", getISO8601Time());
+
+    Firebase.Firestore.patchDocument(&fbdo,
+                                     g_projectId.c_str(),
+                                     g_databaseId.c_str(),
+                                     "compuerta/estadoActual",
+                                     confirm.raw(),
+                                     "");
+}
+
+// LEE FIRESTORE CADA 5s PARA COMANDOS REMOTOS
+void web::set_up() {
+    firebaseInit();
+}

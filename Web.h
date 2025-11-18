@@ -19,7 +19,7 @@ public:
     volatile uint8_t estadoCompuerta = 0;
 
     // Acciones de control local (desde pulsador)
-    void handleStream(const String &accion);
+    void ejecutarComandoCompuerta(const String &accion);
 
     // Tiempo del último refresh del token
     unsigned long lastTokenRefreshTime = 0;
@@ -40,4 +40,3 @@ private:
     FirebaseAuth auth;
     FirebaseConfig config;
 };
-

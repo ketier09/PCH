@@ -13,7 +13,6 @@
 #include "RGBLed.h"
 
 // --- Sincronización de Tareas ---
-// Mutex para proteger el acceso a la matriz de datos global 'data[]'
 SemaphoreHandle_t dataMutex; 
 
 // ----------------- Declaraciones de Componentes -----------------
@@ -21,6 +20,7 @@ SemaphoreHandle_t dataMutex;
 PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST);
 
 web pagina;
+WiFiConfigManager WiFiConfig;
 
 const size_t NUM_CAUDALIMETROS = 1;
 caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
@@ -42,7 +42,7 @@ RGBLed generadores(LED_R, LED_G, LED_B, RGBLed::CATODO_COMUN);
 motor mo_compuerta(COMPUERTA, 0, 60, 120, 180);
 
 // ----------------- Pulsadores -----------------
-void IRAM_ATTR on_0() { pagina.ordenCompuerta = mo_compuerta.siguiente_estado(); }
+void IRAM_ATTR on_0() { pagina.estadoCompuerta = mo_compuerta.siguiente_estado(); }
 
 const size_t NUM_PULSADORES = 1;
 pulsador pulsadores[NUM_PULSADORES] = {
@@ -94,23 +94,23 @@ void serial_enviar(const dato data[]) {
 
 void setup() {
   Serial.begin(115200);
-  
-  dataMutex = xSemaphoreCreateMutex(); 
+
+  dataMutex = xSemaphoreCreateMutex();
   if (dataMutex == NULL) {
     Serial.println(F("[Mutex] ❌ ERROR"));
     while (1);
   }
 
   pantalla.set_up();
-  
+
   for (auto &c : caudalimetros) c.set_up();
   for (auto &u : ultrasonicos) u.set_up();
   for (auto &p : pulsadores)   p.set_up();
   for (auto &a : actuadores_digitales) a.set_up();
-    
+
   mo_compuerta.set_up();
-  
-xTaskCreatePinnedToCore(
+
+  xTaskCreatePinnedToCore(
     TaskLenta,
     "TaskLenta",
     10000,
@@ -124,53 +124,52 @@ xTaskCreatePinnedToCore(
 }
 
 // -------------------- Tarea Lenta (Core 0) --------------------
+
 void TaskLenta(void *pvParameters) {
   Serial.println(F("[TaskLenta] Iniciada"));
 
-for (;;) { // Bucle infinito de la tarea
+  for (;;) { // Bucle infinito de la tarea
 
-  // 1️⃣ Procesar comandos remotos
-  
-  pagina.handleStream();  
-  
-  // 2️⃣ Copiar snapshot protegido
-  dato snapshot[DatoCount];
-  if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
-    for (int i = 0; i < DatoCount; i++) {
-      snapshot[i] = data[i];
+    // 1️⃣ Procesar comandos remotos
+    //pagina.handleStream(); 
+    // 2️⃣ Copiar snapshot protegido
+    dato snapshot[DatoCount];
+    if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
+      for (int i = 0; i < DatoCount; ++i) {
+        snapshot[i] = data[i];
+      }
+      xSemaphoreGive(dataMutex);
     }
-    xSemaphoreGive(dataMutex);
-  }
-  
-  // 3️⃣ Enviar Firestore
-  pagina.enviar(snapshot, DatoCount);
-  
-  // 4️⃣ Actualizar pantalla
-  pantalla.actualizar(snapshot);
-  
-  Serial.println(F("[TaskLenta] ✔ ciclo completado"));
-  
-  // Esperar próximo ciclo
-  vTaskDelay(pdMS_TO_TICKS(3000));
+
+    // 3️⃣ Enviar Firestore
+    pagina.enviar(snapshot, DatoCount);
+
+    // 4️⃣ Actualizar pantalla
+    pantalla.actualizar(snapshot);
+
+    Serial.println(F("[TaskLenta] ✔ ciclo completado"));
+
+    // Esperar próximo ciclo
+    vTaskDelay(pdMS_TO_TICKS(3000)); // 5 segundos
   }
 }
 
-
 // -------------------- Loop (Core 1) --------------------
+
 void loop() {
 
   mo_compuerta.showState(pagina.estadoCompuerta);
-  
+
   for (auto &p : pulsadores) p.update();
 
   static uint32_t lastPrint = 0;
   const uint32_t now = millis();
-  
+
   if (now - lastPrint >= 1000) {
     lastPrint = now;
-    
+
     if (xSemaphoreTake(dataMutex, 10 / portTICK_PERIOD_MS) == pdTRUE) {
-        
+
       data[caudalGeneracion].valor  = ultrasonicos[0].flujo()-ultrasonicos[1].flujo();
       data[caudalIngreso].valor     = caudalimetros[0].reading();
       data[caudalCaptacion].valor   = ultrasonicos[0].flujo();
@@ -180,11 +179,11 @@ void loop() {
       data[cotaCaptacion].valor     = ultrasonicos[0].reading();
       data[cotaGarantia].valor      = ultrasonicos[1].reading();
       data[cantidadGeneradoresActivos].valor = (float) generadoresActivos(data[caudalGeneracion].valor);
-      
+
       generadores.showColor((uint8_t)data[cantidadGeneradoresActivos].valor);
       if (data[caudalGeneracion].valor >= 0.0) actuadores_digitales[0].apagar();
       else actuadores_digitales[0].encender();
-
+      
       serial_enviar(data);
 
       xSemaphoreGive(dataMutex);
@@ -194,6 +193,7 @@ void loop() {
 
 // ---- Nivel de agua desde flujo ----
 float cota_desde_flujo(float flujo, float ancho, float piso, float raizCuadrada_pendiente) {
+
     const float ESCALA = 0.1f; // m/mm
     const float kappa = 2.3;
     const float manningInverso = 1.0f / 0.013f;
