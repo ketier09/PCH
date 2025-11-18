@@ -20,7 +20,6 @@ SemaphoreHandle_t dataMutex;
 PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST);
 
 web pagina;
-WiFiConfigManager WiFiConfig;
 
 const size_t NUM_CAUDALIMETROS = 1;
 caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
