@@ -23,6 +23,7 @@ volatile bool req_compuerta_advance = false;
 PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST);
 
 web pagina;
+WiFiConfigManager WiFiConfig;
 
 const size_t NUM_CAUDALIMETROS = 1;
 caudalimetro caudalimetros[NUM_CAUDALIMETROS] = {
@@ -125,37 +126,37 @@ void setup() {
     0
   );
   delay(100);
+  pagina.set_up();
 }
 
 // -------------------- Tarea Lenta (Core 0) --------------------
 
 void TaskLenta(void *pvParameters) {
-  for (;;) {
+  Serial.println(F("[TaskLenta] Iniciada"));
 
-    // 1️⃣ Procesar comandos remotos Firestore
-    pagina.handleStream();
+  for (;;) { // Bucle infinito de la tarea
 
-    // ⭐ Procesar pulsador seguro (fuera de ISR)
-    if (req_compuerta_advance) {
-      req_compuerta_advance = false;
+    // 1️⃣ Procesar comandos remotos
 
-      uint8_t idx = mo_compuerta.siguiente_estado();  
-      pagina.estadoCompuerta = idx;
-
-      Serial.printf("[Pulsador] Avance seguro -> nuevo indice %u\n", idx);
-    }
-
+    // 2️⃣ Copiar snapshot protegido
     dato snapshot[DatoCount];
     if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
-      for (int i = 0; i < DatoCount; ++i)
+      for (int i = 0; i < DatoCount; ++i) {
         snapshot[i] = data[i];
+      }
       xSemaphoreGive(dataMutex);
     }
 
+    // 3️⃣ Enviar Firestore
     pagina.enviar(snapshot, DatoCount);
+
+    // 4️⃣ Actualizar pantalla
     pantalla.actualizar(snapshot);
 
-    vTaskDelay(pdMS_TO_TICKS(5000));
+    Serial.println(F("[TaskLenta] ✔ ciclo completado"));
+
+    // Esperar próximo ciclo
+    vTaskDelay(pdMS_TO_TICKS(3000)); // 5 segundos
   }
 }
 
