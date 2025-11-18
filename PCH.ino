@@ -15,9 +15,6 @@
 // --- Sincronización de Tareas ---
 SemaphoreHandle_t dataMutex; 
 
-// bandera segura para el pulsador
-volatile bool req_compuerta_advance = false;
-
 // ----------------- Declaraciones de Componentes -----------------
 
 PantallaCustom pantalla(TFT_CS, TFT_DC, TFT_RST);
@@ -45,10 +42,7 @@ RGBLed generadores(LED_R, LED_G, LED_B, RGBLed::CATODO_COMUN);
 motor mo_compuerta(COMPUERTA, 0, 60, 120, 180);
 
 // ----------------- Pulsadores -----------------
-
-void IRAM_ATTR on_0() {
-  req_compuerta_advance = true;  // ISR segura
-}
+void IRAM_ATTR on_0() { pagina.estadoCompuerta = mo_compuerta.siguiente_estado(); }
 
 const size_t NUM_PULSADORES = 1;
 pulsador pulsadores[NUM_PULSADORES] = {
@@ -137,7 +131,7 @@ void TaskLenta(void *pvParameters) {
   for (;;) { // Bucle infinito de la tarea
 
     // 1️⃣ Procesar comandos remotos
-
+    //pagina.handleStream(); 
     // 2️⃣ Copiar snapshot protegido
     dato snapshot[DatoCount];
     if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
@@ -200,7 +194,7 @@ void loop() {
 // ---- Nivel de agua desde flujo ----
 float cota_desde_flujo(float flujo, float ancho, float piso, float raizCuadrada_pendiente) {
 
-    const float ESCALA = 0.1f;
+    const float ESCALA = 0.1f; // m/mm
     const float kappa = 2.3;
     const float manningInverso = 1.0f / 0.013f;
 

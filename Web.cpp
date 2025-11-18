@@ -1,5 +1,4 @@
 #include "Web.h"
-#include "Motor.h"
 #include "Secrets.h"
 #include "Datos.h"
 #include "WiFiConfigManager.h"
@@ -7,11 +6,6 @@
 #include <Firebase_ESP_Client.h>
 #include <WiFi.h>
 #include <time.h>
-
-// Externs
-extern WiFiConfigManager WiFiConfig;
-extern motor mo_compuerta;
-extern web pagina;
 
 // Firestore IDs
 static String g_projectId = String(projectId);
@@ -143,15 +137,13 @@ void web::enviar(dato dataArr[], int n) {
 
 void web::ejecutarComandoCompuerta(const String &accion) {
     if (accion.equalsIgnoreCase("SIGUIENTE")) {
-        estadoCompuerta = mo_compuerta.siguiente_estado();
+        estadoCompuerta = (estadoCompuerta + 1) % 4;
     }
     else if (accion.equalsIgnoreCase("ABRIR")) {
         estadoCompuerta = 3;
-        mo_compuerta.showState(3);
     }
     else if (accion.equalsIgnoreCase("CERRAR")) {
         estadoCompuerta = 0;
-        mo_compuerta.showState(0);
     }
     else return;
 
