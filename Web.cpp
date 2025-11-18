@@ -2,64 +2,57 @@
 
 WiFiConfigManager WiFiConfig;
 
-// Prototipo del callback del token
-void tokenStatusCallback(TokenInfo info);
-
 void web::set_up() {
     WiFiConfig.begin();
-    syncTime();
     firebaseInit();
 }
 
 void web::syncTime() {
-    Serial.println(F("[NTP] ⏳ Sincronizando hora..."));
-    configTime(-5 * 3600, 0, "pool.ntp.org", "time.nist.gov"); // UTC-5
+    Serial.println(F("[NTP] Sincronizando..."));
+    configTime(0, 0, "pool.ntp.org");
 
     for (int i = 0; i < NTP_MAX_ATTEMPTS; i++) {
-        struct tm timeinfo;
-        if (getLocalTime(&timeinfo)) {
-            Serial.println(F("✅ Hora sincronizada."));
+        struct tm t;
+        if (getLocalTime(&t)) {
+            Serial.println(F("[NTP] ✔ Hora sincronizada."));
             return;
         }
-        Serial.print(".");
-        delay(200);
+        delay(300);
     }
-
-    Serial.println(F("\n[NTP] ❌ No se pudo sincronizar la hora."));
+    Serial.println(F("[NTP] ❌ Timeout NTP"));
 }
 
 bool web::firebaseInit() {
-    Serial.println(F("[Firebase] ⏳ Iniciando configuración..."));
+    Serial.println(F("[Firebase] Inicializando..."));
+
+    if (!WiFiConfig.isConnected()) {
+        WiFiConfig.begin();
+    }
+
+    syncTime();
 
     config.api_key = key;
-    config.database_url = url;
-
     auth.user.email = email;
     auth.user.password = password;
-
-    Firebase.reconnectWiFi(true);
-    fbdo.setResponseSize(4096);
     config.token_status_callback = tokenStatusCallback;
 
     Firebase.begin(&config, &auth);
-    Serial.println(F("[Firebase] ✓ Firebase iniciado."));
+    Firebase.reconnectWiFi(true);
 
-    Serial.print(F("⏳ Esperando autenticación..."));
-    while (!Firebase.ready()) {
+    Serial.println(F("[Firebase] ⏳ Esperando token..."));
+
+    unsigned long start = millis();
+    while (!Firebase.ready() && millis() - start < 12000) {
         delay(200);
-        Serial.print(".");
     }
-    Serial.println("\n🔑 Token listo.");
 
-    if (!Firebase.RTDB.beginStream(&stream, "/commands")) {
-        Serial.printf("❌ Error iniciando stream: %s\n",
-                      stream.errorReason().c_str());
+    if (!Firebase.ready()) {
+        Serial.println(F("[Firebase] ❌ Token no listo"));
         return false;
     }
 
-    Serial.println(F("✓ Stream escuchando comandos..."));
-
     lastTokenRefreshTime = millis();
+    Serial.println(F("[Firebase] ✔ Token listo."));
     return true;
 }
 
@@ -86,47 +79,43 @@ void web::handleStream() {
     }
 }
 
-void web::enviar(dato data[], int n) {
-
-    if (!WiFiConfig.isConnected()) {
-        Serial.println(F("[Website] ⚠ Sin WiFi."));
-        return;
+FirebaseJson web::buildFirestorePayload(dato dataArr[], int n) {
+    FirebaseJson json;
+    for (int i = 0; i < n; i++) {
+        String field = "fields/" + String(dataArr[i].etiquetaFirebase) + "/doubleValue";
+        json.set(field.c_str(), dataArr[i].valor);
     }
+    json.set("fields/timestamp/timestampValue", getISO8601Time());
+    return json;
+}
+
+void web::enviar(dato dataArr[], int n) {
+    if (!WiFiConfig.isConnected()) return;
 
     if (!Firebase.ready()) {
-        Serial.println(F("[Website] ⚠ Firebase no listo, reintentando..."));
-        if (!firebaseInit()) return;
+        firebaseInit();
+        delay(400);
     }
 
-    Serial.println(F("[Website] 🔄 Verificando Token..."));
+    FirebaseJson payload = buildFirestorePayload(dataArr, n);
+    String payloadStr;
+    payload.toString(payloadStr, false);
 
-while (auth.token.status != token_status_ready) {
-    Serial.println(F("[TOKEN] ↻ Renovando..."));
-    delay(200);
+    // Último
+    Firebase.Firestore.patchDocument(&fbdo,
+                                     g_projectId.c_str(),
+                                     g_databaseId.c_str(),
+                                     "sensores_latest/actual",
+                                     payloadStr.c_str(),
+                                     "");
+
+    // Histórico
+    Firebase.Firestore.createDocument(&fbdo,
+                                      g_projectId.c_str(),
+                                      g_databaseId.c_str(),
+                                      "sensores_historico",
+                                      "",
+                                      payloadStr.c_str(),
+                                      "");
 }
 
-Serial.println(F("[Website] 🔄 Token OK → Enviando datos..."));
-
-    for (int i = 0; i < n; i++) {
-        String path = "/sensorData/" + String(data[i].etiquetaFirebase);
-
-        if (!Firebase.RTDB.setFloat(&fbdo, path, data[i].valor)) {
-            Serial.printf("[❌] %s: %s\n",
-                          data[i].etiqueta,
-                          fbdo.errorReason().c_str());
-        }
-    }
-
-    Serial.println(F("-> ✅ Datos enviados correctamente."));
-}
-
-void tokenStatusCallback(TokenInfo info) {
-    if (info.status == token_status_ready) {
-        Serial.println("[TOKEN] 🔐 Token listo");
-    } else if (info.status == token_status_error) {
-        Serial.printf("[TOKEN] ❌ Error: %s\n",
-                      info.error.message.c_str());
-    } else {
-        Serial.println("[TOKEN] 🔄 Actualizando token...");
-    }
-}
