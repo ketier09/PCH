@@ -44,27 +44,7 @@ void web::syncTime() {
 bool web::firebaseInit() {
     Serial.println(F("[Firebase] Inicializando..."));
 
-if (WiFi.status() != WL_CONNECTED) {
-    Serial.println(F("[WiFi] Conectando..."));
-    WiFi.mode(WIFI_STA);
-    WiFi.begin("conectividad", "Escuela2023");
-
-    uint32_t start = millis();
-    while (WiFi.status() != WL_CONNECTED && millis() - start < 15000) {
-        Serial.print(".");
-        delay(500);
-    }
-    Serial.println();
-
-    if (WiFi.status() != WL_CONNECTED) {
-        Serial.println(F("[WiFi] ❌ No se pudo conectar"));
-        return false;
-    }
-
-    Serial.print(F("[WiFi] ✔ Conectado (IP: "));
-    Serial.print(WiFi.localIP());
-    Serial.println(")");
-}
+    if (!WiFiConfig.isConnected()) WiFiConfig.begin();
 
     syncTime();
 
@@ -163,3 +143,4 @@ void web::ejecutarComandoCompuerta(const String &accion) {
 void web::set_up() {
     firebaseInit();
 }
+
