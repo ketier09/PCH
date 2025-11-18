@@ -151,27 +151,27 @@ void setup() {
 
 // --- Función que ejecutará la "Tarea Lenta" en el Core 0 ---
 void TaskLenta(void *pvParameters) {
-  pagina.set_up();
 
-  for (;;) {
+  // 1️⃣ Procesar comandos remotos (Firestore)
+  pagina.handleStream();
 
-    // 🔹 Procesar comandos remotos de Firebase
-
-    pagina.handleStream();  
-
-    // 1) Toma snapshot rápido bajo mutex
-    dato snapshot[DatoCount];
-    if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
-      for (int i = 0; i < DatoCount; ++i) snapshot[i] = data[i];
-      xSemaphoreGive(dataMutex);
+  // 2️⃣ Copiar valores desde data[] sin bloqueos excesivos
+  dato snapshot[DatoCount];
+  if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
+    for (int i = 0; i < DatoCount; ++i) {
+      snapshot[i] = data[i];
     }
-
-    // 2) I/O LENTO FUERA del mutex
-    pagina.enviar(snapshot, DatoCount);
-    pantalla.actualizar(snapshot);
-
-    vTaskDelay(pdMS_TO_TICKS(5000)); // 5s
+    xSemaphoreGive(dataMutex);
   }
+
+  // 3️⃣ Enviar al servidor (Firestore)
+  pagina.enviar(snapshot, DatoCount);
+
+  // 4️⃣ Actualizar pantalla
+  pantalla.actualizar(snapshot);
+
+  // 5️⃣ Cada 5 segundos
+  vTaskDelay(pdMS_TO_TICKS(5000));
 }
 
 
