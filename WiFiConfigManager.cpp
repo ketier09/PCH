@@ -2,6 +2,8 @@
 #include <ArduinoJson.h>
 #include <string.h> // Para memset y strlcpy
 
+WiFiConfigManager WiFiConfig;
+
 // --- Página HTML guardada en memoria flash ---
 const char PAGE_INDEX[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
