@@ -8,6 +8,8 @@ public:
   void encender();
   void apagar();
   void cambiar();
+  
+  static constexpr float kappa = 0.0; //m³/s
 
 private:
   const byte pin;

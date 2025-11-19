@@ -130,7 +130,6 @@ void TaskLenta(void *pvParameters) {
   for (;;) { // Bucle infinito de la tarea
 
     // 1️⃣ Procesar comandos remotos
-    //pagina.handleStream(); 
     // 2️⃣ Copiar snapshot protegido
     dato snapshot[DatoCount];
     if (xSemaphoreTake(dataMutex, portMAX_DELAY) == pdTRUE) {
@@ -180,7 +179,7 @@ void loop() {
       data[cantidadGeneradoresActivos].valor = (float) generadoresActivos(data[caudalGeneracion].valor);
 
       generadores.showColor((uint8_t)data[cantidadGeneradoresActivos].valor);
-      if (data[caudalGeneracion].valor >= 0.0) actuadores_digitales[0].apagar();
+      if (data[caudalGeneracion].valor >= actuadores_digitales[0].kappa) actuadores_digitales[0].apagar();
       else actuadores_digitales[0].encender();
       
       serial_enviar(data);
@@ -194,7 +193,7 @@ void loop() {
 float cota_desde_flujo(float flujo, float ancho, float piso, float raizCuadrada_pendiente) {
 
     const float ESCALA = 0.1f; // m/mm
-    const float kappa = 2.3; //Variable empírica
+    const float kappa = 2.3;
     const float manningInverso = 1.0f / 0.013f;
 
     ancho = ancho * ESCALA;
