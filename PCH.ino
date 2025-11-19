@@ -156,7 +156,7 @@ void TaskLenta(void *pvParameters) {
     Serial.println(F("[TaskLenta] ✔ ciclo completado"));
 
     // Esperar próximo ciclo
-    vTaskDelay(pdMS_TO_TICKS(3000)); // 5 segundos
+    vTaskDelay(pdMS_TO_TICKS(5000)); // 5 segundos
   }
 }
 
