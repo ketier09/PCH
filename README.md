@@ -1,6 +1,6 @@
 # 🌊⚡ PCH — Sistema de Monitoreo y Control con ESP32
 
-> Monitorea **niveles** y **caudales** en una **pequeña central hidroeléctrica (PCH)**, decide cuántos **generadores** activar y publica los datos **localmente** y en la **nube (Firebase)**.
+> Monitorea **niveles** y **caudales** en una **pequeña central hidroeléctrica (PCH)**, decide cuántos **generadores** activar y publica los datos **localmente** y en la **nube (Firestore)**.
 
 ![Build](https://github.com/ketier09/PCH/actions/workflows/build.yml/badge.svg)
 
@@ -10,8 +10,8 @@
 
 * **Sensores**: **2 ultrasónicos** (niveles) + **1 caudalímetro** (flujo).
 * **Actuadores**: 1 servomotor para **compuerta** + **1 salida digital**.
-* **Cada ~1 s**: lee → calcula → decide generadores → muestra/serial → envía a Firebase.
-* **Conexión**: WiFi (hora NTP) + Firebase Realtime Database.
+* **Cada ~1 s**: lee → calcula → decide generadores → muestra/serial → envía a Firestore.
+* **Conexión**: WiFi (hora NTP) + Google Firestore.
 * **Serie**: 115200 baudios.
 
 ---
@@ -32,7 +32,7 @@
 │    ← Definiciones de pines (enum PCH_Pines)
 │
 ├─ Secrets.h
-│    ← Credenciales de Firebase y WiFi (no se sube a Git)
+│    ← Credenciales de Firestore y WiFi (no se sube a Git)
 │
 ├─ Caudalimetro.h
 ├─ Caudalimetro.cpp
@@ -72,7 +72,7 @@
 │
 ├─ Web.h
 ├─ Web.cpp
-│    ← Funciones de conexión a Firebase y hora NTP
+│    ← Funciones de conexión a Firestore y hora NTP
 
 ```
 
@@ -91,7 +91,7 @@ Al iniciar el dispositivo, el módulo sigue esta secuencia lógica:
     * Intenta leer las credenciales (`SSID` y `Password`) guardadas en el sistema de archivos **LittleFS** (o SPIFFS) en el archivo `/wifi.json`.
     * Si las encuentra, intenta conectarse al WiFi con esas credenciales.
 2. **Conexión Exitosa:**
-    * El dispositivo se conecta (`WL_CONNECTED`) y continúa con la lógica principal (sincronización NTP, Firebase, etc.).
+    * El dispositivo se conecta (`WL_CONNECTED`) y continúa con la lógica principal (sincronización NTP, Firestore, etc.).
 3. **Conexión Fallida / Sin Credenciales:**
     * Si falla la conexión después de 10 segundos, o si no hay credenciales, el dispositivo entra en **Modo Punto de Acceso (AP)**.
     * Se inicia el **Portal de Configuración** (`startConfigPortal()`).
@@ -188,16 +188,16 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
     * **Serial**: imprime etiquetas, valores y unidades.
     * **Pantalla TFT**: interfaz `PantallaCustom::actualizar(...)`.
-    * **Firebase**: `web::enviar(...)` sube `data[]` a `/sensorData/...`.
+    * **Firestore**: `web::enviar(...)` sube `data[]` a `/sensorData/...`.
     * **Actuación**: servo **compuerta** y **actuador digital**, además de 2 **pulsadores** con callbacks.
 
 ---
 
-## 🗃️ Modelo de datos (Firebase + Serial)
+## 🗃️ Modelo de datos (Firestore + Serial)
 
-Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData/<clave>`.
+Las mediciones se definen en `Datos.h` y se envían a Firestore bajo `/sensorData/<clave>`.
 
-| ID (enum) | Etiqueta | Clave Firebase | Unidad |
+| ID (enum) | Etiqueta | Clave Firestore | Unidad |
 | :--- | :--- | :--- | :--- |
 | `caudalGeneracion` | Caudal Generación | `caudalGeneracion` | m³/s |
 | `caudalIngreso` | Caudal Ingreso | `caudalIngreso` | m³/s |
@@ -219,7 +219,7 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 
 1. **Placa**: instala *ESP32 by Espressif Systems* (Gestor de tarjetas).
 2. **Librerías**:
-    * `Firebase_ESP_Client` [Firebase Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)]
+    * `Firestore_ESP_Client` [Firestore Arduino Client Library for ESP8266 and ESP32 (autor: Mobizt)]
     * `ESP32Servo` [ESP32Servo (autor: Kevin Harrington, John K. Bennett)]
     * `Adafruit_GFX` [Adafruit GFX Library (autor: Adafruit)]
     * `Adafruit_ILI9341` [Adafruit ILI9341 (autor: Adafruit)]
@@ -229,23 +229,6 @@ Las mediciones se definen en `Datos.h` y se envían a Firebase bajo `/sensorData
 4. **Abrir** el sketch principal (`PCH.ino`).
 5. **Velocidad Serial**: 115200.
 6. **Compila y sube**.
-
-### PlatformIO (VS Code)
-
-```ini
-[env:esp32dev]
-platform = espressif32
-board = esp32dev
-framework = arduino
-monitor_speed = 115200
-lib_deps =
-  mobizt/Firebase Arduino Client Library for ESP8266 and ESP32
-  arduino-libraries/Servo
-  adafruit/Adafruit GFX Library
-  adafruit/Adafruit ILI9341
-  lorol/LittleFS @ ^1.0.0
-  bblanchon/ArduinoJson @ ^6.19.4
-```
 
 ---
 
@@ -257,8 +240,8 @@ En el repo ya está `Secrets.h` con **declaraciones**. Debes crear **`Secrets.cp
 // Secrets.cpp
 #include "Secrets.h"
 
-// 🔑 Firebase Web API Key
-const char key[]      = "TU_API_KEY_FIREBASE";
+// 🔑 Firestore Web API Key
+const char key[]      = "TU_API_KEY_Firestore";
 
 // 📧 Usuario autenticado
 const char email[]    = "usuario@ejemplo.com";
@@ -268,10 +251,10 @@ const char password[] = "tu_password";
 
 // 🚫 RTDB ya no se usa → pero la mantenemos por compatibilidad con tu código actual
 // Puedes dejar el valor que ya tenías, pero es una buena práctica usar el Project ID si es para Firestore.
-const char url[]      = "https://TU_PROYECTO.firebaseio.com"; 
+const char url[]      = "https://TU_PROYECTO.Firestoreio.com"; 
 
-// 🌎 Firestore requiere el Project ID de Firebase
-const char projectId[] = "TU_PROJECT_ID_FIREBASE";
+// 🌎 Firestore requiere el Project ID de Firestore
+const char projectId[] = "TU_PROJECT_ID_Firestore";
 ```
 
 ---
@@ -295,12 +278,63 @@ const char projectId[] = "TU_PROJECT_ID_FIREBASE";
 
 ---
 
+# 📐 Variables Empíricas (`κ`)
+
+Las variables **κ (kappa)** son factores de ajuste empíricos utilizados en las ecuaciones de los sensores.  
+Su valor final debe ser determinado mediante **calibración en campo** para asegurar que las lecturas del dispositivo coincidan con mediciones de referencia.
+
+---
+
+## 1. Ultrasónico (`Ultrasonico.h`)
+
+ **Nombre:** kappa
+ 
+ **Unidades:** Adimensional
+ 
+ **Uso:** Se aplica en el cálculo del **Flujo (Q)** mediante la fórmula de **Manning**:
+
+$$
+Q = \frac{\kappa}{n} A R^{2/3} \sqrt{S}
+$$
+
+---
+
+## 2. Caudalímetro (`Caudalimetro.h`)
+
+**Nombre:** kappa
+
+**Unidades:** m³×min/L×s
+ 
+ **Uso:** Se aplica en el escalamiento del valor obtenido del sensor, el cuál es muy pequeño.
+ 
+---
+
+## 3. Relé (`Actuador_digital.h`)
+
+**Nombre:** kappa
+
+**Unidades:** m³/s
+ 
+ **Uso:** Se usa para reconocer el flujo en que es necesario activar la motobomba.
+ 
+---
+
+## 4. Principal (`PCH.ino`)
+
+**Nombre:** kappa
+
+**Unidades:** Adimensional
+ 
+ **Uso:** Se usa para el cálculo de la cota a partir de **Flujo (Q)** mediante la fórmula de **Manning**.
+ 
+---
+
 ## ▶️ Uso básico
 
 1.  Conecta el **ESP32** y abre el **Monitor Serie** (`115200`).
-2.  Verás los mensajes de **WiFi**, **hora** y **Firebase**.
+2.  Verás los mensajes de **WiFi**, **hora** y **Firestore**.
 3.  Cada **~1 s** se imprimirán cotas, caudales y recomendación de generadores.
-4.  La **pantalla TFT** y **Firebase** reflejarán los mismos datos.
+4.  La **pantalla TFT** y **Firestore** reflejarán los mismos datos.
 
 ---
 
@@ -309,8 +343,8 @@ const char projectId[] = "TU_PROJECT_ID_FIREBASE";
 * **No compila**:
     * Asegúrate de tener `Secrets.cpp` y librerías instaladas.
     * Si ves errores con `datos`, confirma `using datos = dato;` en `Datos.h`.
-* **Firebase no conecta**:
-    * Verifica `key`, `url`, `email/password` y la hora **NTP** (que la sincronización sea exitosa).
+* **Firestore no conecta**:
+    * Verifica `key`, `projectId`, `email/password` y la hora **NTP** (que la sincronización sea exitosa).
 * **Lecturas ultrasónicas inestables**:
     * Revisa cableado y fuente de poder.
     * Ajusta `timeout_us` en `reading()`.
@@ -321,7 +355,7 @@ const char projectId[] = "TU_PROJECT_ID_FIREBASE";
 
 ## 🧭 Roadmap corto
 
-* Implementar control remoto de actuadores vía **Firebase stream** (ya está listo el stream de comandos).
+* Implementar control remoto de actuadores vía **Firestore stream** (ya está listo el stream de comandos).
 * Endpoint web/app para visualizar `/sensorData` en tiempo real.
 * Hacer **pantalla TFT** más interactiva con gráficos y estados o animaciones.
 
