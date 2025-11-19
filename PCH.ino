@@ -194,7 +194,7 @@ void loop() {
 float cota_desde_flujo(float flujo, float ancho, float piso, float raizCuadrada_pendiente) {
 
     const float ESCALA = 0.1f; // m/mm
-    const float kappa = 2.3;
+    const float kappa = 2.3; //Variable empírica
     const float manningInverso = 1.0f / 0.013f;
 
     ancho = ancho * ESCALA;

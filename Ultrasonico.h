@@ -23,7 +23,7 @@ private:
   static constexpr float NIVEL_0 = 1268.0f;
   static constexpr float manningInverso = 1.0f / 0.013f;
   static constexpr float suavizador = 0.50f; 
-  static constexpr float kappa = 2.3f;
+  static constexpr float kappa = 2.3f; //Variable empírica
 
   const byte trig;
   const byte echo;

@@ -26,7 +26,7 @@ private:
   static constexpr float FLOW_CALIBRATION_FACTOR = PULSES_PER_LITTER / 60.0f; 
   
   static constexpr float suavizador = 0.3f;
-  static constexpr float kappa = 1.0f; //min*m³/s*L
+  static constexpr float kappa = 1.0f; //min*m³/s*L //Variable empírica
 
   const byte pin;
 
