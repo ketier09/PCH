@@ -1,11 +1,4 @@
 #include "Web.h"
-#include "Secrets.h"
-#include "Datos.h"
-#include "WiFiConfigManager.h"
-
-#include <Firebase_ESP_Client.h>
-#include <WiFi.h>
-#include <time.h>
 
 // Firestore IDs
 static String g_projectId = String(projectId);
