@@ -34,4 +34,4 @@ class WiFiConfigManager {
     void handleSave();
     void handleNotFound(); // Añadido para mejor manejo de errores HTTP
 };
-WiFiConfigManager WiFiConfig;
+extern WiFiConfigManager WiFiConfig;
