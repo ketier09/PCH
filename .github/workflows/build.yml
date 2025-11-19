@@ -43,8 +43,11 @@ jobs:
             --fqbn esp32:esp32:esp32 \
             --warnings all \
             --verbose \
+            --build-property build.partitions=huge_app \
+            --build-property upload.maximum_size=3145728 \
             --export-binaries \
             . |& tee build.log
+
 
       - name: Upload build log (always show even if compile fails)
         if: always()
