@@ -257,10 +257,21 @@ En el repo ya está `Secrets.h` con **declaraciones**. Debes crear **`Secrets.cp
 // Secrets.cpp
 #include "Secrets.h"
 
+// 🔑 Firebase Web API Key
 const char key[]      = "TU_API_KEY_FIREBASE";
-const char url[]      = "https://TU_PROYECTO.firebaseio.com";
+
+// 📧 Usuario autenticado
 const char email[]    = "usuario@ejemplo.com";
+
+// 🔒 Contraseña del usuario
 const char password[] = "tu_password";
+
+// 🚫 RTDB ya no se usa → pero la mantenemos por compatibilidad con tu código actual
+// Puedes dejar el valor que ya tenías, pero es una buena práctica usar el Project ID si es para Firestore.
+const char url[]      = "https://TU_PROYECTO.firebaseio.com"; 
+
+// 🌎 Firestore requiere el Project ID de Firebase
+const char projectId[] = "TU_PROJECT_ID_FIREBASE";
 ```
 
 ---
