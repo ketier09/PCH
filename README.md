@@ -251,7 +251,7 @@ const char password[] = "tu_password";
 
 // 🚫 RTDB ya no se usa → pero la mantenemos por compatibilidad con tu código actual
 // Puedes dejar el valor que ya tenías, pero es una buena práctica usar el Project ID si es para Firestore.
-const char url[]      = "https://TU_PROYECTO.Firestoreio.com"; 
+const char url[]      = ""; 
 
 // 🌎 Firestore requiere el Project ID de Firestore
 const char projectId[] = "TU_PROJECT_ID_Firestore";
