@@ -20,7 +20,7 @@ void RGBLed::set_up() {
   // Apaga el LED al iniciar
   for(int i = 0; i < 4; i++) {
     showColor(i);
-    delay(25);
+    delay(500);
   }
   setColor(0, 0, 0);
 }
