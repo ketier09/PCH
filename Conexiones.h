@@ -48,14 +48,14 @@ enum PCH_Devices_Pines : uint8_t {
   ULTRA_TRIG_0 = PCH_D25,
   ULTRA_ECHO_0 = PCH_D35,  // entrada-solo
   ULTRA_TRIG_1 = PCH_D26,
-  ULTRA_ECHO_1 = PCH_VP,
+  ULTRA_ECHO_1 = PCH_D34,
 
   // --- Actuadores (salidas) ---
   COMPUERTA            = PCH_D13,
   ACTUADOR_DIGITAL_0   = PCH_D27,
 
   // --- Pulsadores ---
-  PULSADOR_0     = PCH_D34,
+  PULSADOR_0     = PCH_VP,
 
   // --- Led ---
   LED_R = PCH_D19,
