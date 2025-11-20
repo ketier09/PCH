@@ -36,8 +36,8 @@ enum PCH_Pines : uint8_t {
   PCH_D33 = 33,
   PCH_D34 = 34,    // entrada-solo
   PCH_D35 = 35,    // entrada-solo
-  PCH_VP  = 36,    // entrada-solo (a.k.a. VP)
-  PCH_VN  = 39     // entrada-solo (a.k.a. VN)
+  PCH_VP  = 36,    // entrada-solo 
+  PCH_VN  = 39     // entrada-solo 
 };
 
 enum PCH_Devices_Pines : uint8_t {
@@ -48,14 +48,14 @@ enum PCH_Devices_Pines : uint8_t {
   ULTRA_TRIG_0 = PCH_D25,
   ULTRA_ECHO_0 = PCH_D35,  // entrada-solo
   ULTRA_TRIG_1 = PCH_D26,
-  ULTRA_ECHO_1 = PCH_D34,
+  ULTRA_ECHO_1 = PCH_D34,  // entrada-solo
 
   // --- Actuadores (salidas) ---
   COMPUERTA            = PCH_D13,
   ACTUADOR_DIGITAL_0   = PCH_D27,
 
   // --- Pulsadores ---
-  PULSADOR_0     = PCH_VP,
+  PULSADOR_0     = PCH_D32,
 
   // --- Led ---
   LED_R = PCH_D19,
