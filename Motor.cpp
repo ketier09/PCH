@@ -5,8 +5,8 @@ motor::motor(byte p, int e1, int e2, int e3, int e4)
 
 void motor::set_up() {
   servo.attach(pin, 500, 2500);
-  for(int i; i < 4; i++){
-    delay(10);
+  for(int i = 0; i < 4; i++){
+    delay(25);
     showState(i);
   }
   showState(0);

@@ -18,9 +18,9 @@ void RGBLed::set_up() {
   analogWriteResolution(_bPin, 8);
 
   // Apaga el LED al iniciar
-  for(int i; i < 4; i++) {
+  for(int i = 0; i < 4; i++) {
     showColor(i);
-    delay(10);
+    delay(25);
   }
   setColor(0, 0, 0);
 }
