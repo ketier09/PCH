@@ -7,6 +7,9 @@ void actuador_digital::set_up(){
   pinMode(pin, OUTPUT);
   estado = LOW;
   digitalWrite(pin, estado);
+  actuador_digital::cambiar();
+  delay(1000);
+  actuador_digital::cambiar();
 }
 
 void actuador_digital::encender(){

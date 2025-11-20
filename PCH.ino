@@ -108,6 +108,7 @@ void setup() {
   for (auto &a : actuadores_digitales) a.set_up();
 
   mo_compuerta.set_up();
+  generadores.set_up();
 
   xTaskCreatePinnedToCore(
     TaskLenta,
