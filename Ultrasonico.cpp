@@ -1,22 +1,22 @@
 #include "Ultrasonico.h"
 
 void IRAM_ATTR ultrasonico::isrThunk(void *p) {
-    ultrasonico *self = static_cast<ultrasonico*>(p);
-    self->instance_isrThunk();
+  ultrasonico *self = static_cast<ultrasonico*>(p);
+  self->instance_isrThunk();
 }
 
 void IRAM_ATTR ultrasonico::instance_isrThunk() {
-    const uint32_t tiempo_actual = micros();
-  
-    if (digitalRead(echo)) {           // ya estás dentro del objeto
-        disparo = tiempo_actual;       // RISING
-    } else {
-        const uint32_t duracion_calculada = tiempo_actual - disparo; 
-    
-        portENTER_CRITICAL_ISR(&mux);
-        duracion = duracion_calculada;
-        portEXIT_CRITICAL_ISR(&mux);
-    }
+  const uint32_t tiempo_actual = micros();
+
+  if (digitalRead(echo)) {           // ya estás dentro del objeto
+    disparo = tiempo_actual;       // RISING
+  } else {
+    const uint32_t duracion_calculada = tiempo_actual - disparo; 
+
+    portENTER_CRITICAL_ISR(&mux);
+    duracion = duracion_calculada;
+    portEXIT_CRITICAL_ISR(&mux);
+  }
 }
 
 // 💡 OPTIMIZACIÓN: Aplicación consistente de ESCALA a las constantes

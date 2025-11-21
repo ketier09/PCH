@@ -193,55 +193,55 @@ void loop() {
 // ---- Nivel de agua desde flujo ----
 float cota_desde_flujo(float flujo, float ancho, float piso, float raizCuadrada_pendiente) {
 
-    const float ESCALA = 0.1f; // m/mm
-    const float kappa = 2.3;
-    const float manningInverso = 1.0f / 0.013f;
+  const float ESCALA = 0.1f; // m/mm
+  const float kappa = 2.3;
+  const float manningInverso = 1.0f / 0.013f;
 
-    ancho = ancho * ESCALA;
-    piso = piso * ESCALA;
+  ancho = ancho * ESCALA;
+  piso = piso * ESCALA;
 
-    if (!(flujo > 0.0f)) return piso;
+  if (!(flujo > 0.0f)) return piso;
 
-    const float b = ancho;
-    const float k = manningInverso * raizCuadrada_pendiente * kappa;
+  const float b = ancho;
+  const float k = manningInverso * raizCuadrada_pendiente * kappa;
 
-    auto q_de_h = [&](float h)->float {
-        if (!(h > 0.0f)) return 0.0f;
-        float A = b * h;
-        float P = b + 2.0f * h;
-        float R = A / P;
-        float R23 = powf(R, 2.0f/3.0f);
-        return manningInverso * R23 * raizCuadrada_pendiente * A * kappa;
-    };
+  auto q_de_h = [&](float h)->float {
+    if (!(h > 0.0f)) return 0.0f;
+    float A = b * h;
+    float P = b + 2.0f * h;
+    float R = A / P;
+    float R23 = powf(R, 2.0f/3.0f);
+    return manningInverso * R23 * raizCuadrada_pendiente * A * kappa;
+  };
 
-    float h_lo = 0.0f;
-    float q_lo = 0.0f;
-    float h_hi = 0.1f;
-    float q_hi = q_de_h(h_hi);
+  float h_lo = 0.0f;
+  float q_lo = 0.0f;
+  float h_hi = 0.1f;
+  float q_hi = q_de_h(h_hi);
 
-    int guard = 0;
-    while (q_hi < flujo && guard < 60) {
-        h_hi *= 2.0f;
-        q_hi = q_de_h(h_hi);
-        guard++;
+  int guard = 0;
+  while (q_hi < flujo && guard < 60) {
+    h_hi *= 2.0f;
+    q_hi = q_de_h(h_hi);
+    guard++;
+  }
+
+  const float tol_h = 1e-6f;
+  const float tol_q = fmaxf(1e-6f, 1e-6f * flujo);
+
+  for (int i = 0; i < 80; ++i) {
+    float h_mid = 0.5f * (h_lo + h_hi);
+    float q_mid = q_de_h(h_mid);
+
+    if (fabsf(q_mid - flujo) <= tol_q || (h_hi - h_lo) <= tol_h)
+      return piso + h_mid;
+
+    if (q_mid < flujo) {
+      h_lo = h_mid;
+      q_lo = q_mid;
+    } else {
+      h_hi = h_mid;
     }
-
-    const float tol_h = 1e-6f;
-    const float tol_q = fmaxf(1e-6f, 1e-6f * flujo);
-
-    for (int i = 0; i < 80; ++i) {
-        float h_mid = 0.5f * (h_lo + h_hi);
-        float q_mid = q_de_h(h_mid);
-
-        if (fabsf(q_mid - flujo) <= tol_q || (h_hi - h_lo) <= tol_h)
-            return piso + h_mid;
-
-        if (q_mid < flujo) {
-            h_lo = h_mid;
-            q_lo = q_mid;
-        } else {
-            h_hi = h_mid;
-        }
-    }
-    return piso + 0.5f * (h_lo + h_hi);
+  }
+  return piso + 0.5f * (h_lo + h_hi);
 }
