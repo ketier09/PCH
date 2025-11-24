@@ -260,6 +260,7 @@ const char projectId[] = "TU_PROJECT_ID_Firestore";
 ```
 
 Si eres "sanbartolomepch@gmail.com" puedes acceder a [las definiciones del Secrets.cpp oficiales](https://mail.google.com/mail/u/0/#inbox/FMfcgzQcqtjBxZdRWXcLgLrpCfnsTWxJ)
+> Si no puedes acceder significa que no iniciaste seción de google como "sanbartolomepch@gmail.com"
 
 ---
 
