@@ -259,9 +259,9 @@ const char url[]      = "";
 const char projectId[] = "TU_PROJECT_ID_Firestore";
 ```
 
----
-
 Si eres "sanbartolomepch@gmail.com" puedes acceder a [las definiciones del Secrets.cpp oficiales](https://mail.google.com/mail/u/0/#inbox/FMfcgzQcqtjBxZdRWXcLgLrpCfnsTWxJ)
+
+---
 
 ## ⚖️ Calibración y parámetros
 
