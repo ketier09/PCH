@@ -2,23 +2,26 @@
 
 > Monitorea **niveles** y **caudales** en una **pequeña central hidroeléctrica (PCH)**, decide cuántos **generadores** activar y publica los datos **localmente** y en la **nube (Firestore)**.
 
-![Build](https://github.com/ketier09/PCH/actions/workflows/build.yml/badge.svg)
-
 ---
 
 ## 🚀 Resumen rápido
 
 * **Sensores**: **2 ultrasónicos** (niveles) + **1 caudalímetro** (flujo).
-* **Actuadores**: 1 servomotor para **compuerta** + **1 salida digital**.
+* **Actuadores**: 1 servomotor para **compuerta** + **1 salida digital (relé)**.
 * **Cada ~1 s**: lee → calcula → decide generadores → muestra/serial → envía a Firestore.
 * **Conexión**: WiFi (hora NTP) + Google Firestore.
 * **Serie**: 115200 baudios.
+
+> Notas relacionadas:
+> * La **estética del portal WiFi** se comenta en la **Issue #20 – “Estética de ingreso de credenciales”**.
+> * La **conexión con Firestore** y posibles simplificaciones de código se discuten en la **Issue #21 – “¿Qué pasa en Firestore?”**.
+> * El comportamiento del **envío de órdenes desde Firestore** hacia la compuerta se documenta en la **Issue #28 – “Firestore no envía órdenes”**.
 
 ---
 
 ## 🧩 Estructura del proyecto
 
-```
+```text
 /src (o raíz del sketch)
 │
 ├─ PCH-_.ino
@@ -48,7 +51,8 @@
 │
 ├─ Actuador_digital.h
 ├─ Actuador_digital.cpp
-│    ← Actuador digital para encender/apagar generadores
+│    ← Actuador digital (relé) para encender/apagar generadores
+│       Ver Issue #27 – “El actuador digital es un relé”
 │
 ├─ Motor.h
 ├─ Motor.cpp
@@ -56,15 +60,18 @@
 │
 ├─ RGBLed.h
 ├─ RGBLed.cpp
-│    ← LED RGB para indicar estados de la WiFi
+│    ← LED RGB para indicar estados o número de generadores activos
+│       Ver Issue #24 – “Colores del Led”
 │
 ├─ Images.h
 ├─ Images.cpp
-│    ← Imágenes para la pantalla TFT
+│    ← Imágenes para la pantalla TFT (uso no prioritario)
+│       Ver Issue #25 – “Simulación”
 │
 ├─ PantallaCustom.h
 ├─ PantallaCustom.cpp
 │    ← Manejo de la pantalla ILI9341
+│       Problemas de espacio de texto: Issue #26 – “El texto de la pantalla se corta”
 │
 ├─ WiFiConfigManager.h
 ├─ WiFiConfigManager.cpp
@@ -73,13 +80,15 @@
 ├─ Web.h
 ├─ Web.cpp
 │    ← Funciones de conexión a Firestore y hora NTP
-
+│       Código objeto de limpieza: Issue #21 – “¿Qué pasa en Firestore?”
 ```
-
+Además existe un archivo de simulación en Proteus que solo sirve como referencia visual de conexiones, comentado en la Issue #25 – “Simulación”; no es necesario para compilar ni ejecutar el proyecto real.
 ---
 ## 🌐 `WiFiConfigManager`: Gestión de Conexión WiFi en ESP32
 
-El módulo `WiFiConfigManager` es la herramienta central que permite a nuestro sistema **ESP32** conectarse de manera persistente a una red WiFi, sin necesidad de reprogramar las credenciales. Si no encuentra una red guardada o falla la conexión, automáticamente inicia un **Portal de Configuración** para que puedas introducir las credenciales de forma inalámbrica.
+El módulo `WiFiConfigManager` es la herramienta central que permite a nuestro sistema ESP32 conectarse de manera persistente a una red WiFi, sin necesidad de reprogramar las credenciales. Si no encuentra una red guardada o falla la conexión, automáticamente inicia un Portal de Configuración para que puedas introducir las credenciales de forma inalámbrica.
+
+La versión actual utiliza páginas HTML muy sencillas; en la Issue #20 se deja constancia de que la estética de estas páginas puede mejorarse en el futuro (tipografía, estilos, mensajes al usuario), pero por ahora se prioriza la funcionalidad.
 
 ---
 
@@ -156,7 +165,9 @@ Para más detalles revisa [el diagrama de conexiones](https://github.com/ketier0
 | Dispositivo | Pin | Descripción |
 |:--------------------|:-----------|:---------------|
 | Compuerta (servo) | **D13** | Compuerta |
-| Actuador digital 0 | **D12** | Generador 1 / Motobomba sara |
+| Actuador digital 0 | **D12** | Generador 1 / Motobomba |
+
+La nomenclatura de este último componente se discute en detalle en la Issue #27, donde se propone llamar al módulo simplemente “Relé” en lugar de “Actuador digital”.
 
 ---
 
@@ -285,6 +296,8 @@ Si eres "sanbartolomepch@gmail.com" puedes acceder a [las definiciones del Secre
 
 # 📐 Variables Empíricas (`κ`)
 
+La Issue #23 – “Variables empíricas” discute por qué algunos parámetros (como κ) deben ajustarse experimentalmente para que estos datos coincidan con mediciones reales en maqueta.
+
 Las variables **κ (kappa)** son factores de ajuste empíricos utilizados en las ecuaciones de los sensores.  
 Su valor final debe ser determinado mediante **calibración en campo** para asegurar que las lecturas del dispositivo coincidan con mediciones de referencia.
 
@@ -339,7 +352,7 @@ $$
 1.  Conecta el **ESP32** y abre el **Monitor Serie** (`115200`).
 2.  Verás los mensajes de **WiFi**, **hora** y **Firestore**.
 3.  Cada **~1 s** se imprimirán cotas, caudales y recomendación de generadores.
-4.  La **pantalla TFT** y **Firestore** reflejarán los mismos datos.
+4.  La **pantalla TFT** y **Firestore** reflejarán los mismos datos (salvo limitaciones indicadas en las issues #24, #26 y #28, todavía en revisión).
 
 ---
 
@@ -350,11 +363,18 @@ $$
     * Si ves errores con `datos`, confirma `using datos = dato;` en `Datos.h`.
 * **Firestore no conecta**:
     * Verifica `key`, `projectId`, `email/password` y la hora **NTP** (que la sincronización sea exitosa).
-* **Lecturas ultrasónicas inestables**:
+    * La Issue #21 documenta partes del código que pueden limpiarse sin afectar el funcionamiento.
+* **Firestore recibe datos pero no controla la compuerta**:
+    * Caso descrito en la Issue #28. Actualmente solo se suben lecturas y el canal de órdenes está pendiente de pruebas adicionales.
+* **Texto se corta en la pantalla**:
     * Revisa cableado y fuente de poder.
     * Ajusta `timeout_us` en `reading()`.
-* **Pulsadores no responden**:
-    * Confirma lógica **LOW** = presionado y `INPUT_PULLUP`.
+* **Firestore no conecta**:
+    * Problema descrito en la Issue #26 cuando se imprimen valores grandes con unidades (msnm). Puede mitigarse acortando etiquetas o reduciendo decimales.
+* **LED RGB no muestra todos los estados esperados**:
+    * La Issue #24 recuerda que este componente fue el menos probado; se recomienda revisar conexiones y el tipo de LED (ánodo/cátodo común).
+* **Posible daño en pines del ESP32**:
+    * En la Issue #22 se documenta un caso de conexión accidental a +5V. Verificar siempre niveles lógicos y usar conversores de nivel cuando sea necesario.
 
 ---
 
@@ -368,11 +388,14 @@ $$
 
 ## 📜 Licencia
 
-Uso académico y demostrativo. Úsalo con criterio y **bajo tu responsabilidad**.
+Uso académico y demostrativo.
 
 ---
 
 ## 🤝 Contribuir
 
 * Issues y PRs son bienvenidos.
-* Describe hardware (placa, sensores) y logs al reportar problemas.
+* Al reportar un problema indica:
+   * Hardware utilizado (placa, sensores, actuadores).
+   * Extracto de logs de serie.
+   * Si el problema ya está relacionado con alguna de las issues mencionadas (#20–#28).
