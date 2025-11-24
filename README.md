@@ -132,6 +132,8 @@ Si el ESP32 no logra conectarse, se convertirá en su propia red WiFi para que p
 
 ## 🔌 Mapa de pines (ESP32)
 
+Para más detalles revisa [el diagrama de conexiones](https://github.com/ketier09/PCH/blob/_/DiagramaDeConexiones.pdf)
+
 ### Sensores de caudal (entradas con interrupción)
 
 | Sensor | Pin | Descripción |
