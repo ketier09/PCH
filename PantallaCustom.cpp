@@ -37,7 +37,7 @@ void PantallaCustom::set_up() {
 
   // Mensaje cuando no hay WiFi configurado
   tft.fillScreen(ILI9341_BLACK);
-  tft.print(F("\n\n\n\nEsperando internet\nConéctate a la red\n'ESP_CONFIG-F9D108'\ny entra a http://192.168.4.1\npara cargar credenciales"));
+  tft.print(F("\n\n\n\nEsperando internet\nConéctate a la red\n'ESP_CONFIG-[ID de LA TARJETA]'\ny entra a http://192.168.4.1\npara cargar credenciales"));
 }
 
 
@@ -117,3 +117,4 @@ double PantallaCustom::reducirDecimales(double numero, int decimales) {
     double factor = pow(10, decimales);
     return round(numero * factor) / factor;
 }
+
