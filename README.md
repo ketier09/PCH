@@ -1,4 +1,4 @@
-# 🌊⚡ PCH — Sistema de Monitoreo y Control con ESP32
+# 🌊⚡ PCH — Sistema de Monitoreo y Control con ESP32 [🎞️](https://www.youtube.com/watch?v=8y_jkQuh2ys)
 
 > Monitorea **niveles** y **caudales** en una **pequeña central hidroeléctrica (PCH)**, decide cuántos **generadores** activar y publica los datos **localmente** y en la **nube (Firestore)**.
 
